@@ -6400,8 +6400,6 @@ break;
 };
 case "formEditDoc":{ // Doc
 
-echo dirname($_SERVER['SCRIPT_FILENAME']);
-
 // id, vid, type
 		require_once 'lib/AES/aes.class.php';     // AES PHP implementation
 		require_once 'lib/AES/aesctr.class.php';  // AES Counter Mode implementation 
