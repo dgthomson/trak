@@ -1,0 +1,12 @@
+Trak
+
+© David Thomson - david.thomson@pat.nhs.uk
+
+Quick start (might be incomplete...)
+
+1. Linux (I use Ubuntu Server)
+2. PHP
+3. MySQL
+4. phpMySQLAdmin
+5. Import the database structure db-template-trak.sql using phpMySQLAdmin
+6. Update /lib/config.php with your site details
