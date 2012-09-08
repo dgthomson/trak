@@ -1,0 +1,1582 @@
+//google.load('visualization', '1', {packages: ['gauge']});
+//var gauge;    var gaugeData;    var gaugeOptions;
+// var visRef=new Array();
+// var clickRef=new Array();
+// var fID=0; // gets set during first trak.refresh
+//var nextDialogID = 1;
+
+$("#xxxdispHAN").button({icons:{primary:"ui-icon-lightbulb"},text:true}).live('click',function(){
+ var url = this.href + '&hansite=' + sID; var dialog = $("#dialogHAN");
+ if ($("#dialogHAN").length == 0) {
+  dialogHAN = $('<div id="dialogHAN"><img src="gfx/fbThrobber.gif" /></div>').appendTo('body');
+ };
+ dialogHAN.dialog({
+  autoOpen: false,
+  close: function(){dialogClose(dialogHAN);},
+  width:540,
+  height:600,
+  modal: true
+ }).load(url,function(){
+  $('#dialogHAN').parent().addClass('hanbg');
+  dialogHAN.dialog("option","title",'Hospital at Night tasks for ' + $('#hanTable').attr('rel'));
+  dialogHAN.dialog("open");
+ });
+ return false;
+}); 
+
+$("#xxx-dispLists").button({icons:{primary:"ui-icon-clipboard"},text:true}).live('click',function(event){
+$(this).qtip({
+	overwrite:	true,
+	hide:		{
+        		fixed: true
+      			},
+	show: 		{
+         event: event.type,
+         ready: true
+      },
+	content:	{
+      text: '<div id="dialog"><img src="gfx/fbThrobber.gif" /></div>',
+      ajax: {
+         url: "http://" + HOST + "/index.php",
+         type: 'POST',
+         data: 	{
+    					act:	"ajax",
+    					type:	"lists",
+						site:	sID,
+						ward:	wID,
+						filter: fID     		
+         		} 
+      }
+  				 },
+	position:	{
+				viewport: $(window),
+				my: 'top center',
+        		at: 'center'
+  	  			},
+  	style:		{
+				classes: 'ui-tooltip-dark qtOverride',
+        		tip:	{
+         				corner: true
+         				}
+      			}
+},event);
+}).each(function(i) {
+//   $.attr(this, 'oldtitle', $.attr(this, 'title'));
+//   this.removeAttribute('title');
+});
+$("#xxx-dispPW").button({icons:{primary:"ui-icon-clipboard"},text:true}).live('click',function(event){
+$(this).qtip({
+	overwrite:	true,
+	hide:		{
+        		fixed: true
+      			},
+	show: 		{
+         event: event.type,
+         ready: true
+      },
+	content:	{
+      text: '<div id="dialog"><img src="gfx/fbThrobber.gif" /></div>',
+      ajax: {
+         url: "http://" + HOST + "/index.php",
+         type: 'POST',
+         data: 	{
+    					act:	"ajax",
+    					type:	"pathways",
+         		} 
+      }
+  				 },
+	position:	{
+				viewport: $(window),
+				my: 'top center',
+        		at: 'center'
+  	  			},
+  	style:		{
+				classes: 'ui-tooltip-dark qtOverride',
+        		tip:	{
+         				corner: true
+         				}
+      			}
+},event);
+}).each(function(i) {
+//   $.attr(this, 'oldtitle', $.attr(this, 'title'));
+//   this.removeAttribute('title');
+});
+
+// May not be used		
+$('.admEdit').live('click',function() {
+            var url = this.href; var dialog = $("#dialog" + nextDialogID);
+    		if ($("#dialog" + nextDialogID).length == 0) {
+        		dialog = $('<div id="dialog'+ nextDialogID +'"></div>').appendTo('body');
+    		} 
+            dialog.load(
+                url, 
+                {},
+                function (responseText, textStatus, XMLHttpRequest) {
+                    dialog.dialog({
+                    close: function() {
+                    					dialog.dialog("destroy");
+                    					nextDialogID+=1;
+                    				  },
+                    width:300, height:300, modal: true,
+                    buttons: {
+                    			Cancel: function() {
+                    				dialog.dialog("destroy");
+                    				nextDialogID+=1;
+                    				},
+                    			Admit:    function() {
+                
+      // act formID_visitid formID_ward formID_triage formID_bed    				
+									$.ajax({
+										type:    "POST",
+										url:     "http://" + HOST + "/index.php",
+										data:    ({
+													act:	 		"dbAddAdmission",
+													formID_visitid:  $("#dialog" + nextDialogID + " #formID_visitid").val(),
+													formID_ward:	 $("#dialog" + nextDialogID + " #jQformID_ward option:selected").val(),
+													formID_triage:	 $("#dialog" + nextDialogID + " #jQformID_triage option:selected").val(),
+													formID_bed:		 $("#dialog" + nextDialogID + " #formID_bed").val()
+												 }),
+										success: function(data){
+															//location.reload();
+															//alert(data);
+															trak.refresh(sID,wID,fID);
+															dialog.dialog("destroy"); nextDialogID+=1;
+															},
+										error: function(jqXHR, textStatus, errorThrown) {
+											updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+										}
+									}); // $.ajax
+                
+                
+                
+                
+                
+                    			}
+                    		 },
+                    title: 'Admit patient to bed'
+                    }); // dialog.dialog
+                }
+
+            ); // dialog.load
+            return false;
+        });
+$('.accEdit').live('click',function() {
+            var url = this.href; var dialog = $("#dialog" + nextDialogID);
+    		if ($("#dialog" + nextDialogID).length == 0) {
+        		dialog = $('<div id="dialog'+ nextDialogID +'"></div>').appendTo('body');
+    		} 
+            dialog.load(
+                url, 
+                {},
+                function (responseText, textStatus, XMLHttpRequest) {
+                    dialog.dialog({
+                    close: function() {
+                    					dialog.dialog("destroy");
+                    					nextDialogID+=1;
+                    				  },
+                    width:360, height:300, modal: true,
+                    buttons: {
+                    			Cancel: function() {
+                    				dialog.dialog("destroy");
+                    				nextDialogID+=1;
+                    				},
+                    			Accept:    function() {
+                
+      // visitid source regtime pc			
+									$.ajax({
+										type:    "POST",
+										url:     "http://" + HOST + "/index.php",
+										data:    ({
+													act:	 		"dbAddAccept",
+													formID_visitid:  $("#dialog" + nextDialogID + " #formID_visitid").val(),
+													formID_source:	 $("#dialog" + nextDialogID + " #jQformID_source option:selected").val(),
+													formID_regtime:	 $("#dialog" + nextDialogID + " #formID_regtime").val(),
+													formID_pc:		 $("#dialog" + nextDialogID + " #formID_pc").val()
+												 }),
+										success: function(data){
+															//location.reload();
+															trak.refresh(sID,wID,fID);
+															//alert(data);
+															dialog.dialog("destroy"); nextDialogID+=1;
+															},
+										error: function(jqXHR, textStatus, errorThrown) {
+											updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+										}
+									}); // $.ajax
+                
+                
+                
+                
+                
+                    			}
+                    		 },
+                    title: 'Accept patient for admission'
+                    }); // dialog.dialog
+                }
+
+            ); // dialog.load
+            return false;
+        });
+// End: May not be used
+
+function xxxaee(periods){
+if ( periods[4] > 3) {
+ $(this).addClass('_red');
+};
+};
+function xxxtrakRefresh(refreshSite,refreshWard,refreshFilter,refreshList) {
+
+trak.refresh(refreshSite,refreshWard,refreshFilter,refreshList);
+
+// 		$.ajax({
+// 			type:    "POST",
+// 			url:     "http://" + HOST + "/index.php",
+// 			data:    ({
+// 						act:	"write",
+// 						site:	refreshSite,
+// 						ward:	refreshWard,
+// 						filter: refreshFilter,
+// 						list:	refreshList,
+// 						_pw:	Aes.Ctr.encrypt(__PW,__PW,256)
+// 					 }),
+// 			success: function(data){
+// 						$('.trakPatient').remove();
+// //						$('#trakButtons').after(Aes.Ctr.decrypt(data,__PW,256));
+// 						$('#trakButtons').after(data);
+// 						
+// 						sID=refreshSite;
+// 						wID=refreshWard;
+// 						fID=refreshFilter;
+// 						lID=refreshList;
+// 						
+// 					 },
+// 			error:	 function(jqXHR, textStatus, errorThrown) {
+// 
+// 					 }
+// 		}); // $.ajax
+
+};
+function xxxtrakRefreshRow(vid) {
+
+trak.refreshRow(vid);
+
+// 		$("#patBoxID_"+vid).fadeOut('fast');
+// 		$.ajax({
+// 			type:    "POST",
+// 			url:     "http://" + HOST + "/index.php",
+// 			data:    ({
+// 						act:	"write",
+// 						filter: 0,
+// 						list:	300,
+// 						vid:	vid,
+// 						site:	sID,
+// 						ward:	wID,
+// 						_pw:	Aes.Ctr.encrypt(__PW,__PW,256)
+// 					 }),
+// 			success: function(data){
+// 						// Parse and insert data
+// 						$("#patBoxID_"+vid).replaceWith(data);
+// 						// Must toggle the padlock and set the toggle bit to keep hiding working
+// 						$("#patBoxID_"+vid+" .pBLB").data('toggled',1);
+// 
+// 		   $('#patBoxID_'+vid).show();
+// 		   if ($('#patBoxID_'+vid).hasClass('_dull')) {
+// 			 $('#patBoxID_'+vid).removeClass('_dull').addClass('x_dull');
+// 		   }
+// 
+// 						$("#patBoxID_"+vid+" .pBLB").find("img:first").attr({src:"gfx/document_decrypt.png"});
+// 		// Copied and adapted from .pBLB
+// 		for (i in visRef[vid]) {
+// 			$('#refHREF_' + visRef[vid][i]).addClass('refUpdate');
+// 			$('#refHREF_' + visRef[vid][i]).attr('href',$('#refHREF_' + visRef[vid][i]).attr('rel'));
+// 	    };
+// 					 },
+// 			error:	 function(jqXHR, textStatus, errorThrown) {
+// 
+// 					 }
+// 		}); // $.ajax
+		
+};
+function xxxserverTime() { 
+    var time = null; 
+    $.ajax({url: "http://" + HOST + "/index.php",
+        async: false, dataType: 'text', 
+        data: ({act: "ajax",type:"serverTime"}),
+        success: function(text) { 
+            time = new Date(text); 
+        }, error: function(http, message, exc) { 
+            time = new Date(); 
+    }}); 
+    return time; 
+};
+function xxxgetUrlVars(url) {
+    var vars = [], hash;
+    var hashes = url.slice(url.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+};
+function xxxconfirm(message,height){
+
+ var confirm = $("#dialog-confirm");
+ if ($("#dialog-confirm").length == 0) {
+  confirm = $('<div id="dialog-confirm" title="Warning!">	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>'+message+'</p></div>').appendTo('body');
+ };
+ confirm.dialog({
+			resizable: false,
+			height:height,
+			modal: true,
+			buttons: {
+				"OK": function() {
+
+					
+	confirm.dialog('close');
+	confirm.dialog("destroy");
+	confirm.remove();
+					
+					
+				}
+			}
+		}).css('font-size','14px');
+};
+$.fn.xxxtabbedDialog = function () {
+    this.tabs();
+    this.dialog({'modal':true,'minWidth':400, 'minHeight':300,'draggable':true});
+    this.find('.ui-tab-dialog-close').append($('a.ui-dialog-titlebar-close'));
+    this.find('.ui-tab-dialog-close').css({'position':'absolute','right':'0', 'top':'23px'});
+    this.find('.ui-tab-dialog-close > a').css({'float':'none','padding':'0'});
+    var tabul = this.find('ul:first');
+    this.parent().addClass('ui-tabs').prepend(tabul).draggable('option','handle',tabul);
+    this.siblings('.ui-dialog-titlebar').remove();
+    tabul.addClass('ui-dialog-titlebar');
+}
+
+
+// jquery: Add (Add patient)
+// 24th Sep 2011
+xxxobjAddButtons = {
+
+
+//"❝":function(){
+// $('#addPat').validationEngine('hideAll');
+//},
+                    
+                    			"↻":function(){
+                    			// $('.ui-dialog-buttonset').prepend('<img class="dialogThrobber" src="gfx/spinner.gif" />');
+                    			
+                    			$("#addPat #id").val("0");
+                    			$("#addPat #name").attr("disabled", false).css({opacity:1}).val("");
+								$("#addPat #dob").attr("disabled", false).css({opacity:1}).val("");
+								$("#addPat #pas").attr("disabled", false).css({opacity:1}).val("");
+								$( "#addPat #patSex0" ).button( "option", "disabled", false ).attr('checked', false).button("refresh");
+								$( "#addPat #patSex1" ).button( "option", "disabled", false ).attr('checked', false).button("refresh");
+                    			
+                    			},
+                    
+
+                    			Add:    function() {
+                    				
+									
+									// Unused (yet) SBARs SBARb SBARa SBARr
+									// destSite destWard xdestBedx nBed nBedNum
+									
+									if ($("#addPat").validationEngine('validate')) {
+									
+									if (  $('#addPat input[name=nBed]:checked').val() == 0 ) {
+ 										var destBed = 0;
+ 										}
+ 										else
+ 										{
+ 										var destBed = $("#addPat #nBedNum").val();
+ 										};
+ 
+									$.ajax({
+										type:    "POST",
+										url:     "http://" + HOST + "/index.php",
+										data:    ({
+													act:	 "dbAddVisit",
+													id:		 $("#addPat #id").val(),
+													pas:	 $("#addPat #pas").val(),
+													name:	 $("#addPat #name").val(),
+													dob:	 $("#addPat #dob").val(),
+													site:	 $("#addPat #site").val(),
+													gender:  $('#addPat input[name=gender]:checked').val(),
+													reftype: $('#addPat input[name=reftype]:checked').val(),
+													reg: 	 $("#addPat #patReg").val(),
+													source:  $('#addPat input[name=source]:checked').val(),
+													destSite:$('#addPat input[name=destSite]:checked').val(),
+													destWard:$('#addPat input[name=destWard]:checked').val(),
+													destBed: destBed
+												 }),
+										success: function(data){
+															//location.reload();
+															
+															
+												//if ($('#addPat input[name=destSite]:checked').val() == sID &&
+													//$('#addPat input[name=destWard]:checked').val() == wID)
+													//{
+													trak.refresh(sID,wID,fID);
+												//};
+													
+															
+															
+															//dialogClose doesn't work here for some reason
+															$("#dialog").dialog("destroy").remove();
+
+															//alert(data);
+															//dialogClose(dialog);
+															},
+										error: function(jqXHR, textStatus, errorThrown) {
+											updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+										}
+									}); // $.ajax
+									} else
+									{
+										window.setTimeout(function(){$('#addPat').validationEngine('hideAll')}, 6000);
+									}; // validationEngine
+                    			}
+                    		 };
+$("#xxxxxaddVisit").button({icons:{primary:"ui-icon-gear"},text:true}).click(function(){
+ var url = this.href + "&addSite=" + sID; var dialog = $("#dialog");
+ if ($("#dialog").length == 0) {
+  dialog = $('<div id="dialog"><img src="gfx/fbThrobber.gif" /></div>').appendTo('body');
+ };
+ dialog.dialog({
+  title: 'Add new patient',
+  close: function(){$('#addPat').validationEngine('hideAll');dialogClose(dialog);},
+  width:400,
+  height:540,
+  modal: true,
+  buttons: objAddButtons
+ }).load(url,function(){
+ 	$('#addPat #patReg').attr('disabled',true).css({opacity:0.6});
+ 	$("#addPat #nBedNum").attr("disabled",true).css({opacity:0.6});
+	$("#tabs").tabs({
+		selected:	0,
+		select: 	function(){
+						if ($("#addPat").validationEngine('validate'))
+						{
+							return true;
+						}
+						else
+						{
+							window.setTimeout(function(){$('#addPat').validationEngine('hideAll')}, 6000);
+							return false;
+						};		
+					//return $("#addPat").validationEngine('validate');					
+					}
+	});
+	$(".dialogButtons").buttonset();
+	$(".patDob").datepicker({changeMonth: true, changeYear: true, yearRange: '-96:-12', dateFormat: 'dd/mm/yy' });
+	$(".patDob").blur(function(){
+		// Makes the validation bubble disappear after datePicker used (NOT USED)
+		// $(".patDob").validationEngine('validateField', ".patDob");
+	});
+	$("#addPat #patSearch").button({icons:{primary: "ui-icon-search"}}).click(function(){  
+            // ajax stuff for search
+//            if ($("#addPat").validationEngine('validateField', "#pas")) {
+    
+							$.ajax({
+								type:    "POST",
+								url:     "http://" + HOST + "/index.php",
+								data:    ({
+											act:	"ajax",
+											type:	"patsearch",
+											pas:	$("#addPat #pas").val()
+											
+										 }),
+								success: function(data){
+								var trakRetObj = jQuery.parseJSON(data);	
+								$("#addPat #name").val(trakRetObj.name);
+								$("#addPat #dob").val(trakRetObj.dob);
+								$("#addPat #id").val(trakRetObj.id);
+								$("#addPat #patSex" + trakRetObj.gender).attr("checked",true);
+
+								$("#addPat #name").attr("disabled", true).css({opacity:0.6});
+								$("#addPat #dob").attr("disabled", true).css({opacity:0.6});
+								$("#addPat #pas").attr("disabled", true).css({opacity:0.6});
+								$( "#addPat #patSex0" ).button( "option", "disabled", true ).button("refresh");
+								$( "#addPat #patSex1" ).button( "option", "disabled", true ).button("refresh");
+		
+								
+													},
+								error: function(jqXHR, textStatus, errorThrown) {
+									updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+								}
+							}); // $.ajax
+							
+//			} else
+//			{
+//				window.setTimeout(function(){$('#addPat').validationEngine('hideAll')}, 6000);
+//			}; // validationEngine
+     
+     
+     // end ajax search
+     
+            });
+	$("#addPat input[name=pas]").focus();
+	$("#addPat").validationEngine('init');
+	$("#addPat").validationEngine('attach', {scroll: false, validationEventTrigger: ''});
+	$("#addPat input[name=source]").click(function(){
+	 if (  $("#addPat input[name=source]:checked").val() == '1'  ) { // A&E
+	 	// Demand registration time
+	 	$('#addPat #patReg').attr('disabled',false).css({opacity:1});
+	 	$('#addPat #patReg').addClass('validate[required,custom[trakTime]]');
+	 }
+	 else
+	 {
+	 	// Hide registration time
+	 	$('#addPat #patReg').val('');
+	 	$('#addPat #patReg').attr('disabled',true).css({opacity:0.6});
+	 	$('#addPat #patReg').removeClass('validate[required,custom[trakTime]]');
+	 };
+	});
+ });
+ return false;
+}); 
+// End: Add
+
+
+
+
+
+
+$("--moved--.pBLB").live('click', function () {
+	var toScrollTo = 0;
+    var toggled = $(this).data('toggled');
+    $(this).data('toggled', !toggled);
+    
+    if (!toggled)
+    {
+	    $(this).find("img:first").attr({src:"gfx/document_decrypt.png"});
+		sid = $(this).find('img').attr('rel');
+		$('.pBLB').each(function() {
+		 hid = $(this).find('img').attr('rel');
+		 if (sid == hid) {
+		   $('#patBoxID_'+hid).fadeTo('fast',1);
+		   if ($('#patBoxID_'+hid).hasClass('_dull')) {
+			 $('#patBoxID_'+hid).removeClass('_dull').addClass('x_dull');
+		   }
+		 }
+		  else
+		 { 
+		   $('#patBoxID_'+hid).fadeTo('slow',0.75);
+		 }
+		});
+	    for (i in trak.visRef[sid]) {
+			$('#refHREF_' + trak.visRef[sid][i]).addClass('refUpdate');
+			$('#refHREF_' + trak.visRef[sid][i]).attr('href',$('#refHREF_' + trak.visRef[sid][i]).attr('rel'));
+	    };
+   		 $("#patBoxButID_"+sid).load(
+    		'http://'+HOST+'/index.php',
+    		{
+    			act:	'ajax',
+    			type:	'patBoxSub',
+    			id:		sid,
+    			status:	$(this).find("img").attr("data-status")
+    	},function(){
+ 	$(".pBSButtonRefEdit").button({icons:{primary:"ui-icon-gear"},text:true});
+	// $(".pBSButtonDoc").button({icons:{primary:"ui-icon-document"},text:true});
+	$(".pBSButtonNote").button({icons:{primary:"ui-icon-script"},text:true});
+	$(".pBSButtonMove").button({icons:{primary:"ui-icon-transferthick-e-w"},text:true});
+	$(".pBSButtonDisc").button({icons:{primary:"ui-icon-trash"},text:true});
+	$(".pBSButtonHAN").button({icons:{primary:"ui-icon-lightbulb"},text:true});
+	// $(".pBSButtonRx").button({icons:{primary:"ui-icon-clipboard"},text:true});  
+    // $(".pBSButtonNursing").button({icons:{primary:"ui-icon-comment"},text:true});
+    $('.mauDox').button({icons:{primary:"ui-icon-document"},text:true});
+
+
+$('.action-labcentre').button({icons:{primary:"ui-icon-gear"},text:true}).click(function(){
+ trak.dialogInit();
+ dialog.dialog({
+  title: 'Labcentre',
+  close: function(){
+  	trak.dialogFinish();
+  },
+  width:800,
+  height:600,
+  modal: true,
+ }).html('<iframe id="_labcentre" width="100%" height="100%" frameborder="0"></iframe>');
+ $("#_labcentre").one('load',function() {
+ 	$("#_labcentre").attr('src',trak.helperUrl.labcentreSearch+'?'+$.param(trak.helperParams.labcentreSearch));
+ }).attr('src',trak.helperUrl.labcentreLogin+'?'+$.param(trak.helperParams.labcentreLogin));
+ return false;
+});
+
+$('.action-prism').button({icons:{primary:"ui-icon-gear"},text:true}).click(function(){
+ trak.dialogInit();
+ dialog.dialog({
+  title: 'Prism Cardiorespiratory System',
+  close: function(){
+  	trak.dialogFinish();
+  },
+  width:800,
+  height:600,
+  modal: true,
+ }).html('<iframe id="_prism" width="100%" height="100%" frameborder="0"></iframe>');
+ $("#_prism").one('load',function() {
+ 	$("#_prism").attr('src',trak.helperUrl.prismSearch+'?'+$.param(trak.helperParams.prismSearch));
+ }).attr('src',trak.helperUrl.prismLogin+'?'+$.param(trak.helperParams.prismLogin));
+ return false;
+});
+
+
+
+ // $.get(trak.helperUrl.labcentreLogin,{
+//  
+//  	username:		'DA02NS',
+//  	password:		'HARRY32'
+//  
+//  },function(response, status, xhr){
+// 
+// 	alert(response.responseText);
+// 	$("#_labcentre").contents().find("html").html(response.responseText);
+// 	// $("#pp").html(response.responseText);
+//  
+//  });
+
+// if (status != "error") {	
+//  		dialog.load(trak.helperUrl.labcentreSearch,{
+//  	
+//  			SearchMethod:			'PatientNumber',
+//  			CurrentPage:			'OrderPatient',
+//  			NextPage:				'OrderGeneral',
+//  			PageAction:				'NextPage',
+//  			enquiryPatientNumber:	$('.action-labcentre').attr('data-pas')
+// 
+//  		},function(){
+//  
+//  			// Empty for now
+//  
+//  		});
+//  	};
+
+
+
+
+    	
+    	}).toggle();
+		toScrollTo = sid; // $.scrollTo("#patBoxID_"+sid,'100%');
+    }
+    else
+    {
+		// Close code. This is replicated in .pBLB/each below
+		$(this).find("img:first").attr({src:"gfx/document_encrypt.png"});
+		sid = $(this).find('img').attr('rel');
+		$('.pBLB').each(function() {
+		 hid = $(this).find('img').attr('rel');
+		
+		if ($('#patBoxID_'+hid).hasClass("_dull"))
+		{
+		 $('#patBoxID_'+hid).fadeTo('fast',0.75);
+		} else if ($('#patBoxID_'+hid).hasClass("x_dull"))
+		{
+		 $('#patBoxID_'+hid).fadeTo('fast',0.75);
+		 $('#patBoxID_'+hid).removeClass('x_dull').addClass('_dull');
+		} else
+		{
+		 $('#patBoxID_'+hid).fadeTo('fast',1);
+		};
+		
+		
+		});
+		for (i in trak.visRef[sid])
+		{
+			$('#refHREF_' + trak.visRef[sid][i]).removeClass('refUpdate');
+			$('#refHREF_' + trak.visRef[sid][i]).removeAttr('href');
+		};
+		$("#patBoxButID_"+sid).toggle().html(''); // 02-04-2012 Added .html('') stops dup classes;
+    };
+    
+    cid = $(this).find('img').attr('rel');    
+    $('.pBLB').each(function() {
+		lid = $(this).find('img').attr('rel');
+		tog = $(this).data('toggled');
+		if (cid != lid && tog) {
+			$(this).find("img:first").attr({src:"gfx/document_encrypt.png"});
+				for (i in trak.visRef[lid])
+				{
+					$('#refHREF_' + trak.visRef[lid][i]).removeAttr('class');
+					$('#refHREF_' + trak.visRef[lid][i]).removeAttr('href');
+				};
+			$("#patBoxButID_"+lid).hide().html(''); // 02-04-2012 Added .html('') stops dup classes
+			$(this).data('toggled', false);
+		}
+		});
+	// Defer the scroll to here, so any boxes than needed closing have been closed already
+	if (toScrollTo != '0') { $.scrollTo("#patBoxID_"+toScrollTo,'100%'); };
+		
+}); // gone to object
+$(".-OLDpBLB").live('click', function () {
+    var toggled = $(this).data('toggled');
+    $(this).data('toggled', !toggled);
+    if (!toggled) {
+	    $(this).find("img:first").attr({src:"gfx/document_decrypt.png"});
+		sid = $(this).find('img').attr('rel');
+		$('.pBLB').each(function() {
+		 hid = $(this).find('img').attr('rel');
+		 if (sid == hid) {
+		   $('#patBoxID_'+hid).fadeTo('fast',1);
+		   if ($('#patBoxID_'+hid).hasClass('_dull')) {
+			 $('#patBoxID_'+hid).removeClass('_dull').addClass('x_dull');
+		   }
+		 }
+		  else
+		 { 
+		   $('#patBoxID_'+hid).fadeTo('slow',0.75);
+		 }
+		});
+
+	    for (i in trak.visRef[$(this).find("img").attr("rel")]) {
+			$('#refHREF_' + trak.visRef[$(this).find("img").attr("rel")][i]).addClass('refUpdate');
+			$('#refHREF_' + trak.visRef[$(this).find("img").attr("rel")][i]).attr('href',$('#refHREF_' + trak.visRef[$(this).find("img").attr("rel")][i]).attr('rel'));
+	    };
+	    // <img src="gfx/fbThrobber.gif" />
+	    //$("#patBoxButID_"+$(this).find("img").attr("rel")).children().html('<img src="gfx/fbThrobber.gif" />');
+   		 $("#patBoxButID_"+$(this).find("img").attr("rel")).load(
+    		'http://'+HOST+'/index.php',
+    		{
+    			act:	'ajax',
+    			type:	'patBoxSub',
+    			id:		$(this).find("img").attr("rel"),
+    			status:	$(this).find("img").attr("data-status")
+    	},function(){
+ 	$(".pBSButtonRefEdit").button({icons:{primary:"ui-icon-gear"},text:true});
+	//$(".pBSButtonDoc").button({icons:{primary:"ui-icon-document"},text:true});
+	$(".pBSButtonNote").button({icons:{primary:"ui-icon-script"},text:true});
+	$(".pBSButtonMove").button({icons:{primary:"ui-icon-transferthick-e-w"},text:true});
+	$(".pBSButtonDisc").button({icons:{primary:"ui-icon-trash"},text:true});
+	$(".pBSButtonHAN").button({icons:{primary:"ui-icon-lightbulb"},text:true});
+	$(".pBSButtonRx").button({icons:{primary:"ui-icon-clipboard"},text:true});  
+    $(".pBSButtonNursing").button({icons:{primary:"ui-icon-comment"},text:true}); 
+    	
+    	}).toggle();
+		$.scrollTo("#patBoxID_"+$(this).find("img").attr("rel"),'100%');
+    } else {
+		// Close code. This is replicated in .pBLB/each below
+		$(this).find("img:first").attr({src:"gfx/document_encrypt.png"});
+
+
+$('.pBLB').each(function() {
+ hid = $(this).find('img').attr('rel');
+
+if ($('#patBoxID_'+hid).hasClass("_dull"))
+{
+ $('#patBoxID_'+hid).fadeTo('fast',0.75);
+} else if ($('#patBoxID_'+hid).hasClass("x_dull"))
+{
+ $('#patBoxID_'+hid).fadeTo('fast',0.75);
+ $('#patBoxID_'+hid).removeClass('x_dull').addClass('_dull');
+} else
+{
+ $('#patBoxID_'+hid).fadeTo('fast',1);
+};
+
+//    if ($('#patBoxID_'+hid).hasClass("x_dull")) {
+//     $('#patBoxID_'+hid).fadeTo('fast',0.75),removeClass('x_dull').addClass('_dull');
+//    };
+//   if (!($('#patBoxID_'+hid).hasClass("_dull"))) {
+//    $('#patBoxID_'+hid).fadeTo('fast',1);
+//   }
+//   else
+//   {
+//      $('#patBoxID_'+hid).fadeTo('fast',0.75);
+//         if ($('#patBoxID_'+hid).hasClass('x_dull')) {
+//     $('#patBoxID_'+hid).removeClass('x_dull').addClass('_dull');
+//   }
+//   };
+});
+
+
+
+
+		for (i in trak.visRef[$(this).find("img").attr("rel")])
+		{
+			$('#refHREF_' + trak.visRef[$(this).find("img").attr("rel")][i]).removeClass('refUpdate');
+			$('#refHREF_' + trak.visRef[$(this).find("img").attr("rel")][i]).removeAttr('href');
+		};
+		$("#patBoxButID_"+$(this).find("img").attr("rel")).toggle();
+    };
+    cid = $(this).find('img').attr('rel'); // delete if removing the .pBLB each fn
+    $('.pBLB').each(function() {
+		lid = $(this).find('img').attr('rel');
+		tog = $(this).data('toggled');
+		//console.log ('cid:' + cid + ' lid:' + lid);
+		//to turn the hiding function off temporarily, add ! in front of tog on next line
+	if (cid!=lid && tog) {
+	    $(this).find("img:first").attr({src:"gfx/document_encrypt.png"});
+			for (i in trak.visRef[$(this).find("img").attr("rel")])
+			{
+				$('#refHREF_' + trak.visRef[$(this).find("img").attr("rel")][i]).removeAttr('class');
+				$('#refHREF_' + trak.visRef[$(this).find("img").attr("rel")][i]).removeAttr('href');
+			};
+		$("#patBoxButID_"+$(this).find("img").attr("rel")).hide();
+		$(this).data('toggled', false);
+	}
+  	});
+}); // not used
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// jquery: Accept (Accept/Predict patient)
+// 25th Sep 2011: updated for loading status
+xxxxobjEditButtons = {
+ 
+// "❝":function(){
+// $('#editPat').validationEngine('hideAll');
+//},
+                    			Alter:    function() {
+                
+// reftype destSite destWard nBedNum triage ews
+
+if ($("#editPat").validationEngine('validate')) {
+
+									if (  $('#editPat input[name=nBed]:checked').val() == 0 ) {
+ 										var destBed = 0;
+ 										}
+ 										else
+ 										{
+ 										var destBed = $("#editPat #nBedNum").val();
+ 										};
+ 										
+									$.ajax({
+										type:    "POST",
+										url:     "http://" + HOST + "/index.php",
+										data:    ({
+													act:	 	"dbEditPat",
+													id:			$("#editPat input[name=id]").val(),
+													reftype:  	$('#editPat input[name=reftype]:checked').val(),
+													destSite:  	$('#editPat input[name=destSite]:checked').val(),
+													destWard:  	$('#editPat input[name=destWard]:checked').val(),												
+													triage:		$('#editPat input[name=triage]:checked').val(),
+													ews:		$("#editPat input[name=ews]").val(),
+													destBed:  	destBed,
+													
+												 }),
+										success: function(data){
+										
+															// location.reload();
+												// Don't refresh if destination site's not what we're looking at
+												 //if ($('#addPat input[name=destSite]:checked').val() == sID &&
+													//$('#addPat input[name=destWard]:checked').val() == wID)
+													//{
+													trak.refresh(sID,wID,fID);
+												//};
+															//alert(data);
+                    					//dialogClose(dialog);
+                    					//dialogClose doesn't work here for some reason
+										$("#dialog").dialog("destroy").remove();
+															},
+										error: function(jqXHR, textStatus, errorThrown) {
+											updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+										}
+									}); // $.ajax
+                
+                									} else
+									{
+										window.setTimeout(function(){$('#editPat').validationEngine('hideAll')}, 6000);
+									}; // validationEngine
+                
+                
+                
+                    			}
+                    		 };
+$('xxx.editPat').live('click',function() {
+ var url = this.href; var dialog = $("#dialog");
+ if ($("#dialog").length == 0) {
+  dialog = $('<div id="dialog"><img src="gfx/fbThrobber.gif" /></div>').appendTo('body');
+ };
+ dialog.dialog({
+  close: function(){$('#editPat').validationEngine('hideAll');dialogClose(dialog);},
+  width:400,
+  height:540,
+  modal: true,
+  buttons: objEditButtons
+ }).load(url, function(){
+    dialog.dialog("option","title",'Alter referral for ' + $('#editPat').attr('rel'));
+ 	$("#editPat").validationEngine('init');
+	$("#editPat").validationEngine('attach', {scroll: false,validationEventTrigger: ''});
+ 	$(".dialogButtons").buttonset();
+	if (  $('#editPat input[name=nBed]:checked').val() == 0 ) {
+ 		$("#editPat #nBedNum").attr("disabled", true).css({opacity:0.6});
+ 	};
+ });
+ return false;
+}); 
+// End: Accept
+
+// jquery: Move (Move patient)
+// 25th Sep 2011: updated for loading status
+xxxobjMoveButtons = {
+
+                    			Move:    function() {
+                
+                if ($("#movePat").validationEngine('validate')) {
+                
+// 									if (  $('#movePat input[name=nBed]:checked').val() == 0 ) {
+//  										var destBed = 0;
+//  										}
+//  										else
+//  										{
+//  										var destBed = $("#movePat #nBedNum").val();
+//  										};
+
+var destBed = $("#movePat #nBedNum").val();
+if ($('#movePat input[name=nBed]:checked').val() == 0) 		{ var destBed = 0; };
+if ($('#movePat input[name=nBed]:checked').val() == 127)	{ var destBed = 127; };
+
+									$.ajax({
+										type:    "POST",
+										url:     "http://" + HOST + "/index.php",
+										data:    ({
+													act:	 	"dbMovePat",
+													movetype:	0,
+													id:			$("#movePat input[name=id]").val(),
+													destSite:  	$('#movePat input[name=destSite]:checked').val(),
+													destWard:  	$('#movePat input[name=destWard]:checked').val(),												
+													destBed:  	destBed
+													
+												 }),
+										success: function(data){
+															//location.reload();
+															//alert(data);
+															trak.refresh(sID,wID,fID);
+                    					$("#dialog").dialog("destroy").remove(); //dialogClose(dialog);
+															},
+										error: function(jqXHR, textStatus, errorThrown) {
+											updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+										}
+									}); // $.ajax
+                
+                									} else
+									{
+										window.setTimeout(function(){$('#movePat').validationEngine('hideAll')}, 6000);
+									}; // validationEngine
+                
+                
+                
+                    			},
+                    			
+                           			Predict:    function() {
+                
+                if ($("#movePat").validationEngine('validate')) {
+
+// 									if (  $('#movePat input[name=nBed]:checked').val() == 0 ) {
+//  										var destBed = 0;
+//  										}
+//  										else
+//  										{
+//  										var destBed = $("#movePat #nBedNum").val();
+//  										};
+
+var destBed = $("#movePat #nBedNum").val();
+if ($('#movePat input[name=nBed]:checked').val() == 0) 		{ var destBed = 0; };
+if ($('#movePat input[name=nBed]:checked').val() == 127)	{ var destBed = 127; };
+ 										
+									$.ajax({
+										type:    "POST",
+										url:     "http://" + HOST + "/index.php",
+										data:    ({
+													act:	 	"dbMovePat",
+													movetype:	1,
+													id:			$("#movePat input[name=id]").val(),
+													destSite:  	$('#movePat input[name=destSite]:checked').val(),
+													destWard:  	$('#movePat input[name=destWard]:checked').val(),												
+													destBed:  	destBed
+													
+												 }),
+										success: function(data){
+															//location.reload();
+															//alert(data);
+															//trak.refresh(sID,wID,fID);
+															trak.refreshRow($("#movePat input[name=id]").val());
+															$("#dialog").dialog("destroy").remove();
+                    					//dialogClose(dialog);
+															},
+										error: function(jqXHR, textStatus, errorThrown) {
+											updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+										}
+									}); // $.ajax
+                
+                									} else
+									{
+										window.setTimeout(function(){$('#movePat').validationEngine('hideAll')}, 6000);
+									}; // validationEngine
+                
+                
+                
+                    			}            			
+                    			
+                    			
+                    			
+                    			
+                    		 };
+$('xxxmovePat').live('click',function() {
+ var url = this.href; var dialog = $("#dialog");
+ if ($("#dialog").length == 0) {
+  dialog = $('<div id="dialog"><img src="gfx/fbThrobber.gif" /></div>').appendTo('body');
+ };
+ dialog.dialog({
+  close: function(){$('#movePat').validationEngine('hideAll');dialogClose(dialog);},
+  width:400,
+  height:370,
+  modal: true,
+  buttons: objMoveButtons
+ }).load(url,function(){
+    
+    dialog.dialog("option","title",'Move ' + $('#movePat').attr('rel'));
+    //dialog.dialog("option","title",'Move ' +  $('#_AESname_'+$('#movePat').attr('data-visitid')).html());
+    $("#movePat").validationEngine('init');
+	$("#movePat").validationEngine('attach', {scroll: false,validationEventTrigger: ''});
+ 	$('.dialogButtons').buttonset();
+	if ($('#movePat input[name=nBed]:checked').val() == 0) {
+ 		$("#movePat #nBedNum").attr("disabled", true).css({opacity:0.6}).val('');
+ 	};
+ 	if ($('#movePat input[name=nBed]:checked').val() == 127) {
+ 		$("#movePat #nBedNum").attr("disabled", true).css({opacity:0.6}).val('');
+ 	};
+ });
+ return false;
+});
+// End: Move
+
+
+
+
+// jquery: NoteEdit (Add or edit a note)
+// 8th Oct 2011: transitioned
+xxxobjNoteEditButtons = {
+
+                    			Save:    function() {
+                    				
+
+									if ($("#formAddNote").validationEngine('validate')) {
+									$.ajax({
+										type:    "POST",
+										url:     "http://" + HOST + "/index.php",
+										data:    ({
+													act:	 		"dbAddNote",
+													formID_id:		 $("#formAddNote input[name=formID_id]").val(),
+													formID_visitid:  $("#formAddNote input[name=formID_visitid]").val(),
+													formID_refid:	 $("#formAddNote input[name=formID_refid]").val(),
+													formID_author:	 $("#formAddNote input[name=formID_author]").val(),
+													formID_bleep:	 $("#formAddNote input[name=formID_bleep]").val(),
+													formID_role:	 $("#formAddNote input[name=formID_role]:checked").val(),
+													formID_note:	 $("#formAddNote textarea[name=formID_note]").val()
+												 }),
+										success: function(){
+										vid = $("#formAddNote input[name=formID_visitid]").val();
+															// location.reload();
+															$("#patBoxSubID_" + vid ).hide();
+															
+// Update note count icon
+// if ( $("#noteImg_"+vid+"b").length )
+// {
+// 		if ($("#formAddNote input[name=formID_id]").val() == "") {
+// 			lBadge = $('#noteImg_'+vid+'b #Badge').html();
+// 			$('#noteImg_'+vid+'b #Badge').html(   Number(lBadge)+1   );
+// 		}
+// }
+// else
+// {
+// 
+// 	$('#noteTD_'+vid+' ._notes').prepend('<div rel="'+vid+'" id="noteImg_'+vid+'b" class="noteImg"><img id="noteImg_'+vid+'" width="38" height="38" src="gfx/note_pad.png" /></div>');
+// 	$('#noteImg_'+vid+'b').badger('1');
+// 							
+// };
+// Update note count icon
+if ( $('.patient-notes').attr('data-number') != '0' )
+{
+		
+		currentNumber = $('.patient-notes').attr('data-number');
+		$('.patient-notes').attr('data-number',Number(currentNumber)+1).badger($('.patient-notes').attr('data-number'));
+		
+}
+else
+{
+
+		$('.patient-notes').button('option','label','Notes&nbsp;&nbsp;').attr('data-number',1).badger($('.patient-notes').attr('data-number'));				
+
+};							
+
+															//dialogClose doesn't work here for some reason
+													$("#dialog").dialog("destroy").remove();
+															},
+										error: function(jqXHR, textStatus, errorThrown) {
+											updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+										}
+									}); // $.ajax
+											} else
+									{
+										window.setTimeout(function(){$('#formAddNote').validationEngine('hideAll')}, 6000);
+									}; // validationEngine
+                    			}
+                    		 };
+$('xxx.noteEdit').live('click',function() {
+ trak.dialogInit();
+ dialog.dialog({
+  close: function(){
+  	$('#formAddNote').validationEngine('hideAll');
+  	trak.dialogFinish();
+  },
+  width:640,
+  height:410,
+  modal: true,
+  open: function(){
+  	$('.ui-button').blur();
+  },
+  buttons: trak.buttons.notes
+ }).load(trak.url,{
+
+	act:	'formAddNote',
+	vid:	$(this).attr('data-visitid') 
+ 
+ },function(){
+  dialog.dialog("option","title",'Note for ' + $('#formAddNote').attr('rel'));
+  $("#formAddNote").validationEngine('init');
+  $("#formAddNote").validationEngine('attach', {scroll: false, validationEventTrigger: ''});
+  $('#refButtons').buttonset();
+  $('#refButtons .ui-button-text').removeClass('ui-button-text').addClass('refButtonsPad').hover(function(){
+   refEle = $(this);
+   $('#refWho').html('<span style="color:#AAA;">'+refEle.children("img").attr("rel")+'</span>');
+  },function(){
+   $('#refWho').html('');
+  }).click(function(){
+   refEle = $(this);
+   $('#refDetails').html(  'from ' + refEle.children("img").attr("rel")    );
+   $('#formID_note').focus();
+  });
+ });
+ return false;
+}); 
+// End: NoteEdit
+
+
+$('xxxx.noteImg').live('click',function(){
+NIvisitID = $(this).attr('rel');
+
+			  $.ajax({url: "http://"+HOST+"/index.php",type: "POST",data: ({vid: NIvisitID, act:"ajax", type:"notes"})})
+			  .success(function(data){
+			  
+			  $("#patBoxSubID_"+NIvisitID).html(data);$("#patBoxSubID_"+NIvisitID).toggle();
+			  $.scrollTo("#patBoxID_"+NIvisitID,'100%');
+			  })
+
+});
+
+
+
+
+
+
+
+
+
+
+$('.XXhandoverDox').button({icons:{primary:"ui-icon-print"},text:true}).live('click',function(){
+ var url = $(this).attr('data-href') + '&site=' + sID + '&ward=' + wID + '&filter=' + fID;
+ var dialog = $("#dialog");
+ if ($("#dialog").length == 0) {
+  dialog = $('<div id="dialog"><img src="gfx/fbThrobber.gif" /></div>').appendTo('body');
+ };
+ dialog.dialog({
+  title: 'Working...',
+  close: function(){dialogClose(dialog);},
+  width:800,
+  height:600,
+  modal: true,
+ }).load(url,function(){
+ 	dialog.dialog("option","title",'Handover for ' + $('#adeptol').attr('data-name')); 
+ }).css('overflow','hidden');
+ return false;
+}).css('font-size','13px');
+
+
+
+
+
+
+
+// jquery: RxEdit (Add or edit presciption)
+// 19th Nov 2011: new
+// - Now in .refUpdate
+$('.rxEdit').live('click',function() {
+ var url = this.href; var dialog = $("#dialog");
+ if ($("#dialog").length == 0) {
+  dialog = $('<div id="dialog"><img src="gfx/fbThrobber.gif" /></div>').appendTo('body');
+ };
+ dialog.dialog({
+  open: function(){
+  	$('.ui-button').blur();
+  },
+  beforeClose: function(){
+  	if (_rxChanged == 1) {
+  		trak.confirm("The prescription has been altered. Press <strong>Save</strong> to remember the changes or <strong>Cancel</strong> to discard them.",190);
+  		return false;
+  	};
+  },
+  close: function(){
+  	$('#formEditRx').validationEngine('hideAll');
+  	dialogClose(dialog);
+  },
+  width:760,
+  height:440,
+  modal: true,
+  buttons: objRxEditButtons
+ }).load(url,function(){
+  dialog.dialog("option","title",'Prescription reconcilliation for ' + $('#formEditRx').attr('rel'));
+  $("#formEditRx").validationEngine('init');
+  $("#formEditRx").validationEngine('attach', {scroll: false, validationEventTrigger: ''});
+  $('#dialog').css('overflow','hidden'); // gets rid of the scrollbars in #dialog
+ });
+ return false;
+}); 
+// End: RxEdit
+
+// jquery: nursingEdit (Add or edit nursing history)
+// 25th Feb 2012: new
+// - Now in .refUpdate
+$('.nursingEdit').live('click',function() {
+
+ var url = this.href; var dialog = $("#dialog");
+ if ($("#dialog").length == 0) {
+  dialog = $('<div id="dialog"><img src="gfx/fbThrobber.gif" /></div>').appendTo('body');
+ };
+ dialog.dialog({
+  create: function(){
+   $(".ui-dialog-titlebar").hide();
+   $(".ui-dialog-content").css('padding','0');   
+  },
+  open: function(){
+  	$('.ui-button').blur();
+  },
+  beforeClose: function(){
+//  	if (_rxChanged == 1) {
+//  		trak.confirm("The prescription has been altered. Press <strong>Save</strong> to remember the changes or <strong>Cancel</strong> to discard them.",190);
+//  		return false;
+//  	};
+  },
+  close: function(){
+  	$('#formEditNursing').validationEngine('hideAll');
+  	dialogClose(dialog);
+  },
+  draggable:false,
+  width:670,
+  height:300,
+  modal: true,
+  buttons: objNursingEditButtons
+ }).load(url,function(){
+  // dialog.dialog("option","title",'Nursing notes for ' + $('#formEditNursing').attr('rel'));
+  $("#formEditNursing").validationEngine('init');
+  $("#formEditNursing").validationEngine('attach', {scroll: false, validationEventTrigger: ''});
+  $('#dialog').css('overflow','hidden'); // gets rid of the scrollbars in #dialog
+  $('#tabs').tabs();
+  // Forces tabs into title bar. See also dialog.create
+  $('#tabs').find('.ui-tab-dialog-close').append($('a.ui-dialog-titlebar-close'));
+  $('#tabs').find('.ui-tab-dialog-close').css({'position':'absolute','right':'6px', 'top':'20px'});
+  $('#tabs').find('.ui-tab-dialog-close > a').css({'float':'none','padding':'0'});
+  $('#tabs.ui-widget-content').css({'border':'0px'});
+  $('.ui-tabs-nav').append('<div class="ui-dialog-title" style="padding-top:4px;padding-left:13px">Nursing notes for '+$('#formEditNursing').attr('rel')+'</div>');
+  $('.dialogButtons').buttonset().css('font-size','13px');
+  // Following moved from index.php
+  
+ _rxChanged = 0;
+ $('input[name=ews],input[name=triage],input[name=resus]').click(function(){
+ 	 _rxChanged = 1;
+ });
+ $('.SBARfield, .SBARfieldTall, .noteAuthorField').change(function(){
+	 _rxChanged = 1;
+ });
+ $('._cond ._R').hover(function(){
+   				$(this).parent().addClass("_drughover");
+  			},function(){
+   				$(this).parent().removeClass("_drughover");
+   			}).click(function(){
+   				_rxChanged = 1;
+      			$(this).parent().remove();			
+   			});
+ $("#formEditNursing #condAddButton").button({icons:{primary: "ui-icon-plus"}}).click(function(){
+
+		_rxChanged = 1;
+		$('#hlist').append(function(){
+			_s = '<span class="_cond">';
+			_e = '</span>';
+			_name	= $('#formEditNursing input[name=pmhxauto]').val();
+			_id		= '<input value="" type="hidden" name="pmhx">';
+			_nameid	= '<input value="'+ $('#formEditNursing input[name=pmhxauto]').val() +'" type="hidden" name="pmhxname">';
+			_remove = '<a class="_R" href="#">✪</a>';
+			return (_s + _name + _id + _nameid + _remove + _e);
+		});
+		
+			$('._cond ._R').last().hover(function(){
+   				$(this).parent().addClass("_drughover");
+  			},function(){
+   				$(this).parent().removeClass("_drughover");
+   			}).click(function(){
+      			$(this).parent().remove();			
+   			});
+
+ 		$('#formEditNursing input[name=pmhxauto]').val('');  
+   
+   }).css({'font-size':'12px','padding-top':'2px','padding-bottom':'1px'});
+ $('#formEditNursing input[name=pmhxauto]').autocomplete(
+    {
+			source: "http://" + HOST + "/index.php?act=ajax&type=nursing",
+			minLength: 4,
+			select: function(e,ui){
+
+		$('#formEditNursing input[name=pmhxauto]').val('');
+		_rxChanged = 1;
+		$('#hlist').append(function(){
+			_s = '<span class="_cond">';
+			_e = '</span>';
+			_name	= ui.item.label;
+			_id		= '<input value="'+ ui.item.value +'" type="hidden" name="pmhx">';
+			_nameid	= '<input value="'+ ui.item.label +'" type="hidden" name="pmhxname">';
+			_remove = '<a class="_R" href="#">✪</a>';
+			return (_s + _name + _id + _nameid + _remove + _e);
+		});
+		
+			$('._cond ._R').last().hover(function(){
+   				$(this).parent().addClass("_drughover");
+  			},function(){
+   				$(this).parent().removeClass("_drughover");
+   			}).click(function(){
+      			$(this).parent().remove();			
+   			});
+
+
+
+
+				return false;
+			}
+	});
+	
+  // End move from index.php
+ });
+ return false;
+});
+
+
+
+
+
+
+
+
+// jquery: Referral (Refer to other specialty)
+// 7th Oct 2011: transitioned
+xxxobjRefEditButtonsDefault = {
+	Save:    function() { 
+
+ if ($("#formAddRef").validationEngine('validate')) {
+
+		$.ajax({
+			type:    "POST",
+			url:     "http://" + HOST + "/index.php",
+			data:    ({
+						act:	 		"dbAddRef",
+						formID_id:		 $("#formAddRef input[name=formID_id]").val(),
+						formID_noteid:	 $("#formAddRef input[name=formID_noteid]").val(),
+						formID_visitid:  $("#formAddRef input[name=formID_visitid]").val(),
+						formID_who:		 $("#formAddRef input[name=formID_who]:checked").val(),
+						formID_status:	 $("#formAddRef input[name=formID_status]").val(),
+						formID_rtime:	 $("#formAddRef input[name=formID_rtime]").val(),
+						formID_note:	 $("#formAddRef textarea[name=formID_note]").val()
+					 }),
+			success: function(data, textStatus, jqXHR){
+
+
+
+var trakRetObj = jQuery.parseJSON(data);
+
+if (trakRetObj.id != undefined) {
+ trak.visRef[trakRetObj.vid].push(trakRetObj.id);
+$("#patBoxRefID_" + trakRetObj.vid + " ._refs").append('<a id="refHREF_'+trakRetObj.id+'" class="refUpdate" href="http://' + HOST + '/index.php?act=formUpdateRef&id='+ trakRetObj.id +'&amp;type='+ trakRetObj.who +'&amp;vid='+trakRetObj.vid+'" data-form="http://' + HOST + '/index.php?act=formUpdateRef&id='+ trakRetObj.id +'&amp;vid='+trakRetObj.vid+'"><img id="refImg_'+ trakRetObj.id +'" width="38" height="38" src="gfx/'+ trakRetObj.icon +'" /></a>');												
+//genBubble(trakRetObj.id,trakRetObj.vid);
+
+//$("#tCount_" + trakRetObj.vid ).countdown({serverSync: serverTime, since: new Date(),format: "HMS", layout: "➘ {hn}{sep}{mnn}{sep}{snn}"});
+
+
+} else {
+
+$("#refImg_"+ $("#formAddRef input[name=formID_id]").val()).attr("src","gfx/" + trakRetObj.icon);
+$("#refImg_"+ $("#formAddRef input[name=formID_id]").val()).SetBubblePopupInnerHtml($("#formAddRef textarea[name=formID_note]").val());
+ 
+};
+
+//dialogClose doesn't work here for some reason
+$("#dialog").dialog("destroy").remove();
+
+
+
+
+
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+			}
+		}); // $.ajax
+		} else
+									{
+										window.setTimeout(function(){$('#formAddRef').validationEngine('hideAll')}, 6000);
+									}; // validationEngine
+	}
+ };
+xxxobjRefEditButtonsHAN = {
+
+
+	Save:    function() { 
+//        x   x   x      x       x     x      x          x                          x
+//formID act id noteid visitid status hx reqaction HANcompleteDate HANcompleteTime edd (expiry 10am)
+ if ($("#formAddRef").validationEngine('validate')) {
+		$.ajax({
+			type:    "POST",
+			url:     "http://" + HOST + "/index.php",
+			data:    ({
+
+
+						act:	 			"dbAddRef",
+						id:		 			$("#formAddRef input[name=formID_id]").val(),
+						noteid:	 			$("#formAddRef input[name=formID_noteid]").val(),
+						visitid: 		 	$("#formAddRef input[name=formID_visitid]").val(),
+						who:				127,
+						status:	 			$("#formAddRef input[name=formID_status]").val(),
+						hx:					$("#formAddRef textarea[name=formID_hx]").val(),
+						reqaction:			$("#formAddRef textarea[name=formID_reqaction]").val(),
+						HANcompleteDate:	$("#formAddRef input[name=HANcompleteDate]:checked").val(),
+						HANexpireDate:		$("#formAddRef input[name=edd]:checked").val(),
+						HANcompleteTime:	$("#formAddRef input[name=HANcompleteTime]").val()
+						
+					 }),
+			success: function(data, textStatus, jqXHR){
+
+
+
+//alert(data);
+
+clearInterval(clockMinutes);
+clearInterval(clockSeconds);
+clearInterval(clockHours);
+
+// Add lightbulb icon to indicate HAN job 
+
+
+$('#patBoxID_' + $("#formAddRef input[name=formID_visitid]").val() + ' ._info').html('<img src="gfx/ktip_1453_128.png" width="32" height="32" id="han_'+  $("#formAddRef input[name=formID_visitid]").val()  +'" />');
+
+
+// Add one to HAN button badge
+lBadge = $('#action-han #Badge').html();
+if (lBadge == null) {
+ $('#action-han').badger('1');
+}
+else
+{
+ $('#action-han #Badge').html(Number(lBadge)+1);
+};
+
+
+//dialogClose doesn't work here for some reason
+$("#dialog").dialog("destroy").remove();
+
+
+
+
+
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+			}
+		}); // $.ajax
+ 		} else
+									{
+										window.setTimeout(function(){$('#formAddRef').validationEngine('hideAll')}, 6000);
+									}; // validationEngine
+	}
+ };
+$('.xxxxrefEdit').live('click',function() {
+ var url = this.href; var dialog = $("#dialog");
+ if ($("#dialog").length == 0) {
+  dialog = $('<div id="dialog"><img src="gfx/fbThrobber.gif" /></div>').appendTo('body');
+ };
+ switch(trak.fn.getUrlVars(url)["type"]) {
+	case "127":
+		// HAN
+		dialog.dialog({
+			title: 'Job for Hospital at Night',
+			close: function(){
+				//dialogClose(dialog);
+				$('#formAddRef').validationEngine('hideAll');
+				clearInterval(clockMinutes);
+				clearInterval(clockSeconds);
+				clearInterval(clockHours);
+				$("#dialog").dialog("destroy").remove();
+			},
+			width: 350,
+			height:470,
+			modal: true,
+			buttons: objRefEditButtonsHAN
+		}).load(url,function()
+		{
+  		 $('.dialogButtons').buttonset();
+		 $('#formAddRef #formID_hx').focus();
+		 $("#formAddRef").validationEngine('init');
+		 $("#formAddRef").validationEngine('attach', {scroll: false, validationEventTrigger: ''});
+		});
+	break;
+	default:
+		dialog.dialog({
+			close: function(){
+				$('#formAddRef').validationEngine('hideAll');
+				//alert('close');
+				dialogClose(dialog);
+			},
+			width: 334,
+			height:430,
+			modal: true,
+			buttons: objRefEditButtonsDefault
+		}).load(url,function()
+		{
+		 dialog.dialog("option","title",'Referral for ' + $('#formAddRef').attr('rel'));
+
+		 $('.dialogButtons').buttonset();
+		 $('#refButtons .ui-button-text').removeClass('ui-button-text').addClass('refButtonsPad').hover(function(){
+		  refEle = $(this);
+		  $('#refWho').html(' '+refEle.children("img").attr("rel"));
+		 },function(){
+		  $('#refWho').html('…');
+		 }).click(function(){
+		  refEle = $(this);
+		  $('#refDetails').html('for '+refEle.children("img").attr("rel"));
+		  $('#formID_note').focus();
+		 });
+		 $("#formAddRef").validationEngine('init');
+		 $("#formAddRef").validationEngine('attach', {scroll: false, validationEventTrigger: ''});
+		});
+	break;
+ };
+ return false;
+}); 
+// End: Referral
+
+
+
+
+
