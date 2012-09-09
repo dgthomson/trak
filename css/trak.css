@@ -164,7 +164,7 @@ width:30px;height:19px !important;font-size:12px !important;text-align:left;padd
 
 
 body {
-background: url(css/ui-lightness/images/ui-bg_diagonals-thick_20_666666_40x40.png) repeat 0 0;
+background: url(ui-lightness/images/ui-bg_diagonals-thick_20_666666_40x40.png) repeat 0 0;
 }
 ._loc, ._loc em, ._pn, ._info, ._ref, ._note, ._but, ._refs, ._notes, .notePaper, ._refborder, .scrapPaper {
  border:1px solid #ccc;
@@ -268,7 +268,7 @@ width:32px;
 width:168px;
 }
 ._but {
-	background: url(/trak/css/ui-lightness/images/ui-bg_diagonals-thick_18_b81900_40x40.png) repeat 0 0;
+	background: url(ui-lightness/images/ui-bg_diagonals-thick_18_b81900_40x40.png) repeat 0 0;
 	font-size:13px;
 }
 ._stat {
@@ -564,7 +564,7 @@ font-family:"ClearView3B";
     border-radius:4px;
     -webkit-border-radius:4px;
     -moz-border-radius:4px;
-    	background: url(/trak/css/ui-lightness/images/ui-bg_diagonals-thick_18_b81900_40x40.png) repeat 0 0;
+    	background: url(ui-lightness/images/ui-bg_diagonals-thick_18_b81900_40x40.png) repeat 0 0;
 }
 
 .cdn {
@@ -624,11 +624,11 @@ width:24px;height:24px;margin-top:12px;margin-right:108px;
 }
 
 .tdStripeR, .ui-dialog-titlebar, .ui-widget-header {
-	background: url(/trak/css/ui-lightness/images/ui-bg_diagonals-thick_18_b81900_40x40.png) repeat 0 0;
+	background: url(ui-lightness/images/ui-bg_diagonals-thick_18_b81900_40x40.png) repeat 0 0;
 }
 
 .tdStripeG , .patBoxLock{
-	background: url(/trak/css/ui-lightness/images/ui-bg_diagonals-thick_20_666666_40x40.png) repeat 0 0;
+	background: url(ui-lightness/images/ui-bg_diagonals-thick_20_666666_40x40.png) repeat 0 0;
 }
 
 .qtOverride
@@ -638,7 +638,7 @@ font-size: 18px !important;
 
 .qtStripe
 {
-	background: url(/trak/css/ui-lightness/images/ui-bg_diagonals-thick_18_b81900_40x40.png) repeat 0 0;
+	background: url(ui-lightness/images/ui-bg_diagonals-thick_18_b81900_40x40.png) repeat 0 0;
  font-family:'Trebuchet MS', Tahoma, Verdana, Arial, sans-serif;
  font-size:18px;
  font-style:normal;
