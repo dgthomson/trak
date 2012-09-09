@@ -164,7 +164,7 @@ width:30px;height:19px !important;font-size:12px !important;text-align:left;padd
 
 
 body {
-background: url(/trak/css/ui-lightness/images/ui-bg_diagonals-thick_20_666666_40x40.png) repeat 0 0;
+background: url(css/ui-lightness/images/ui-bg_diagonals-thick_20_666666_40x40.png) repeat 0 0;
 }
 ._loc, ._loc em, ._pn, ._info, ._ref, ._note, ._but, ._refs, ._notes, .notePaper, ._refborder, .scrapPaper {
  border:1px solid #ccc;
