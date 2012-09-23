@@ -603,7 +603,8 @@ $documentTypes = array(
 1 => array('Clerking',"Clerking document"),
 2 => array('Discharge',"Discharge summary"),
 3 => array('Notes',"Progress notes"),
-4 => array('Patient\'s info','Patient-held admission information')
+4 => array('Patient\'s info','Patient-held admission information'),
+5 => array('A&E Clerking','A&E Unified Clerking document')
 
 );
 

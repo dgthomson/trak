@@ -7396,6 +7396,138 @@ case '4': // Patient information document
 	break;
 
 };
+case '5': // Unified clerking document
+{
+
+	$sql = sprintf ("	SELECT * FROM mau_patient pat, mau_visit vis
+						WHERE vis.id='%s'
+						AND pat.id = vis.patient
+						LIMIT 1",
+					mysql_real_escape_string($_REQUEST['vid']));
+	$dbQuery = mysql_query($sql);
+	if (!$dbQuery) {
+  	  echo 'Could not run query: ' . mysql_error();
+  	  exit;
+	};
+	if (mysql_num_rows($dbQuery) != 0) {
+		while ($_visit = mysql_fetch_array($dbQuery, MYSQL_ASSOC)) {
+			$_notes = dbGetByVisit('mau_data',$_visit['id']);
+			$sql = sprintf(	"SELECT * FROM mau_activehx, med_activehx
+					 WHERE patient = %s
+					 AND mau_activehx.cond = med_activehx.id
+					 ORDER BY mau_activehx.id;",
+					 $_visit['patient']); $_ad = '';
+			$adQuery = mysql_query($sql);
+			if (!$adQuery) {
+		echo 'Could not run query (disch_ActiveDiagnosis): ' . mysql_error();
+		exit;
+	};
+			if (mysql_num_rows($adQuery) != 0) {
+
+		while ($_ActiveDiagnosis = mysql_fetch_array($adQuery, MYSQL_ASSOC)) {
+	
+				$_ad .= $_ActiveDiagnosis['comorb'];
+				$_ad .= '</w:t><w:br/><w:t>';
+				
+		};
+		$_ad = substr($_ad,0,-18); // always remove the last </w:t><w:br/><w:t>
+	};
+			$sql = sprintf(	"SELECT * FROM mau_pmhx, med_pmhx
+					 WHERE patient = %s
+					 AND mau_pmhx.cond = med_pmhx.id
+					 ORDER BY mau_pmhx.id;",
+					 $_visit['patient']); $_pm = '';
+			$pmQuery = mysql_query($sql);
+			if (!$pmQuery) {
+		echo 'Could not run query (disch_PMDiagnosis): ' . mysql_error();
+		exit;
+	};
+			if (mysql_num_rows($pmQuery) != 0) {
+				while ($_PMDiagnosis = mysql_fetch_array($pmQuery, MYSQL_ASSOC)) {
+					$_pm .= $_PMDiagnosis['comorb'];
+					$_pm .= '</w:t><w:br/><w:t>';
+				};
+				$_pm = substr($_pm,0,-18); // always remove the last </w:t><w:br/><w:t>
+			};
+			// $bc = new Barcode39($_visit['pas']);
+			// $bc->draw(sprintf("/i-data/30dfda76/trak/cache/barcode/%s.gif",$_visit['pas']));
+			$im     = imagecreate(150, 20);  
+			$black  = ImageColorAllocate($im,0x00,0x00,0x00);  
+			$white  = ImageColorAllocate($im,0xff,0xff,0xff);  
+			imagefilledrectangle($im, 0, 0, 150, 20, $white);  
+			$bc_data = Barcode::gd($im, $black, 100, 10, 0, "code128", $_visit['pas']); 
+			imagegif($im, sprintf(dirname($_SERVER['SCRIPT_FILENAME'])."/cache/barcode/%s.gif",$_visit['pas']));
+			$data[] = array(
+		
+				'name'		=>	strtoupper($_visit['name']),
+				'addr'		=>	$_visit['paddr'],
+				'adm'		=>	date("d/m/Y",strtotime($_visit['admitdate'])),
+				'reason'	=>	$_notes['pc'],
+				'admsrc'		=>	$baseSource[$_visit['source']][2],
+				'activeDx'	=>	$_ad == '' ? 'No information' : $_ad,
+				'pmHx'		=>	$_pm == '' ? 'No information' : $_pm,
+				'site'		=>	$baseSites[$_visit['site']][0],
+				'ward'		=>	$baseWards[$_visit['site']][$_visit['ward']][0],
+				'dob'		=>	date("d/m/Y",strtotime($_visit['dob'])),
+				'pas'		=>	$_visit['pas'],
+				'NHS'		=>	$_visit['nhs'],
+				'gpaddr'	=>	$_visit['gpaddr'],
+				'gpname'	=>	'Dr ' . $_visit['gpname'],
+				'todaysDate'=>	date("D jS F Y"),
+				'consoc'	=>	$consultantsOncall[$_visit['site']][$_visit['consoc']],
+				'x-adm'		=> '10/06/2012',
+				'disch'		=>	'10/06/2013',
+				'src'		=>	$baseSites[$_visit['site']][1] . ' ' . $baseWards[$_visit['site']][$_visit['ward']][1],
+				'ambulatory'	=> $_visit['pathway'] != 0 ? $basePathway[$_visit['pathway']][0] : 'None',
+				'triage' => trim( preg_replace( '/\s+/', ' ', $_notes['SBARs'] ) ),
+				'barcode'=>	sprintf(dirname($_SERVER['SCRIPT_FILENAME']).'/cache/barcode/%s.gif',$_visit['pas'])
+
+						
+			);
+			$refQuery = mysql_query("SELECT * FROM mau_referral WHERE visitid=" . $_visit['id']);
+			while ($_referral = mysql_fetch_array($refQuery, MYSQL_ASSOC)) {
+				if (in_array($_referral['who'],array(1,2,5,18))) continue;
+				$noteHx = dbGetNote($_referral['id'],NOTE_REFHX);
+				$noteDx = dbGetNote($_referral['id'],NOTE_REFDX);
+				$ref[] = array(
+		'who'		=>	$baseAuthorRole[$_referral['who']][0],
+		'referral'	=>	$noteHx['note'],
+		'outcome'	=>	$noteDx['note']
+	);
+			};
+			$sql = sprintf ("	SELECT * FROM mau_events
+							WHERE mau_events.vid = %s
+							AND status < 16;",
+    					$_visit['id']);
+			$jobsQuery = mysql_query($sql); if (!$jobsQuery) {
+			echo 'Could not run query: ' . mysql_error();
+			exit;
+		}
+			while ($_job = mysql_fetch_array($jobsQuery, MYSQL_ASSOC)) {
+				$job[]=array(
+
+'type' => $jobType[$_job['type']][0],
+'ref' => htmlspecialchars($_job['event_desc']),
+'res' => htmlspecialchars($_job['event_result'])
+
+);
+			};
+			if (!isset($ref)) {
+				$ref[]=array('who'=>'No information','referral'=>'','outcome'=>'');
+			};
+			if (!isset($job)) {
+				$job[]=array('type'=>'No information','ref'=>'','res'=>'');
+			};
+			mergeDocument("tpl/unified-clerking.docx",'trakData',$data,"cache/uniclerk_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job,1);	
+		};
+	};
+	break;
+
+};
+
+
+
+
 default:
 {
 echo 'Internal error: [DocumentRender] No document template specified!';

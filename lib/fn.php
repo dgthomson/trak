@@ -608,7 +608,7 @@ global $baseWards;
 				echo '</dd>';
 };
 
-function mergeDocument($template,$root,$data,$out,$mergeRoot='',$merge=0,$jobRoot='',$job=0) {
+function mergeDocument($template,$root,$data,$out,$mergeRoot='',$merge=0,$jobRoot='',$job=0,$skipHeader=0) {
 
 		$_key = 'K8582886212201292249';
 		include_once('lib/tbs_class.php');
@@ -630,7 +630,13 @@ function mergeDocument($template,$root,$data,$out,$mergeRoot='',$merge=0,$jobRoo
 			$TBS->MergeBlock($jobRoot, $job);	
 		};		
 		
+if ($skipHeader == 1)
+{
+}
+else
+{
 		$TBS->LoadTemplate('#word/header1.xml'); 	$TBS->MergeBlock($root, $data);
+};
 		//$TBS->LoadTemplate('#word/header2.xml');	$TBS->MergeBlock($root, $data);
 		//$TBS->LoadTemplate('#word/header3.xml');	$TBS->MergeBlock($root, $data);
 		//$TBS->LoadTemplate('#word/footer1.xml');	$TBS->MergeBlock($root, $data);

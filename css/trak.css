@@ -673,7 +673,31 @@ display:none;
 #Date ul { display:inline;margin:0 auto; padding:0px; list-style:none; text-align:center; }
 #Date ul li { display:inline; font-size:13px; text-align:left; font-family:'Trebuchet MS',sans-serif; font-weight:bold;}
 
-#point, ._fl { position:relative; x-moz-animation:mymove 1s ease infinite; x-webkit-animation:mymove 1s ease infinite; padding-left:1px; padding-right:1px; }
+#point, ._fl {
+position:relative;
+x-moz-animation:mymove 1s ease infinite;
+x-webkit-animation:mymove 1s ease infinite;
+padding-left:1px; padding-right:1px;
+};
+
+/*
+._fl {
+	-webkit-animation-name: spinnerRotate;
+	-webkit-animation-duration: 2s;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-timing-function: linear;
+}
+
+@-webkit-keyframes spinnerRotate {
+	from {
+		-webkit-transform:rotate(0deg);
+	}
+	to {
+		-webkit-transform:rotate(360deg);
+	}
+}
+*/
+
 
 /* Simple Animation */
 @-webkit-keyframes mymove 
