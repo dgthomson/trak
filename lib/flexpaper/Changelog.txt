@@ -1,3 +1,12 @@
+  August 2012 (Version 1.5.8)
+» StartAtPage made more reliable, as it was failing in some scenarios.  
+» Issue corrected where navigating from thumb mode would not work if using split file approach.
+» Start up time improved
+» Issue related to search in 'SinglePage' mode corrected
+» Urgent fix for Chrome and Firefox where a recent error introduced in a new version of Adobe Flash caused the viewer to fail to load 
+» Style of search result finished dialog improved
+
+
   July 2012 (Version 1.5.6)
 » Improved ASP.NET installation package with more error checks
 » Fix for allowing highlights to be displayed in split mode properly (highlights should be added inside the onPageLoaded event handler in split mode)

@@ -120,9 +120,11 @@ public partial class setup : System.Web.UI.Page
             configManager.setConfig("cmd.conversion.jsonfile", configManager.getConfig("cmd.conversion.jsonfile").Replace("pdf2json.exe", "\"" + path_to_pdf2json + "pdf2json.exe" + "\""));
             configManager.setConfig("cmd.searching.extracttext", configManager.getConfig("cmd.searching.extracttext").Replace("swfstrings.exe", "\"" + path_to_pdf2swf + "swfstrings.exe" + "\""));
 
-            configManager.SaveConfig(Server.MapPath(VirtualPathUtility.GetDirectory(Request.Path)));
-
-            Response.Redirect("Default.aspx");
+			if(configManager.SaveConfig(Server.MapPath(VirtualPathUtility.GetDirectory(Request.Path)))){
+    	        Response.Redirect("Default.aspx");
+    	    }else{
+    	    	Response.Redirect("setup.aspx?step=-1");
+    	    }
         }
     }
 
@@ -169,7 +171,7 @@ public partial class setup : System.Web.UI.Page
             string output = proc.StandardOutput.ReadToEnd();
             proc.WaitForExit();
             proc.Close();
-            return output.ToLower().IndexOf("swftools") >= 0;
+            return output.ToLower().IndexOf("swftools 0.9.1") >= 0;
         }
         catch
         {

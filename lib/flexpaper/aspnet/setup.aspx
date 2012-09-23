@@ -13,6 +13,12 @@
 				<li class=""><span>Step 2: FlexPaper Configuation</span></li>
 			<% 
 			break;
+				case -1:
+			%>
+				<li class="first active"><span>Step 1: Server Requirements</span></li>
+				<li class=""><span>Step 2: FlexPaper Configuation</span></li>
+			<% 
+			break;
 			default:
 			%>
 				<li class="first prevactive"><span>Step 1: Server Essentials</span></li>
@@ -37,7 +43,7 @@
                     Test t2 = new Test();
                     t2.desc = "SWFTools support";
                     t2.test = pdf2swfEnabled(path_to_pdf2swf + pdf2swf_exec);
-                    t2.failmsg = "Without SWFTools installed, documents will have to be published manually. Please see <a href='http://www.swftools.org'>swftools.org</a> on how to install SWFTools.<br/><br/>Have you installed SWFTools at a different location? Please enter the full path to your SWFTools installation below<br/><form class='devaldi'><div class='text' style='width:400px;float:left;'><input type='text' name='PDF2SWF_PATH' id='PDF2SWF_PATH' value='" + path_to_pdf2swf + "' onkeydown='updatepdf2swfpath()'/><div class='effects'></div><div class='loader'></div></div></form><br/>";
+                    t2.failmsg = "You may not have SwfTools installed or you are an unsupported version. Without <font color='red'>SWFTools 0.9.1</font> installed, documents will have to be published manually. Please see <a href='http://www.swftools.org'>swftools.org</a> on how to install SWFTools.<br/><br/>Have you installed SWFTools at a different location? Please enter the full path to your SWFTools installation below<br/><form class='devaldi'><div class='text' style='width:400px;float:left;'><input type='text' name='PDF2SWF_PATH' id='PDF2SWF_PATH' value='" + path_to_pdf2swf + "' onkeydown='updatepdf2swfpath()'/><div class='effects'></div><div class='loader'></div></div></form><br/>";
                     t2.sev = 1;
                     tests.Add(t2);
                     
@@ -64,6 +70,10 @@
                     }%>
                 </ul>			
 			    <% } %>
+            <% break; %>
+            <% case -1: %>
+            <h3>FlexPaper: Error writing to config file</h3>
+			FlexPaper failed to write your settings to the configuration file. Please check the file permissions for the config.xml file or <a href="http://flexpaper.devaldi.com/docs_publishing_with_ASPNET.jsp">see our documentation</a> on how to finish the configuration manually.   
             <% break; %>
             <% default: %>
                 <script language="JavaScript">

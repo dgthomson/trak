@@ -45,9 +45,15 @@ namespace lib
                 return null;
         }
 
-        public void SaveConfig(String mapPath)
+        public Boolean SaveConfig(String mapPath)
         {
-            _doc.Save(mapPath + @"config\config.xml");
+	        try
+	        {
+            	_doc.Save(mapPath + @"config\config.xml");
+            	return true;
+            }catch{
+            	return false;
+            }
         }
     }
 }

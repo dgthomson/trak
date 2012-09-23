@@ -22,8 +22,21 @@ public partial class change_config : System.Web.UI.Page
 
         if (Request["SAVE_CONFIG"] != null)
         {
-            configManager.setConfig("path.pdf", Request["PDF_Directory"]);
-            configManager.setConfig("path.swf", Request["SWF_Directory"]);
+            String path_pdf = Request["PDF_Directory"];
+            String path_pdf_workingdir = Request["SWF_Directory"];
+
+            if (!path_pdf.EndsWith("\\"))
+            {
+                path_pdf += "\\";
+            }
+
+            if (!path_pdf_workingdir.EndsWith("\\"))
+            {
+                path_pdf_workingdir += "\\";
+            }
+
+            configManager.setConfig("path.pdf", path_pdf);
+            configManager.setConfig("path.swf", path_pdf_workingdir);
             configManager.setConfig("licensekey", Request["LICENSEKEY"]);
             configManager.setConfig("splitmode", Request["SPLITMODE"]);
             configManager.setConfig("renderingorder.primary", Request["RenderingOrder_PRIM"]);
