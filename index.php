@@ -1080,6 +1080,15 @@ case "ajax":{
 
 			case "jobsubtype":{
 
+if (!isset($_REQUEST['jid']))
+{
+	echo '<script type="text/javascript"><!--' . "\n";
+	echo '  trak.fn.statusMessageDialog("Please choose a <em>job type</em> before adding an investigation!");' . "\n";
+	echo "  $('.patient-job-subtype').qtip('destroy');\n";
+	echo '--></script>' . "\n";
+	exit;
+};
+
 echo '<div id="pat-jobsubtype" >';
 
 foreach ($jobType[$_REQUEST['jid']][2] as $k => $v) {
@@ -6828,12 +6837,12 @@ echo '</form>';
 
 echo '</div>';
 
-echo '<div style="float:left;width:220px;height:480px;">';
+echo '<div style="float:left;width:220px;height:480px;margin-left:4px;">';
 
 echo <<<HTML
-<div class="patient-job-subtype">Add</div>
+<div class="patient-job-subtype">Add an investigation</div>
 <form id="joblist">
-<div class="scrapPaper" style="width:200px;">
+<div class="scrapPaper" style="width:280px;height:261px;margin-top:4px;">
 <img src="gfx/paper-clip-mini.png" style="margin-top:-2px;margin-left:4px;float:left;" />
 
 <div class="_small" style="float:left;">

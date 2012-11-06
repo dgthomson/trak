@@ -4472,7 +4472,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
   	$('#addJob').validationEngine('hideAll');
   	trak.dialogFinish();
   },
-  width:800,
+  width:690,
   height:410,
   modal: true,
   open: function(){
