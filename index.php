@@ -5428,7 +5428,7 @@ else
 
    $('#formEditRx input[name=drugname]').autocomplete(
     {
-			source: "http://" + HOST + "/index.php?act=ajax&type=drug",
+			source: trak.url + "?act=ajax&type=drug",
 			minLength: 2,
 			select: function(e,ui){
 				$('#formEditRx input[name=drugname]').val(ui.item.label).attr('readonly',true);
@@ -5451,7 +5451,7 @@ else
             {                      
                 $.ajax(
                 { 
-                    url: "http://" + HOST + "/index.php",
+                    url: trak.url,
                     data: {
                     		act:	'ajax',
                     		type:	'dose',
