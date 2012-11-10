@@ -112,6 +112,7 @@
 		$configs['admin.username'] 				= $_POST['ADMIN_USERNAME'];
 		$configs['admin.password'] 				= $_POST['ADMIN_PASSWORD'];
 		$configs['licensekey'] 					= $_POST['LICENSEKEY'];
+		$configs['splitmode']  					= $_POST['SPLITMODE'];
 		
 		if($configManager->getConfig('test_pdf2json')){
 			$configs['renderingorder.primary']		= $_POST['RenderingOrder_PRIM'];
@@ -440,6 +441,7 @@
 											<input type="text" name="ADMIN_USERNAME" id="ADMIN_USERNAME" value="<?php echo $configManager->getConfig('admin.username')?>"/>
 											<div class="effects"></div><div class="loader"></div>
 								</div>
+								<div style="float:left;font-size:10px;padding-top:5px;">The admin username you want to use for the admin publishing interface.</div>
 								<div id="ADMIN_USERNAME_RESULT" class="formError" style="float:right;"></div>
 							</td>
 						</tr>
@@ -451,6 +453,7 @@
 											<input type="text" name="ADMIN_PASSWORD" id="ADMIN_PASSWORD" value="<?php echo $configManager->getConfig('admin.password')?>"/>
 											<div class="effects"></div><div class="loader"></div>
 								</div>
+								<div style="float:left;font-size:10px;padding-top:5px;">The admin password you want to use for the admin publishing interface.</div>
 								<div id="ADMIN_PASSWORD_RESULT" class="formError" style="float:right;"></div>
 							</td>
 						</tr>
@@ -515,6 +518,16 @@
 						</tr>
 						<?php } ?>
 						
+						<tr>
+							<td>Split mode publishing? </th>
+							<td>
+									<INPUT TYPE=RADIO NAME="SPLITMODE" id="SPLITMODE1" VALUE="0" <?php if($configManager->getConfig('splitmode') == "false" || $configManager->getConfig('splitmode') == "" || $configManager->getConfig('splitmode') == "0") { ?>checked="true"<?php } ?> style="vertical-align: middle"> No
+									<INPUT TYPE=RADIO NAME="SPLITMODE" id="SPLITMODE2" VALUE="1" <?php if($configManager->getConfig('splitmode') == "true" || $configManager->getConfig('splitmode') == "1") { ?>checked="true"<?php } ?> style="vertical-align: middle;margin-left:30px;"> Yes<BR>									
+								<div style="float:left;font-size:10px;padding-top:5px;">If you generally publish large PDF documents then running split mode is recommended.</div>
+								<div id="LICENSEKEY_ERROR" class="formError" style="float:right;"></div>
+							</td>
+						</tr>
+												
 						<tr>
 							<td>License Key</th>
 							<td>

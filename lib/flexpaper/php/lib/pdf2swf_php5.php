@@ -4,11 +4,6 @@
 * 
 * Copyright (c) 2009 - 2011 Devaldi Ltd
 *
-* GNU GENERAL PUBLIC LICENSE Version 3 (GPL).
-* 
-* The GPL requires that you not remove the FlexPaper copyright notices
-* from the user interface. 
-*  
 * Commercial licenses are available. The commercial player version
 * does not require any FlexPaper notices or texts and also provides
 * some additional features.
@@ -48,7 +43,7 @@ class pdf2swf
 		$pdfFilePath = $this->configManager->getConfig('path.pdf') . $doc;
 		$swfFilePath = $this->configManager->getConfig('path.swf') . $doc  . $page. ".swf";
 		
-		if(strlen($page)>0)
+		if($this->configManager->getConfig('splitmode'))
 			$command = $this->configManager->getConfig('cmd.conversion.splitpages');
 		else
 			$command = $this->configManager->getConfig('cmd.conversion.singledoc');
@@ -69,12 +64,16 @@ class pdf2swf
 
 		$return_var=0;
 		
-		if(strlen($page)>0){
+		if($this->configManager->getConfig('splitmode')){
 			$pagecmd = str_replace("%",$page,$command);
 			$pagecmd = $pagecmd . " -p " . $page;
 
 			exec($pagecmd,$output,$return_var);
-			exec(getForkCommandStart() . $command . getForkCommandEnd());
+			$hash = getStringHashCode($command);
+            if(!isset($_SESSION['CONVERSION_' . $hash])){
+                exec(getForkCommandStart() . $command . getForkCommandEnd());
+                $_SESSION['CONVERSION_' . $hash] = true;
+            }
 		}else
 			exec($command,$output,$return_var);
 			
@@ -87,7 +86,7 @@ class pdf2swf
 	}
 
 	/**
-	* Method:isNotConverted
+	* Method:isConverted
 	*/
 	public function isNotConverted($pdfFilePath,$swfFilePath)
 	{

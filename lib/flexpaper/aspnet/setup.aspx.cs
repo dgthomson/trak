@@ -106,6 +106,7 @@ public partial class setup : System.Web.UI.Page
             configManager.setConfig("admin.username", Request["ADMIN_USERNAME"]);
             configManager.setConfig("admin.password", Request["ADMIN_PASSWORD"]);
             configManager.setConfig("licensekey", Request["LICENSEKEY"]);
+            configManager.setConfig("splitmode", Request["SPLITMODE"]);
 
             if (configManager.getConfig("test_pdf2json") == "true")
             {

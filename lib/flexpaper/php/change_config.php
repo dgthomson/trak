@@ -3,59 +3,81 @@
 	require_once("lib/config.php");
 	$configManager = new Config();
 	session_start();
-	
+
 	if($configManager->getConfig('admin.password')==null){
 		$url = 'setup.php';
 		header("Location: $url");
 		exit;
 	}
-	
+
 	if(isset($_POST['SAVE_CONFIG'])){
 		$configs = $configManager->getConfigs();
-		$configs['path.pdf']  					= $_POST['PDF_Directory'];
-		$configs['path.swf']  					= $_POST['SWF_Directory'];		
-		$configs['licensekey']  				= $_POST['LICENSEKEY'];				
-		$configs['splitmode']  					= $_POST['SPLITMODE'];				
+
+		$path_pdf = $_POST['PDF_Directory'];
+		$path_pdf_workingdir = $_POST['SWF_Directory'];
+
+		if(	PHP_OS == "WIN32" || PHP_OS == "WINNT"	){
+			if(!endsWith($path_pdf,'\\')){
+				$path_pdf = $path_pdf . '\\';
+			}
+
+			if(!endsWith($path_pdf_workingdir,'\\')){
+				$path_pdf_workingdir = $path_pdf_workingdir . '\\';
+			}
+		}else{
+			if(!endsWith($path_pdf,'/')){
+				$path_pdf = $path_pdf . '/';
+			}
+
+			if(!endsWith($path_pdf_workingdir,'/')){
+				$path_pdf_workingdir = $path_pdf_workingdir . '/';
+			}
+		}
+
+		$configs['path.pdf']  					= $path_pdf;
+		$configs['path.swf']  					= $path_pdf_workingdir;
+		$configs['licensekey']  				= $_POST['LICENSEKEY'];
+		$configs['splitmode']  					= $_POST['SPLITMODE'];
 		$configs['renderingorder.primary']		= $_POST['RenderingOrder_PRIM'];
-		$configs['renderingorder.secondary']	= $_POST['RenderingOrder_SEC'];		
-		
+		$configs['renderingorder.secondary']	= $_POST['RenderingOrder_SEC'];
+
 		$configManager->saveConfig($configs);
 		$dir = $configManager->getConfig('path.swf');
 		foreach(glob($dir.'*.*') as $v){
 		    unlink($v);
-		} 
+		}
 
 		header("Location: index.php?msg=Configuration%20saved!");
 		exit;
 	}
-	
+
 	if(!isset($_SESSION['FLEXPAPER_AUTH'])) {
 		$url = 'index.php';
 		header("Location: $url");
 		exit;
 	}
-	
+
 	require_once("admin_files/header.php");
 ?>
 				<script language="JavaScript">
 				var globalTimeout;
 				var currentTimeoutField;
-				
+
 				function initTimer(event) {
 					currentTimeoutField = $(this);
-					
+
 				    if (globalTimeout) clearTimeout(globalTimeout);
 				    globalTimeout = setTimeout(checkDirectoryPermissionsHandler, 2000);
 				}
-				
+
 				$(document).ready(function(){
 					$("input#PDF_Directory").keyup(initTimer);
 					$("input#PDF_Directory").change(checkDirectoryChangePermissionsHandler);
-					
+
 					$("input#SWF_Directory").keyup(initTimer);
 					$("input#SWF_Directory").change(checkDirectoryChangePermissionsHandler);
 				});
-				
+
 				function checkDirectoryPermissions(obj){
 					var infield = obj;
 					if(infield.val().length<3){return;}
@@ -73,23 +95,23 @@
 							return true;
 						}
 					  }
-					});	
+					});
 				}
-				
+
 				function checkDirectoryChangePermissionsHandler(event){
 					var infield = $(this);
 					checkDirectoryPermissions(infield);
 				}
-				
+
 				function checkDirectoryPermissionsHandler(event){
 					var infield = currentTimeoutField;
-					checkDirectoryPermissions(infield);						
+					checkDirectoryPermissions(infield);
 				}
 				</script>
 		    	<div style="position:relative;left:10px;top:10px;background-color:#fff;padding: 20px 10px 20px 30px;border:0px;-webkit-box-shadow: rgba(0, 0, 0, 0.246094) 0px 4px 8px 0px;min-width:400px;float:left;margin-left:10px;margin-bottom:50px;margin-top:20px">
 
 					<h3>FlexPaper Configuration</h3>
-					<form class="devaldi" method="post" action="change_config.php" style="padding-bottom:30px;width:650px;"> 
+					<form class="devaldi" method="post" action="change_config.php" style="padding-bottom:30px;width:650px;">
 									<table>
 										<tr>
 											<td style="border:0px;" valign="top">
@@ -102,7 +124,7 @@
 												</font>
 											</td>
 										</tr>
-										
+
 										<tr>
 											<td style="border:0px" valign="top">
 												<label><nobr>PDF Directory</nobr></label>
@@ -130,7 +152,7 @@
 												<div id="SWF_Directory_ERROR" class="formError" style="float:right;"></div>
 											</td>
 										</tr>
-										
+
 										<?php if($configManager->getConfig('test_pdf2json')){?>
 										<tr>
 											<td style="border:0px" valign="top">
@@ -146,7 +168,7 @@
 											</td>
 										</tr>
 										<?php } ?>
-										
+
 										<?php if($configManager->getConfig('test_pdf2json')){?>
 										<tr>
 											<td style="border:0px" valign="top">
@@ -160,9 +182,9 @@
 													</select><br/>
 												<div style="float:left;font-size:10px;padding-top:5px;">This decides what to use as secondary media format to use for your visitors. </div>
 											</td>
-										</tr>										
+										</tr>
 										<?php } ?>
-										
+
 										<tr>
 											<td style="border:0px">
 												<label><nobr>License Key</nobr></label>
@@ -174,7 +196,7 @@
 												</div>
 											</td>
 										</tr>
-										
+
 									</table>
 									<div style="padding-top:30px">
 									<div style="float:left;padding-left:10px;"><button class="tiny main n_button" type="submit"><span></span><em style="min-width:75px;">Save</em></button>&nbsp;<br/></div>
@@ -182,6 +204,6 @@
 									</div>
 									<input type="hidden" value="1" id="SAVE_CONFIG" name="SAVE_CONFIG" />
 								</form>
-								 
+
 				</div>
 <?php require_once("admin_files/footer.php"); ?>

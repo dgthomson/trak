@@ -1,20 +1,20 @@
 <?php
 /**
-* █▒▓▒░ The FlexPaper Project 
-* 
+* █▒▓▒░ The FlexPaper Project
+*
 * Copyright (c) 2009 - 2011 Devaldi Ltd
 *
 * GNU GENERAL PUBLIC LICENSE Version 3 (GPL).
-* 
+*
 * The GPL requires that you not remove the FlexPaper copyright notices
-* from the user interface. 
-*  
+* from the user interface.
+*
 * Commercial licenses are available. The commercial player version
 * does not require any FlexPaper notices or texts and also provides
 * some additional features.
 * When purchasing a commercial license, its terms substitute this license.
 * Please see http://flexpaper.devaldi.com/ for further details.
-* 
+*
 */
 
 require_once("config.php");
@@ -25,7 +25,7 @@ class swfextract
 {
 	private $configManager = null;
 	private $pdftoolsPath;
-	
+
 	/**
 	* Constructor
 	*/
@@ -40,27 +40,44 @@ class swfextract
 	function __destruct() {
         //echo "swfextract destructed\n";
     }
-	
+
 	/**
 	* Method:extractText
 	*/
-	public function extractText($doc,$page)
+	public function findText($doc,$page,$searchterm,$numPages = -1)
 	{
 		$output=array();
-	
+		if(strlen($searchterm)==0){return "[{\"page\":-1, \"position\":-1}]";}
+		
 		try {
 			// check for directory traversal & access to non pdf files and absurdely long params
-			if(	!validSwfParams($this->configManager->getConfig('path.swf') . $doc  . $page . ".swf",$doc,$page) )
+			$pdfFilePath = $this->configManager->getConfig('path.pdf') . $doc;
+			if($numPages == -1){
+				$pagecount = count(glob($this->configManager->getConfig('path.swf') . $doc . "*"));
+			}else{
+				$pagecount = $numPages;
+			}
+
+			if(	!validPdfParams($pdfFilePath,$doc,$page))
 				return;
-		
+
 			$command = $this->configManager->getConfig('cmd.searching.extracttext');
-			$command = str_replace("{path.swf}",$this->configManager->getConfig('path.swf'),$command);
-			$command = str_replace("{swffile}",$doc  . $page. ".swf",$command);
+			$command = str_replace("{swffile}", $this->configManager->getConfig('path.swf') . $doc . "_"  . $page. ".swf",$command);
 			$return_var=0;
-			
+
 			exec($command,$output,$return_var);
 			if($return_var==0){
-				return arrayToString($output);
+				$pos = strpos(strtolower(arrayToString($output)),strtolower($searchterm));
+				if($pos > 0){
+					return "[{\"page\":" . $page .", \"position\":" . $pos . "}]";
+				}else{
+					if($page<$pagecount){
+						$page++;
+						return $this->findText($doc,$page,$searchterm,$pagecount);
+					}else{
+						return "[{\"page\":-1, \"position\":-1}]";
+					}
+				}
 			}else{
 				return "[Error Extracting]";
 			}

@@ -131,4 +131,13 @@
 	    $start  = $length * -1; //negative
 	    return (substr($haystack, $start) === $needle);
 	}
+
+	function getStringHashCode($string){
+      $hash = 0;
+      $stringLength = strlen($string);
+      for($i = 0; $i < $stringLength; $i++){
+        $hash = 31 * $hash + $string[$i];
+      }
+      return $hash;
+    }
 ?>

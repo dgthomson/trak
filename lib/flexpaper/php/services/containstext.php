@@ -20,10 +20,10 @@
 * 
 */
 require_once("../lib/swfextract_php5.php");
-$doc=$_GET["doc"];
+$doc=$_GET["doc"] . ".pdf";
 $page=$_GET["page"];
 $searchterm=$_GET["searchterm"];
 
 $swfextract=new swfextract();
-echo strpos(strtolower($swfextract->extractText($doc,$page)),strtolower($searchterm));	
+echo $swfextract->findText($doc,$page,$searchterm);	
 ?>

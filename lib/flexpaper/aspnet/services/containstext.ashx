@@ -35,8 +35,8 @@ public class containstext : IHttpHandler
         doc = context.Request["doc"];
         page = context.Request["page"];
         searchterm=context.Request["searchterm"];
-        String extracted = new swfextract(context.Server.MapPath(VirtualPathUtility.GetDirectory(context.Request.Path)) + @"..\").extractText(doc, page);
-        context.Response.Write(extracted.ToLower().IndexOf(searchterm.ToLower()));
+        String result = new swfextract(context.Server.MapPath(VirtualPathUtility.GetDirectory(context.Request.Path)) + @"..\").findText(doc, page, searchterm);
+        context.Response.Write(result);
     }
 
     public bool IsReusable

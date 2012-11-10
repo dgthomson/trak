@@ -189,7 +189,17 @@
 							</td>
 						</tr>
 						<% } %>
-						
+
+						<tr>
+                            <td>Split mode publishing? </th>
+                            <td>
+                                    <INPUT TYPE=RADIO NAME="SPLITMODE" id="SPLITMODE1" VALUE="0" checked="true" style="vertical-align: middle"> No
+                                    <INPUT TYPE=RADIO NAME="SPLITMODE" id="SPLITMODE2" VALUE="1" style="vertical-align: middle;margin-left:30px;"> Yes<BR>
+                                <div style="float:left;font-size:10px;padding-top:5px;">If you generally publish large PDF documents then running split mode is recommended.</div>
+                                <div id="LICENSEKEY_ERROR" class="formError" style="float:right;"></div>
+                            </td>
+                        </tr>
+
 						<tr>
 							<td>License Key</th>
 							<td>

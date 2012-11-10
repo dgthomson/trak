@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.IO;
 
 namespace lib
 {
@@ -14,14 +15,21 @@ namespace lib
             configManager = new Config(mapPath);
         }
 
-        public String extractText(String doc, String page)
+        public String findText(String doc, String page, String searchterm, int numPages = -1)
         {
             try
             {
                 String output = "";
                 String swfFilePath = configManager.getConfig("path.swf") + doc + page + ".swf";
                 String command = configManager.getConfig("cmd.searching.extracttext"); ;
-            
+                int pagecount = -1;
+
+                if(numPages == -1){
+                    pagecount = Directory.GetFiles(configManager.getConfig("path.swf"), doc+"*").Count();
+                }else{
+                    pagecount = numPages;
+                }
+
                 if(!Common.validSwfParams(swfFilePath,doc,page))
                     return "[Invalid Parameters]";
 
@@ -39,7 +47,18 @@ namespace lib
                 if (proc.Start())
                 {
                     output = proc.StandardOutput.ReadToEnd();
-                    return output;
+                    int strpos = output.ToLower().IndexOf(searchterm.ToLower());
+                    if(strpos > 0){
+                        return "[{\"page\":" + page + ", \"position\":" + strpos + "}]";
+                    }else{
+                        int npage = Convert.ToInt32(page);
+
+                        if(npage < pagecount){
+                            return this.findText(doc,(npage+1).ToString(),searchterm,pagecount);
+                        }else{
+                            return "[{\"page\":-1, \"position\":-1}]";
+                        }
+                    }
                 }
                 else
                     return "[Error Extracting]";
