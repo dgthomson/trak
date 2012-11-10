@@ -6853,9 +6853,9 @@ HTML;
 $_data = json_decode($map['event_data'],$assoc = true);
 if (isset($_data)) {
 foreach ($_data['ixid'] as $k => $v) {
-	printf ('<div %sclass="hdrWideButtons23" data-id="%s"><input type="hidden" name="ixid" value="%s"><input type="hidden" name="ixres" value="%s">%s</div>',
+	printf ('<div %sclass="hdrWideButtons23" data-id="%s"><input type="hidden" name="ixid" value="%s"><input type="hidden" name="ixres" value="%s"><input type="hidden" name="ixtxt" value="%s">%s</div>',
 	isset($jobType[$map['type']][3]) ? 'style="width:'. $jobType[$map['type']][3] .'px;" ' : 'style="width:80px;" ',
-	$v,$v,  urldecode($_data['ixres'][$k])  ,$jobType[$map['type']][2][$v]);
+	$v,$v,  urldecode($_data['ixres'][$k])  ,$jobType[$map['type']][2][$v],$jobType[$map['type']][2][$v]);
 };
 };
 
