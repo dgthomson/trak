@@ -26,6 +26,7 @@ session_start();
 if (!isset($_SESSION['LAST_ACTIVITY'])) {
 	$_SESSION['LAST_ACTIVITY'] = time();
 };
+include_once "./lib/config-db.php";
 include_once "./lib/config.php";
 include_once "./lib/tmpl.php";
 include_once "./lib/write.php";
