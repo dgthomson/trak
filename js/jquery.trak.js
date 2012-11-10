@@ -4041,7 +4041,8 @@ $('.patient-jobprint').live('click',function(){
  	act:	'document',
  	type:	127,
  	task:	$('#addJob input[name=type]:checked').val(),
- 	data:	$('#joblist').serialize()
+ 	data:	$('#joblist').serialize(),
+ 	clin:	$('#addJob textarea[name=event_desc]').val()
  
  },function(){
  	//dialogdoc.dialog("option","title", _desc + ' for ' + _name); 
