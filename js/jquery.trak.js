@@ -1790,6 +1790,22 @@ var trak = {
 		dialog.remove();
 	
 					},
+	dialogDocInit:		function() {
+					if ($("#"+trak.dialogdoc).length == 0) {
+				  		dialogdoc = $('<div id="'+trak.dialogdoc+'"><img src="gfx/fbThrobber.gif" /></div>').appendTo('body');
+				 	}
+				 	else
+				 	{
+					 		// Temporary
+					 		trak.dialogDocFinish();
+				 	};
+				},
+	dialogDocFinish:	function() {
+	
+		dialogdoc.dialog("destroy");
+		dialogdoc.remove();
+	
+					},
 	refresh:		function(refreshSite,refreshWard,refreshFilter,refreshList) {
 
 		var refreshTimeout = setTimeout(function(){
@@ -2193,8 +2209,11 @@ var trak = {
 					jobstatus:	function() {
 						$('.ui-dialog-buttonpane').append('<div style="float:right;margin:.5em .6em .5em 0" class="patient-jobstatus">'+$('#_patient-jobstatus-code').attr('data-text')+'</div>');		
 						$('.patient-jobstatus').button({icons:{primary:"ui-icon-key"}});									
+					},
+					jobprint:	function() {
+						$('.ui-dialog-buttonpane').append('<div style="float:left;margin:.5em 0 .5em .6em" class="patient-jobprint">Print</div>');		
+						$('.patient-jobprint').button({icons:{primary:"ui-icon-print"}});									
 					}
-
 				
 		},
 		name:			function(id) {
@@ -3624,7 +3643,7 @@ $('.hdrWideButtons4').live('click',function(){
   width:800,
   height:600,
   modal: true,
-  open: function(){  	
+  oldopen: function(){  	
     var fp = new FlexPaperViewer(	
 		 'lib/flexpaper/FlexPaperViewer',
 		 'dialog', { config : {
@@ -3652,6 +3671,65 @@ $('.hdrWideButtons4').live('click',function(){
 		 localeChain: 'en_US'
 		 }});
   },
+  open: function(){  	
+
+    $('#dialog').FlexPaperViewer(
+            { config : {
+
+                SWFFile : escape(trak.url + "/../pathways/"+lName),
+				jsDirectory: 'lib/flexpaper/js/',
+                Scale : 1.2,
+                ZoomTransition : 'easeOut',
+                ZoomTime : 0.5,
+                ZoomInterval : 0.2,
+                FitPageOnLoad : false,
+                FitWidthOnLoad : true,
+                FullScreenAsMaxWindow : false,
+                ProgressiveLoading : true,
+                MinZoomSize : 0.2,
+                MaxZoomSize : 5,
+                SearchMatchAll : false,
+                InitViewMode : 'Portrait',
+                RenderingOrder : 'flash,html',
+                StartAtPage : '',
+                ViewModeToolsVisible : true,
+                ZoomToolsVisible : true,
+                NavToolsVisible : true,
+                CursorToolsVisible : true,
+                SearchToolsVisible : true,
+                WMode : 'window',
+                localeChain: 'en_US'
+            }}
+    );
+
+//     var fp = new FlexPaperViewer(	
+// 		 'lib/flexpaper/FlexPaperViewer',
+// 		 'dialog', { config : {
+// 		 SwfFile : escape(trak.url + "/../pathways/"+lName),
+// 		 Scale : 1.2, 
+// 		 ZoomTransition : 'easeOut',
+// 		 ZoomTime : 0.5,
+// 		 ZoomInterval : 0.2,
+// 		 FitPageOnLoad : false,
+// 		 FitWidthOnLoad : true,
+// 		 FullScreenAsMaxWindow : false,
+// 		 ProgressiveLoading : true,
+// 		 MinZoomSize : 0.2,
+// 		 MaxZoomSize : 5,
+// 		 SearchMatchAll : false,
+// 		 InitViewMode : 'Portrait',
+// 		 PrintPaperAsBitmap : false,
+// 		 
+// 		 ViewModeToolsVisible : true,
+// 		 ZoomToolsVisible : true,
+// 		 NavToolsVisible : true,
+// 		 CursorToolsVisible : true,
+// 		 SearchToolsVisible : true,
+// 		
+// 		 localeChain: 'en_US'
+// 		 }});
+
+  },
   xopen: function(){
   
   var myPDF = new PDFObject({
@@ -3675,11 +3753,11 @@ $('.hdrWideButtons5').live('click',function(){
 	$(".patient-documents").qtip('hide');
  _name = trak.fn.name($(this).attr('data-visitid'));
  _desc = $(this).attr('data-description');
- trak.dialogInit();
- dialog.dialog({
+ trak.dialogDocInit();
+ dialogdoc.dialog({
   title: 'Working...',
   close: function(){
-  	trak.dialogFinish();
+  	trak.dialogDocFinish();
   },
   width:800,
   height:600,
@@ -3691,7 +3769,7 @@ $('.hdrWideButtons5').live('click',function(){
  	type:	$(this).attr('data-type')
  
  },function(){
- 	dialog.dialog("option","title", _desc + ' for ' + _name); 
+ 	dialogdoc.dialog("option","title", _desc + ' for ' + _name); 
  });
  return false;
 }); // qTip for Documents
@@ -3932,7 +4010,7 @@ _width = $(this).attr('data-width');
 
 $('#joblist').find('._small').append(function(){
 
-return '<div class="hdrWideButtons23" data-id="'+_id+'"><input type="hidden" name="ixid" value="'+_id+'"><input type="hidden" name="ixres" value="">'+_text+'</div>';
+return '<div class="hdrWideButtons23" data-id="'+_id+'"><input type="hidden" name="ixid" value="'+_id+'"><input type="hidden" name="ixres" value=""><input type="hidden" name="ixtxt" value="'+_text+'">'+_text+'</div>';
 
 
 });
@@ -3942,7 +4020,34 @@ $(".patient-job-subtype").qtip('hide');
 });
 
 
+$('.patient-jobprint').live('click',function(){
 
+// Copy of .hdrWideButtons5
+
+ //_name = trak.fn.name($(this).attr('data-visitid'));
+ //_desc = $(this).attr('data-description');
+ trak.dialogDocInit();
+ dialogdoc.dialog({
+  title: 'Working...',
+  close: function(){
+  	trak.dialogDocFinish();
+  },
+  width:800,
+  height:600,
+  modal: true
+ }).load(trak.url,{
+ 
+ 	vid:	$('#addJob input[name=vID]').val(),
+ 	act:	'document',
+ 	type:	127,
+ 	task:	$('#addJob input[name=type]:checked').val(),
+ 	data:	$('#joblist').serialize()
+ 
+ },function(){
+ 	//dialogdoc.dialog("option","title", _desc + ' for ' + _name); 
+ });
+ return false;
+});
 
 		} catch(error) {
 	   			trak.confirm('There was a javascript initialisation error. Sorry.<p>[trak.support] '+error.message+'.</p>',220)		
@@ -4496,6 +4601,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
  },function()
  {
  			trak.fn.forms.jobstatus();
+ 			trak.fn.forms.jobprint();
 		 	$('.dialogButtons').buttonset().css('font-size','12px');
  			$('.dialogButtons#jobButtons .ui-button-text').removeClass('ui-button-text').addClass('refButtonsPad');
 			$('.hdrWideButtons23').css({"font-size":"13px","margin-bottom":"0.2em","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
@@ -6976,6 +7082,7 @@ $(".hdrWideButtons23").qtip('reposition');
  										}
 					
 					},									
-	dialog:			"dialog"
+	dialog:			"dialog",
+	dialogdoc:		"dialog-doc"
 
 };

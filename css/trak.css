@@ -883,7 +883,7 @@ height:120px;
 		-ms-user-select: none;
 		user-select: none;
 }
-	#dialog, #dialog-confirm {
+	#dialog, #dialog-confirm, #dialog-doc {
  		overflow:hidden !important;
 	}
 

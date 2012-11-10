@@ -7534,7 +7534,15 @@ case '5': // Unified clerking document
 
 };
 
+case '127': // Request form
+{
 
+$rx = multi_parse_str($_REQUEST['data']);
+print_r($rx['ixtxt']);
+echo $_REQUEST['task'];
+
+break;
+};
 
 
 default:

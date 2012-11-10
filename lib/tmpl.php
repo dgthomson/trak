@@ -45,7 +45,7 @@ echo <<<HEADER
 	   \$LAB
 	   .script("https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
 	   .script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.22/jquery-ui.min.js")
-	   .script("lib/flexpaper/js/flexpaper_flash_debug.js")
+	   .script("lib/flexpaper/js/flexpaper.js")
 	   .script("js/pdfobject.js")
 	   .script("js/jquery.printElement.js")
 	   .script("js/jquery.countdown.min-1.5-11.js")
