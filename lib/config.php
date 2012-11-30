@@ -139,7 +139,13 @@ $baseDefaultWards = array(
 // Format: Ward name, ward shortname, number of beds
 $baseWards =   array(
 
-	1 => array(	   1 => array("Medical Assessment Unit",	"MAU",	49),
+	1 => array(	
+	
+	
+					   13 => array("Acute Medicine Unit","AMU",48),
+					   14 => array("Medical Treatment Unit","MTU",8),
+
+
 				   2 => array("Coronary Care Unit",			"CCU",8),
 				   3 => array("F7 (Respiratory)",			"F7",24),
 				   4 => array("F8 (Cardiology)",			"F8",18),
@@ -150,7 +156,8 @@ $baseWards =   array(
 				   9 => array("A1 (Discharge)",				"A1",16),
 				   10 => array("A&E Observation Ward",	"Obs",8),
 				   11 => array("DVT Clinic",				"DVT",3),
-				   12 => array("Ambulatory Assessment Unit",	"AAU",3)
+				   12 => array("(Ambulatory Assessment Unit)",	"AAU",3),
+				   1 => array("(Medical Assessment Unit)",	"MAU",	49),
 			  ),
 
 	2 => array(	   1 => array("Medical Assessment Unit",	"MAU",	28),
@@ -193,8 +200,22 @@ $wardFilter = array(
 						  ),			  
 						  
 			
-			
-			
+13 => array(
+	1=>  array('Bay 1','1,2,3,4,5,6'),
+	2=>  array('Bay 2','7,8,9,10,11,12'),
+	3=>  array('Bay 3','13,14,15,16,17,18'),
+	4=>  array('Bay 4','19,20,21,22,23,24'),
+	5=>  array('Bay 5','25,26,27,28,29,30'),
+	6=>  array('Bay 6','31,32,33,34,35,36'),
+	7=>  array('Bay 7','37,38,39,40,41,42'),
+	8=>  array('Bay 8','43,44,45,46,47,48'),
+	9=>  array('Low','1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,21,22,23,24'),
+	10=> array('High','25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48')
+),			
+14 => array(
+	1=>  array('Bay 1','1,2,3,4'),
+	2=>  array('Bay 2','5,6,7,8'),
+),			
 									
 			),
 

@@ -18,6 +18,8 @@
 // http://www.position-absolute.com/articles/using-the-jquery-validation-engine-with-modal-plugins/
 // new: https://github.com/posabsolute/jQuery-Validation-Engine/blob/master/README.md#detach
 
+// Will make referral of type x flash
+// $('._refs div[data-type=x] img').addClass('_fl');
 
 //error_reporting(E_ALL); ini_set('display_errors', '1');
 
@@ -876,6 +878,10 @@ if (!empty($_REQUEST['data'])) {
  	
  };
  $visitmap['nldok'] = $_forNLD;
+ // Force NLDOK to off if we're not using NLD
+ if($_REQUEST['nld']=='0'){
+ 	$visitmap['nldok'] = '0';
+ };
 
  dbPut(UPDATE,'mau_data',		$nldmap,				$_REQUEST['nid']);
  dbPut(UPDATE,'mau_referral',	$refmap,				$_REQUEST['rid']);

@@ -1949,6 +1949,12 @@ var trak = {
 	},
 	fn:				{
 	
+		isTouchDevice:	function() {
+
+			return !!('ontouchstart' in window)
+				|| !!('onmsgesturechange' in window);
+			
+		},
 		decodeName:		function(id) {
 		var _AESObj = $("#_pn"+id).find('dt');
 		_AESObj.html(Aes.Ctr.decrypt(_AESObj.html(),__PW,256));
@@ -3626,6 +3632,9 @@ $('.hdrWideButtons3').live('click',function(){
 
 });
 $('.hdrWideButtons4').live('click',function(){
+
+if (!trak.fn.isTouchDevice()) {
+
 	lID   = $(this).attr("rel");
 	fName = $(this).find('.ui-button-text').html();
 	lName = $('#dPW'+lID).attr('value');
@@ -3746,6 +3755,12 @@ $('.hdrWideButtons4').live('click',function(){
   
   }
  }).css('overflow','hidden');
+
+} else {
+
+	trak.fn.statusMessage("Adobe Flash is needed to show this. Try a computer rather than an iPad.");
+
+};
  
 });
 $('.hdrWideButtons5').live('click',function(){

@@ -675,28 +675,11 @@ display:none;
 
 #point, ._fl {
 position:relative;
-x-moz-animation:mymove 1s ease infinite;
-x-webkit-animation:mymove 1s ease infinite;
-padding-left:1px; padding-right:1px;
-};
-
-/*
-._fl {
-	-webkit-animation-name: spinnerRotate;
-	-webkit-animation-duration: 2s;
-	-webkit-animation-iteration-count: infinite;
-	-webkit-animation-timing-function: linear;
+x-moz-animation:mymove 0.75s ease infinite;
+x-webkit-animation:mymove 0.75s ease infinite;
 }
 
-@-webkit-keyframes spinnerRotate {
-	from {
-		-webkit-transform:rotate(0deg);
-	}
-	to {
-		-webkit-transform:rotate(360deg);
-	}
-}
-*/
+
 
 
 /* Simple Animation */

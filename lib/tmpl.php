@@ -27,6 +27,9 @@ $_URL = 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME'];
 //	<script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js">IE7_PNG_SUFFIX=".png";</script>
 //	<![endif]-->
 
+// Old QTIP2 code (pre-Nov2012)
+//	<link type="text/css" rel="stylesheet" href="css/jquery.qtip.min.css" />
+//	.script("js/jquery.qtip.min.js")
 
 echo <<<HEADER
 <!doctype html>
@@ -38,7 +41,7 @@ echo <<<HEADER
 	<link type="text/css" rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.16.custom.css" />	
 	<link type="text/css" rel="stylesheet" href="css/trak.css" media="screen,print"/>
 	<link type="text/css" rel="stylesheet" href="css/badger.min.css" />
-	<link type="text/css" rel="stylesheet" href="css/jquery.qtip.min.css" />
+	<link type="text/css" rel="stylesheet" href="js/qtip2/jquery.qtip.css" />
 	<link type="text/css" rel="stylesheet" href="js/scheduler/dhtmlxscheduler_glossy.css" />
 	<script type="text/javascript" src="js/LAB.min.js"></script>
 	<script>
@@ -50,7 +53,7 @@ echo <<<HEADER
 	   .script("js/jquery.printElement.js")
 	   .script("js/jquery.countdown.min-1.5-11.js")
 	   .script("js/jquery.badger.min.js")
-	   .script("js/jquery.qtip.min.js")
+	   .script("js/qtip2/jquery.qtip.js")
 	   .script("js/jquery.scrollTo-1.4.2-min.js")
 	   .script("js/jquery.validationEngine.js")
 	   .script("js/jquery.validationEngine.en.js")
