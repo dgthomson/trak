@@ -2232,15 +2232,15 @@ var trak = {
 			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 
 		},
-		loginThrobberOn:	function() {
+		loginThrobberOn:		function() {
 			loginThrobberTimeout = setTimeout(function(){
 				$('#login-throbber').show();
 			},500);
 		},
-		loginThrobberOff:	function() {
+		loginThrobberOff:		function() {
 			clearTimeout(loginThrobberTimeout);
 		},
-		statusMessage:		function(_message) {
+		statusMessage:			function(_message) {
 		
 //	         event: event.type,	
 		
@@ -2298,7 +2298,7 @@ window.setTimeout(function(){$('#trakButtons').qtip('destroy')}, 8000);
     	event:	'unfocus'
     },
     content:	{
-      text: '<div id="_trakTip" style="text-align:center;">'+_message+'</div>',
+      text: '<div id="_trakTip" style="text-align:center;width:280px;">'+_message+'</div>',
 
   				 },
 	position:	{
@@ -2327,8 +2327,7 @@ window.setTimeout(function(){$('#trakButtons').qtip('destroy')}, 8000);
 		} catch(error) {
 		
 		};	
-		
-		
+			
 		},
 		buttonset:		{
 		
@@ -6967,7 +6966,6 @@ if ($('#_patient-bed').attr('data-vwr') == '1') {
 },event);
 				//$("body").css("overflow", "auto");
 			});
-
    			$(".patient-job-subtype").live('click',function(event){
  				// Overflow set to avoid flash of scrollbar when opening qTip
  				//$("body").css("overflow", "hidden");
@@ -7025,7 +7023,6 @@ if ($('#_patient-bed').attr('data-vwr') == '1') {
 },event);
 				//$("body").css("overflow", "auto");
 			});
-
    			$(".hdrWideButtons23").live('click',function(event){
  				// Overflow set to avoid flash of scrollbar when opening qTip
  				//$("body").css("overflow", "hidden");
