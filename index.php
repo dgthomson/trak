@@ -1085,6 +1085,33 @@ case "handover":{
 case "ajax":{
 		switch ($_REQUEST['type']):
 
+case "jobextras":{
+
+// Variant of formAddJob
+foreach ($jobType[$_REQUEST['job']][4] as $key => $value) {
+
+	echo '<div style="float:left;">';
+	printf ('<label for="type" class="nLabel">%s</label><br />',str_replace('_',' ',$key));
+	echo	'<div class="dialogButtons">';
+	foreach($value as $_loop => $option) {
+
+		printf ('<input %s type="radio" value="%s" id="%s%s" name="%s" />',
+			current(array_keys($value)) == $_loop ? 'checked="checked"' : '',
+			$_loop,$key,$_loop,$key
+			);
+		printf ('<label for="%s%s">%s</label>',
+			$key,$_loop,$option
+			);
+
+	};
+	echo "</div>";
+	echo "</div>";
+
+};
+
+break;
+};
+
 			case "jobsubtype":{
 
 if (!isset($_REQUEST['jid']))
@@ -1155,15 +1182,23 @@ break;
 
 };
 			case "documents":{
+
+// sleep(5);
+
 $jsFooter ='';			
 echo '<div id="documents" >';
 foreach ($documentTypes as $k => $v) {
 
-printf	('<input type="radio" id="ddoc%s" name="ddoc" />
-<label data-description="%s" data-visitid="%s" data-type="%s" id="docLabel%s" style="width:140px;text-align:left;"
-class="hdrWideButtons5" for="ddoc%s">%s</label><br/>',$k,$v[1],$_REQUEST['vid'],$k,$k,$k,$v[0] );
-$jsFooter .= sprintf('$("#ddoc%s").button({icons:{primary:"ui-icon-clipboard"}});',$k);
-$jsFooter .= sprintf('$("#docLabel%s").css("font-size","13px");',$k);
+// printf	('<input type="radio" id="ddoc%s" name="ddoc" />
+// <label data-description="%s" data-visitid="%s" data-type="%s" id="docLabel%s" style="width:140px;text-align:left;"
+// class="hdrWideButtons5" for="ddoc%s">%s</label><br/>',$k,$v[1],$_REQUEST['vid'],$k,$k,$k,$v[0] );
+// $jsFooter .= sprintf('$("#ddoc%s").button({icons:{primary:"ui-icon-clipboard"}});',$k);
+// $jsFooter .= sprintf('$("#docLabel%s").css("font-size","13px");',$k);
+
+printf	('<div data-description="%s" data-visitid="%s" data-type="%s" class="hdrWideButtons5">%s</div><br/>',$v[1],$_REQUEST['vid'],$k,$v[0]);
+
+// 140 wide
+
 
 };
 echo '</div>';
@@ -1448,31 +1483,31 @@ echo '</div>';
 			
 			};
 			case "pathways":{
-$jsFooter ='';
-echo '<div id="pathways" >';
 
+// Development bodge
+// $_REQUEST['touch'] = 'true';
 
-
-$k=0;foreach (file_array(PATHWAYS_PATH) as $file) {
-if (substr($file,0,1)=='.') continue;
-
-printf	('<input value="%s" type="radio" id="dPW%s" name="dPW" />
-<label id="PWLabel%s" rel="%s" style="width:220px;text-align:left;"
-class="hdrWideButtons4" for="dPW%s">%s</label><br/>',$file,$k,$k,$k,$k,substr($file, 0, strrpos($file, '.')) );
-$jsFooter .= sprintf('$("#dPW%s").button({icons:{primary:"ui-icon-clipboard"}});',$k);
-$jsFooter .= sprintf('$("#PWLabel%s").css("font-size","14px");',$k);
-
-$k++;
+echo '<div id="pathways">';
+if ($_REQUEST['touch'] == 'false') {
+	// Flash-based
+	foreach (file_array(PATHWAYS_PATH) as $file) {
+		if (substr($file,0,1)=='.') continue;
+		printf	('<div data-width="220px" data-file="%s" class="hdrWideButtons4">%s</div><br/>',$file,substr($file, 0, strrpos($file, '.')) );
+	};
+}
+else
+{
+	// PDF-based
+	foreach (file_array(PATHWAYS_PDF_PATH) as $file) {
+	if (substr($file,0,1)=='.') continue;
+	printf	('<div data-description="%s" data-visitid="0" data-type="0" data-width="220px" data-file="%s" class="hdrWideButtons5">%s</div><br/>',substr($file, 0, strrpos($file, '.')),PATHWAYS_PDF_EXTERNAL.$file,substr($file, 0, strrpos($file, '.')) );
 };
-// $('#pathways').buttonset().css('font-size','13px');
+
+
+};
 echo '</div>';
-echo <<<FOOTER
-<script type="text/javascript"><!--
- 
- $jsFooter
---></script>
-FOOTER;
-break;};
+break;
+};
 			case "nursing":{
 $sql = sprintf("SELECT * FROM `med_pmhx` WHERE `comorb` REGEXP '%s';",$_REQUEST['term']);
 $dbQuery = mysql_query($sql);
@@ -2684,7 +2719,11 @@ case "dbAddJob":{
 
 		$data = multi_parse_str($__AES->decrypt($_REQUEST['data'],$__PW, 256));
 		$req = multi_parse_str($__AES->decrypt($_REQUEST['req'],$__PW, 256));
-
+		$extras = multi_parse_str($__AES->decrypt($_REQUEST['extras'],$__PW, 256));
+		
+		//print_r($extras);
+		//exit;
+		
 		// event_start = event_end +5min
 
 		// UK-formatted date from front-end. Change to ISO 8601
@@ -2705,7 +2744,8 @@ case "dbAddJob":{
 				 'status'			=> $data['patient-jobstatus-code'][0],
 				 'event_desc'		=> urldecode($data['event_desc'][0]),
 				 'event_result'		=> $__AES->decrypt($_REQUEST['result'],$__PW, 256),
-				 'event_data'		=> json_encode($req)
+				 'event_data'		=> json_encode($req),
+				 'extras'			=> json_encode($extras)
 		);
 
 		if ($data['id'][0] == "") {
@@ -6714,7 +6754,8 @@ case "formAddJob":{
 				 'event_time'		=> date( 'H:i', strtotime($query['event_start']) ),
 				 'event_desc'		=> $query['event_desc'],
 				 'event_result'		=> $query['event_result'],
-				 'event_data'		=> $query['event_data']
+				 'event_data'		=> $query['event_data'],
+				 'extras'			=> $query['extras']
 				 );
 	} else {
 		$map = array(
@@ -6733,7 +6774,8 @@ case "formAddJob":{
 				 'event_time'		=> date( 'H:i', time() ),
 				 'event_desc'		=> "",
 				 'event_result'		=> "",
-				 'event_data'		=> ''
+				 'event_data'		=> '',
+				 'extras'		=> ''
 				);	
 	};
 
@@ -6741,8 +6783,13 @@ case "formAddJob":{
 echo '<div style="float:left;width:360px;">';
 
 //Job
-echo '<form id="addJob">';
-
+if ($map['type'] != "") {
+	printf ('<form id="addJob" data-desc="%s">',$jobType[$map['type']][0]);
+}
+else
+{
+	printf ('<form id="addJob" data-desc="">');
+};
 echo '<input type="hidden" name="act" value="dbAddJob" />';
 printf ('<input name="id" type="hidden" id="id" value="%s"/>', $map['id']);
 printf ('<input name="pID" type="hidden" id="pID" value="%s"/>', $map['pID']);
@@ -6807,7 +6854,7 @@ foreach ($jobType as $key => $who) {
  printf ('<input %s type="radio" value="%s" id="job%s" name="type" class="validate[required,groupRequired[jobType]]" />',
  $map['type'] == $key ? 'checked="checked"' : "",
  $key,$key);
- printf ('<label for="job%s"><img src="%s" width="38" height="38" data-desc="%s" /></label>',$key,$who[1],$who[0]);
+ printf ('<label for="job%s"><img src="%s" width="38" height="38" data-desc="%s" data-type="%s" /></label>',$key,$who[1],$who[0],$key);
 };
 echo	"</div>";
 echo "</div>";
@@ -6844,12 +6891,12 @@ echo '</form>';
 
 echo '</div>';
 
-echo '<div style="float:left;width:220px;height:480px;margin-left:4px;">';
+echo '<div style="float:left;width:320px;height:480px;margin-left:4px;">';
 
 echo <<<HTML
 <div class="patient-job-subtype">Add an investigation</div>
 <form id="joblist">
-<div class="scrapPaper" style="width:280px;height:261px;margin-top:4px;">
+<div class="scrapPaper" style="width:320px;height:261px;margin-top:4px;">
 <img src="gfx/paper-clip-mini.png" style="margin-top:-2px;margin-left:4px;float:left;" />
 
 <div class="_small" style="float:left;">
@@ -6868,7 +6915,47 @@ foreach ($_data['ixid'] as $k => $v) {
 
 
 
-echo '</div></div></form></div>';
+
+echo '</div></div></form>';
+
+
+
+
+// Special
+// Variant is found in ajax->jobextras and formAddJob
+$_extras = json_decode($map['extras'],$assoc = true);
+echo '<form id="extraslist">';
+foreach ($jobType[$map['type']][4] as $key => $value) {
+
+	// If a new extras array key doesn't (yet) exist in the database, set the value to
+	// the first key of the array of options as the default
+	if (!isset($_extras[$key][0])) {
+		$_extras[$key][0] = current(array_keys($value));
+	};
+	echo '<div style="float:left;">';
+	printf ('<label for="type" class="nLabel">%s</label><br />',str_replace('_',' ',$key));
+	echo	'<div class="dialogButtons">';
+	foreach($value as $_loop => $option) {
+
+		printf ('<input %s type="radio" value="%s" id="%s%s" name="%s" />',
+			$_extras[$key][0] == $_loop ? 'checked="checked"' : '',
+			$_loop,$key,$_loop,$key
+			);
+		printf ('<label for="%s%s">%s</label>',
+			$key,$_loop,$option
+			);
+
+	};
+	echo "</div>";
+	echo "</div>";
+
+};
+echo '</form>';
+// End:Special
+
+
+
+echo '</div>';
 
 
 
@@ -6999,7 +7086,7 @@ case '1': // Clerking document
 						'FullAdmitDate'	=>	date("d/m/Y g:i a",strtotime($_visit['admitdate']))
 						
 						);
-			mergeDocument("tpl/mau.xml.docx",'trakImported',$data,"cache/mau_" . str_replace(' ', '', $_visit['name']) . ".docx");	
+			mergeDocument(0,"tpl/mau.xml.docx",'trakImported',$data,"cache/mau_" . str_replace(' ', '', $_visit['name']) . ".docx");	
 		};
 	};
 	break;
@@ -7133,7 +7220,7 @@ case '2': // Discharge document
 			if (!isset($job)) {
 				$job[]=array('type'=>'No information','ref'=>'','res'=>'');
 			};
-			mergeDocument("tpl/discharge.xml.docx",'trakData',$data,"cache/discharge_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job);	
+			mergeDocument(0,"tpl/discharge.xml.docx",'trakData',$data,"cache/discharge_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job);	
 		};
 	};
 	break;
@@ -7265,7 +7352,7 @@ case '3': // Progress notes
 			if (!isset($job)) {
 				$job[]=array('type'=>'No information','ref'=>'','res'=>'');
 			};
-			mergeDocument("tpl/progress.xml.docx",'trakData',$data,"cache/discharge_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job);	
+			mergeDocument(0,"tpl/progress.xml.docx",'trakData',$data,"cache/discharge_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job);	
 		};
 	};
 	break;
@@ -7406,7 +7493,7 @@ case '4': // Patient information document
 			if (!isset($job)) {
 				$job[]=array('type'=>'No information','ref'=>'','res'=>'');
 			};
-			mergeDocument("tpl/patient-info.xml.docx",'trakData',$data,"cache/patient-info_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job);	
+			mergeDocument(0,"tpl/patient-info.xml.docx",'trakData',$data,"cache/patient-info_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job);	
 		};
 	};
 	break;
@@ -7534,7 +7621,7 @@ case '5': // Unified clerking document
 			if (!isset($job)) {
 				$job[]=array('type'=>'No information','ref'=>'','res'=>'');
 			};
-			mergeDocument("tpl/unified-clerking.docx",'trakData',$data,"cache/uniclerk_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job,1);	
+			mergeDocument(1,"tpl/unified-clerking.docx",'trakData',$data,"cache/uniclerk_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job);	
 		};
 	};
 	break;
@@ -7560,7 +7647,18 @@ $ix[]=htmlspecialchars(urldecode($x));
 $_ix = implode('</w:t><w:br/><w:t>',$ix);
 $_clindata = htmlspecialchars(urldecode($_REQUEST['clin']));
 
+$_extras = $_REQUEST['extras'];
+//print_r($_extras);
 
+parse_str($_extras, $output);
+
+
+foreach($output as $key=>$value){
+$extras[]=array('key'=>str_replace('_',' ',$key),'value'=>htmlentities($jobType[$_REQUEST['task']][4][$key][$value]));
+
+};
+//print_r($extras);
+//exit;
 
 
 
@@ -7693,7 +7791,11 @@ $_clindata = htmlspecialchars(urldecode($_REQUEST['clin']));
 			if (!isset($job)) {
 				$job[]=array('type'=>'No information','ref'=>'','res'=>'');
 			};
-			mergeDocument("tpl/labrequest-".$_REQUEST['task'].".xml.docx",'trakData',$data,"cache/labrequest-".$_REQUEST['task']."_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job);	
+			
+//			$extras[]=array('key'=>'UCR','value'=>'Banana');
+//			$extras[]=array('key'=>'Priority','value'=>'Manana');
+						
+			mergeDocument(0,"tpl/labrequest-".$_REQUEST['task'].".xml.docx",'trakData',$data,"cache/labrequest-".$_REQUEST['task']."_" . date('U') . "_" . str_replace(' ', '', $_visit['name']) . ".docx",'trakRef',$ref,'trakJob',$job,'trakExtras',$extras);	
 		};
 	};
 	break;
@@ -7720,6 +7822,22 @@ $_clindata = htmlspecialchars(urldecode($_REQUEST['clin']));
 
 
 
+
+
+break;
+};
+
+case '0': // PDF document
+{
+
+$_url = urlencode($_REQUEST['file']);
+
+echo <<<HTML
+<iframe id="pdfdocument" src="https://docs.google.com/viewer?embedded=true&amp;url=$_url" width="100%" height="100%" style="border: none;"></iframe>
+HTML;
+//echo <<<HTML
+//<iframe type="text/html" width="100%" height="100%" src="http://vuzit.com/view/?url=$_url&output=embed&z=0&key=47103d76-8a40-7957-a9ed-c54df17d9ef0" frameborder="0" ></iframe>
+//HTML;
 
 
 break;

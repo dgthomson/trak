@@ -2718,7 +2718,8 @@ Save: function() {
 													act:	"dbAddJob",
 													data:	Aes.Ctr.encrypt(  $("#addJob").serialize()  ,__PW,256),
 													result:	Aes.Ctr.encrypt(  $('#addJobResult textarea[name=event_result]').val()  ,__PW,256),
-													req:	Aes.Ctr.encrypt(  $("#joblist").serialize()  ,__PW,256)
+													req:	Aes.Ctr.encrypt(  $("#joblist").serialize()  ,__PW,256),
+													extras:	Aes.Ctr.encrypt(  $("#extraslist").serialize()  ,__PW,256)
 
 													
 												 }),
@@ -3635,9 +3636,9 @@ $('.hdrWideButtons4').live('click',function(){
 
 if (!trak.fn.isTouchDevice()) {
 
-	lID   = $(this).attr("rel");
+	//lID   = $(this).attr("rel");
 	fName = $(this).find('.ui-button-text').html();
-	lName = $('#dPW'+lID).attr('value');
+	lName = $(this).attr('data-file');
 	$("#action-pathways").qtip('hide'); // otherwise it hangs around too long
  var dialog = $("#dialog");
  if ($("#dialog").length == 0) {
@@ -3766,9 +3767,17 @@ if (!trak.fn.isTouchDevice()) {
 $('.hdrWideButtons5').live('click',function(){
 
 	$(".patient-documents").qtip('hide');
- _name = trak.fn.name($(this).attr('data-visitid'));
- _desc = $(this).attr('data-description');
+
+ try {
+ 	_name = trak.fn.name($(this).attr('data-visitid'));
+	_desc = $(this).attr('data-description');
+	_text = _desc + ' for ' + _name;
+ } catch(e)
+ {
+ 	_text = $(this).attr('data-description');
+ };
  trak.dialogDocInit();
+ 	$("#action-pathways").qtip('hide'); // otherwise it hangs around too long
  dialogdoc.dialog({
   title: 'Working...',
   close: function(){
@@ -3781,10 +3790,11 @@ $('.hdrWideButtons5').live('click',function(){
  
  	vid:	$(this).attr('data-visitid'),
  	act:	'document',
- 	type:	$(this).attr('data-type')
+ 	type:	$(this).attr('data-type'),
+ 	file:	$(this).attr('data-file')
  
  },function(){
- 	dialogdoc.dialog("option","title", _desc + ' for ' + _name); 
+ 	dialogdoc.dialog("option","title", _text); 
  });
  return false;
 }); // qTip for Documents
@@ -4057,7 +4067,8 @@ $('.patient-jobprint').live('click',function(){
  	type:	127,
  	task:	$('#addJob input[name=type]:checked').val(),
  	data:	$('#joblist').serialize(),
- 	clin:	$('#addJob textarea[name=event_desc]').val()
+ 	clin:	$('#addJob textarea[name=event_desc]').val(),
+ 	extras:	$('#extraslist').serialize(),
  
  },function(){
  	//dialogdoc.dialog("option","title", _desc + ' for ' + _name); 
@@ -4182,8 +4193,15 @@ $(this).qtip({
          type: 'POST',
          data: 	{
     					act:	"ajax",
-    					type:	"pathways"
-         		} 
+    					type:	"pathways",
+    					touch:	trak.fn.isTouchDevice()
+         		},
+         success:	function(data, status) {
+         	this.set('content.text', data);
+    		$("#pathways .hdrWideButtons4").css({"font-size":"14px","width":function(){return $(this).attr('data-width');},"text-align":"left"}).button({icons:{primary:"ui-icon-clipboard"}});
+    		$("#pathways .hdrWideButtons5").css({"font-size":"14px","width":function(){return $(this).attr('data-width');},"text-align":"left"}).button({icons:{primary:"ui-icon-clipboard"}});
+       		$("#action-pathways").qtip('reposition');
+         }
       }
   				 },
 	position:	{
@@ -4575,9 +4593,11 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 				});
 			$(".patient-jobs").live('click',function(){
 
+
+ var _jid = $(this).attr('data-jobid');
  trak.dialogInit();
  dialog.dialog({
-  title: 'Edit job',
+  title: '',
   xtitle: function(){
   alert($(this).attr('data-jobid'));
   	if ($(this).attr('data-jobid') != '') {
@@ -4593,8 +4613,9 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
   	$('#addJob').validationEngine('hideAll');
   	trak.dialogFinish();
   },
-  width:690,
-  height:410,
+  width:730,
+  height:610,
+  xheight:410,
   modal: true,
   open: function(){
   	$('.ui-button').blur();
@@ -4616,6 +4637,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
   	
  },function()
  {
+ 			var _selected = '';
  			trak.fn.forms.jobstatus();
  			trak.fn.forms.jobprint();
 		 	$('.dialogButtons').buttonset().css('font-size','12px');
@@ -4647,6 +4669,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 			$("#addJob input[name=event_time]").timepicker({
 		setDate:		new Date()	
 	});
+
 			$('#statusButtons').click(function(){
 		 _tVal = 0;
 		 $("#addJob input[name=status]:checked").each(function(){
@@ -4654,13 +4677,46 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 		 });
 		 $('#addJob input[name=statusSum]').val(_tVal);
 	});
+
+
 			$(".refButtonsPad").hover(function(){
-			$('#_jobDesc').html( ' <span style="color:#AAA;">' + $(this).find('img').attr('data-desc') + '</span>' );},function(){
+				$('#_jobDesc').html( ' <span style="color:#AAA;">' + $(this).find('img').attr('data-desc') + '</span>' );},function(){
 			
-				$('#_jobDesc').html('');
+				$('#_jobDesc').html( ' <span style="color:#AAA;">' + _selected + '</span>' );
 			
-			});
+			}).click(function(){
+
+ 				var _selected	=	$(this).find('img').attr('data-desc');
+ 				var _pressed	=	$(this).find('img').attr('data-type');
+ 				$('#_jobDesc').html( ' <span style="color:#AAA;">' + _selected + '</span>' );
+ 				$('#extraslist').load(trak.url,{
+ 
+				 	act:	'ajax',
+ 					type:	'jobextras',
+ 					job:	function(){ return _pressed }
+ 
+				},function(){
+					$('#extraslist .dialogButtons').buttonset().css('font-size','12px');
+				});
+ 				
+ 			});
  			$('.patient-job-subtype').css({"font-size":"13px","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
+
+	if (_jid !=undefined) {
+		$('#jobButtons input[name=type]').button( "option", "disabled", true ).button("refresh");
+			// adapted from trak.fn.buttonset.bordersoff
+			$('#jobButtons').find('.ui-state-disabled').not('.ui-corner-left').css({"border-left-color":"transparent"});
+			$('#jobButtons').find('.ui-state-disabled').not('.ui-corner-right').css({"border-right-color":"transparent"});			
+
+
+		_selected=$('#addJob').attr('data-desc');
+		$('#_jobDesc').html( ' <span style="color:#AAA;">' + _selected + '</span>' );
+		$(".refButtonsPad").off('click');
+		dialog.dialog("option","title",$('#addJob').attr('data-desc'));
+	} else {
+		dialog.dialog("option","title",'Add job');	
+	};
+
 
  });
  return false;
@@ -5810,7 +5866,12 @@ trak.fn.decode('textarea[name=jobs]');
     					act:	"ajax",
     					type:	"documents",
 						vid:	$(this).attr('data-visitid')    		
-         		} 
+         		},
+         success:	function(data, status) {
+         	this.set('content.text', data);
+  			$("#documents .hdrWideButtons5").css({"font-size":"13px","width":"140px","text-align":"left"}).button({icons:{primary:"ui-icon-clipboard"}});
+       		$('.patient-documents').qtip('reposition');
+         } 
       }
   				 },
 	position:	{
@@ -6937,7 +6998,7 @@ if ($('#_patient-bed').attr('data-vwr') == '1') {
     	}
   				 },
 	position:	{
-				xviewport: $(window),
+				viewport: $(window),
 				my: 'left center',
         		at: 'center'
   	  			},

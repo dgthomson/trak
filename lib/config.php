@@ -14,6 +14,8 @@ $__PW  = 'trak';
 define('INSERT',1);
 define('UPDATE',0);
 define('PATHWAYS_PATH',dirname($_SERVER['SCRIPT_FILENAME']).'/pathways/');
+define('PATHWAYS_PDF_PATH',dirname($_SERVER['SCRIPT_FILENAME']).'/pathways/pdf/');
+define('PATHWAYS_PDF_EXTERNAL','http://'.HOST.'pathways/pdf/');
 
 define('NOTE_NOTE',0);
 define('NOTE_REFHX',1);
@@ -427,8 +429,31 @@ $jobType = array(
 	11	=> 'INR',
 	12	=> 'Immunoglobulins'
 
-),148),
-2	=>	array("ECG",'gfx/ix/EKG_.png'),
+),148,array(
+
+'Priority' => array(1=>'Routine',2=>'Urgent'),
+'Sample_risk' => array(1=>'Normal',2=>'Hazardous'),
+
+)),
+2	=>	array("Cardiorespiratory",'gfx/ix/EKG_.png',array(
+
+1=> 'ECG',
+2=> 'Echocardiogram',
+3=> 'TOE',
+4=> '24h ECG',
+5=> '48h ECG',
+6=> 'Cardiomemo',
+7=> 'Spirometry',
+8=> 'Pulmonary function',
+9=> 'Overnight oximetry',
+10=> 'Sleep study'
+
+),170,array(
+
+'UCR' => array(1=>'No',2=>'Yes'),
+'Priority' => array(1=>'Normal',2=>'Outpatient',3=>'Urgent outpatient'),
+
+)),
 3	=>	array("Ultrasound",'gfx/ix/wifi.png',array(
 
 	1	=> 'Abdomen',	
@@ -440,7 +465,22 @@ $jobType = array(
 
 ),120),
 4	=>	array("Urine",'gfx/ix/urine.png'),
-5	=>	array("X-ray",'gfx/ix/xray.png'),
+5	=>	array("X-ray",'gfx/ix/xray.png',array(
+
+1=>'Chest',
+2=>'Abdomen',
+3=>'Pelvis',
+4=>'Left hip',
+5=>'Right hip'
+
+
+),120,array(
+
+'UCR' => array(1=>'No',2=>'Yes'),
+'eGFR' => array(1=>'>= 30',2=>'< 30'),
+'Pregnant' => array(1=>'No',2=>'Yes'),
+'Priority' => array(1=>'Normal',2=>'Emergency',3=>'Urgent outpatient'),
+)),
 6	=>	array("Appointment",'gfx/ix/cal.png'),
 7	=>	array('Endoscopy','gfx/ix/leopard-fiber-optic-cable_128x128.png',array(
 
@@ -453,7 +493,15 @@ $jobType = array(
 
 
 
-),136)
+),136,array(
+
+	'NSAID'		=>	array(1=>'No',2=>'Yes'),
+	'Warfarin'	=>	array(1=>'No',2=>'Yes'),
+	'Blatchford_score' => array(1=>'>= 8',2=>'< 8'),
+	'Priority' => array(1=>'Normal',2=>'Emergency',3=>'Urgent outpatient'),
+	'Portal_hypertension' => array(1=>'Unknown',2=>'Yes',3=>'No')
+
+))
 
 );
 
