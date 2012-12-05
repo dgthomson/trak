@@ -4,7 +4,7 @@ $param1 = "first";
 $param2 = "second";
 $param3 = "third";
  
-$command = "python /home/wellington/python_script_example.py";
+$command = "python /var/www/trak/lib.dtest.py";
 $command .= " $param1 $param2 $param3 2>&1";
  
 header('Content-Type: text/html; charset=utf-8');
