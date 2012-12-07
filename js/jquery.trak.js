@@ -1695,12 +1695,12 @@ var trak = {
 		$('.hdrFilter').button().css('font-size','14px');
 		//intervalRefresh = setInterval(trak.interval,trak.refreshTime*1000);
 		$('#trakButtons').fadeIn('slow');
-// 		window.onerror = function(msg, url, line) {
-// 	   		trak.confirm('There was a javascript runtime error. Sorry.<p>[global:'+line+'] '+msg+'.</p>',220)
-// 			//alert("Error: " + msg + "\nurl: " + url + "\nline #: " + line);
-//   			var suppressErrorAlert = true;
-//    			return suppressErrorAlert;
-// 		};
+		window.onerror = function(msg, url, line) {
+	   		trak.confirm('There was a javascript runtime error. Sorry.<p>[global:'+line+'] '+msg+'.</p>',220)
+			//alert("Error: " + msg + "\nurl: " + url + "\nline #: " + line);
+  			var suppressErrorAlert = true;
+   			return suppressErrorAlert;
+		};
 
 	} catch(error) {
 	   	trak.confirm('There was a javascript runtime error. Sorry.<p>[boot] '+error.message+'.</p>',220)
