@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 08, 2012 at 11:19 AM
+-- Generation Time: Dec 05, 2012 at 08:31 PM
 -- Server version: 5.1.30
 -- PHP Version: 5.2.8
 
@@ -100,6 +100,7 @@ CREATE TABLE IF NOT EXISTS `mau_events` (
   `event_desc` text NOT NULL,
   `event_result` text NOT NULL,
   `event_data` text NOT NULL,
+  `extras` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id` (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;

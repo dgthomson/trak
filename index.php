@@ -1095,7 +1095,7 @@ foreach ($jobType[$_REQUEST['job']][4] as $key => $value) {
 	echo	'<div class="dialogButtons">';
 	foreach($value as $_loop => $option) {
 
-		printf ('<input %s type="radio" value="%s" id="%s%s" name="%s" />',
+		printf ('<input %s type="radio" value="%s" id="%s%s" name="%s">',
 			current(array_keys($value)) == $_loop ? 'checked="checked"' : '',
 			$_loop,$key,$_loop,$key
 			);
@@ -6937,7 +6937,7 @@ foreach ($jobType[$map['type']][4] as $key => $value) {
 	echo	'<div class="dialogButtons">';
 	foreach($value as $_loop => $option) {
 
-		printf ('<input %s type="radio" value="%s" id="%s%s" name="%s" />',
+		printf ('<input %s type="radio" value="%s" id="%s%s" name="%s">',
 			$_extras[$key][0] == $_loop ? 'checked="checked"' : '',
 			$_loop,$key,$_loop,$key
 			);

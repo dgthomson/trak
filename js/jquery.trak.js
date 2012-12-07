@@ -1695,12 +1695,12 @@ var trak = {
 		$('.hdrFilter').button().css('font-size','14px');
 		//intervalRefresh = setInterval(trak.interval,trak.refreshTime*1000);
 		$('#trakButtons').fadeIn('slow');
-		window.onerror = function(msg, url, line) {
-	   		trak.confirm('There was a javascript runtime error. Sorry.<p>[global:'+line+'] '+msg+'.</p>',220)
-			//alert("Error: " + msg + "\nurl: " + url + "\nline #: " + line);
-  			var suppressErrorAlert = true;
-   			return suppressErrorAlert;
-		};
+// 		window.onerror = function(msg, url, line) {
+// 	   		trak.confirm('There was a javascript runtime error. Sorry.<p>[global:'+line+'] '+msg+'.</p>',220)
+// 			//alert("Error: " + msg + "\nurl: " + url + "\nline #: " + line);
+//   			var suppressErrorAlert = true;
+//    			return suppressErrorAlert;
+// 		};
 
 	} catch(error) {
 	   	trak.confirm('There was a javascript runtime error. Sorry.<p>[boot] '+error.message+'.</p>',220)
@@ -3639,14 +3639,10 @@ if (!trak.fn.isTouchDevice()) {
 	fName = $(this).find('.ui-button-text').html();
 	lName = $(this).attr('data-file');
 	$("#action-pathways").qtip('hide'); // otherwise it hangs around too long
- var dialog = $("#dialog");
- if ($("#dialog").length == 0) {
-  dialog = $('<div id="dialog"><img src="gfx/fbThrobber.gif" /></div>').appendTo('body');
- };
+ trak.dialogInit();
  dialog.dialog({
   title: fName,
-  close: function(){
-  	// dialogClose(dialog);
+  close: function() {
   	trak.dialogFinish();
   },
   width:800,
@@ -3739,7 +3735,7 @@ if (!trak.fn.isTouchDevice()) {
 // 		 }});
 
   },
-  xopen: function(){
+  xpdfopen: function(){
   
   var myPDF = new PDFObject({
   url: trak.url + "/../pathways/"+lName,
