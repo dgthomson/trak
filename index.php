@@ -1079,6 +1079,9 @@ case "write":{
 		break;
 };
 case "handover":{
+//print_r ($_REQUEST['pid']);
+//echo implode(',',$_REQUEST['pid']);
+
 		handover($_REQUEST['site'],$_REQUEST['ward'],$_REQUEST['viewType']);
 	break;
 };
@@ -1619,11 +1622,41 @@ ORDER BY v.triage, r.rtime;",$_REQUEST['site'],$_REQUEST['ward'],$k);
 
 };
 
-printf('<div style="margin-top:4px;" id="lists-other">Other…</div><br>');
-printf('<div id="lists-byconsultant">By consultant…</div><br>');
+printf('<div id="lists-other">Other…</div><br>');
+printf('<div style="margin-top:4px;" id="lists-byconsultant">By consultant…</div><br>');
+printf('<div id="lists-bydestination">By destination…</div><br>');
 
+$sql = sprintf("SELECT * FROM `mau_visit` WHERE `handover` = '1' AND `handate` >= '%s' AND `site` = '%s' AND status != '4'",date('Y-m-d 11:00:00'),$_REQUEST['site']);
+$listQuery = mysql_query($sql);
+if (mysql_num_rows($listQuery) != 0) {
+	printf('<div data-number="%s" style="margin-top:4px;" data-name="Handover" data-list="403" class="hdrWideButtons3 _all">Handover</div><br>',mysql_num_rows($listQuery));
+
+} else {
 	printf('<div style="margin-top:4px;" data-name="Handover" data-list="403" class="hdrWideButtons3 _all">Handover</div><br>');
+};
+mysql_free_result($listQuery);
+
+
+// 		$sql = sprintf ("SELECT *, 0 AS pred FROM mau_patient p, mau_visit v
+// 		WHERE p.id=v.patient
+// 		AND v.site='$trakSite'
+// 		AND v.ward='$trakWard'
+// 		AND v.status != '4'
+// 		AND (v.sugward = '126'
+// 		OR v.nldok = '1')
+// 		ORDER BY v.ward,v.bed;");
+
+$sql = sprintf("SELECT * FROM `mau_visit` WHERE (`sugward` = '126' OR `nldok` = '1') AND `site` = '%s' AND `ward` = '%s' AND status != '4'",$_REQUEST['site'],$_REQUEST['ward']);
+$listQuery = mysql_query($sql);
+if (mysql_num_rows($listQuery) != 0) {
+	printf('<div data-number="%s" style="margin-top:4px;" data-name="Discharge" data-list="404" class="hdrWideButtons3 _all">Discharge</div><br>',mysql_num_rows($listQuery));
+
+} else {
 	printf('<div style="margin-top:4px;" data-name="Discharge" data-list="404" class="hdrWideButtons3 _all">Discharge</div><br>');
+};
+mysql_free_result($listQuery);
+
+
 
 
 $sql = sprintf("SELECT * FROM `mau_visit` WHERE `dsite` = %s AND `status` = 1",$_REQUEST['site']);
@@ -1761,6 +1794,33 @@ break;
 			
 			
 			};
+			case "lists-dest":{
+			
+	$_list = $consultantsOncall[$_REQUEST['site']];
+	asort($_list, SORT_STRING);		
+	echo '<div id="lists-destination" >';
+	foreach ($baseWards[$_REQUEST['site']] as $k => $v) {
+		if ($v[0][0] == '(') continue; // Don't show commented-out wards
+		printf('<div data-code="%s" data-name="%s" class="hdrWideButtons24">%s</div><br>',$k,'➟'.$v[1],$v[0]);
+	};
+
+
+// 	foreach ($_list as $k => $v) {
+// 		printf('<div data-code="%s" data-name="%s" class="hdrWideButtons8">%s</div><br>',$k,$v,$v);
+// 	};
+//	printf('<div style="margin-top:4px;" data-code="127" data-name="Locum" class="hdrWideButtons8">Locum</div><br>');
+//	printf('<div style="margin-top:4px;" data-code="0" data-name="No consultant" class="hdrWideButtons8">Not set</div><br>');
+	echo '</div>';
+
+
+break;
+			
+			
+			};
+
+
+
+
 			case "patBoxSub":{
 
 printf ('<td colspan="1"><center>⤷</center></td><td class="_but" colspan="4">',$_REQUEST['id']);

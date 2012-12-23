@@ -66,6 +66,66 @@ $_key = 'K8582886212201292249';
 		ORDER BY v.triage",$_REQUEST['site']);
 		break;
 		};
+		
+		case "403": // Marked as needing handover
+		{
+		$sql = sprintf ("SELECT *, 0 AS pred FROM mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='%s'
+		AND v.status != '4'
+		AND v.handover = '1'
+		AND v.handate >= '%s'
+		ORDER BY v.ward,v.bed;",
+		$_REQUEST['site'],date('Y-m-d 11:00:00'));
+//		$_allWards = true;
+//		$_skipFiltering = true;
+		break;
+		};
+
+		case "404": // Marked as discharged at PTWR or NLD complete
+		{
+		$sql = sprintf ("SELECT *, 0 AS pred FROM mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='$trakSite'
+		AND v.ward='$trakWard'
+		AND v.status != '4'
+		AND (v.sugward = '126'
+		OR v.nldok = '1')
+		ORDER BY v.ward,v.bed;");
+		// $_allWards = true;
+		$_skipFiltering = true;
+		break;
+		};		
+
+		case "400": // 18: Waiting to see consultant, any ward
+		{
+		$sql = sprintf ("SELECT *,0 AS pred FROM mau_referral r, mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='$trakSite'
+		AND v.status != '4'
+		AND r.who = '18'
+		AND r.status < 4
+		AND r.visitid = v.id
+		ORDER BY v.triage, r.rtime;",$_REQUEST['list']);
+		$_allWards = true;
+		break;
+		};
+		case "410": // 18: Waiting to see doctor, any ward
+		{
+		$sql = sprintf ("SELECT *,0 AS pred FROM mau_referral r, mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='$trakSite'
+		AND v.status != '4'
+		AND r.who = '1'
+		AND r.status < 4
+		AND r.visitid = v.id
+		ORDER BY v.triage, r.rtime;",$_REQUEST['list']);
+		$_allWards = true;
+		break;
+		};
+
+
+		
 		default: // Finds pts waiting to see x
 		{
 		$sql = sprintf ("SELECT *,0 AS pred FROM mau_referral r, mau_patient p, mau_visit v
@@ -81,6 +141,24 @@ $_key = 'K8582886212201292249';
 		};		
 	endswitch;
 //};
+
+
+// TODO:
+// Handover DONE
+// Discharge DONE
+// Doctor and CP for all wards DONE ?WORKING
+
+// $sql = sprintf ("SELECT *,0 AS pred FROM mau_visit v, mau_patient p
+// 		WHERE v.id IN (%s)
+// 		AND p.id=v.patient
+// 		ORDER BY v.bed;", implode(',',$_REQUEST['pid']) );
+
+
+//echo $sql;
+//exit;
+
+
+
 
 //print_r($_REQUEST);
 //print $sql;
@@ -235,7 +313,7 @@ switch ($viewType):
 
 case "google":
 echo <<<HTML
-<iframe id="handover" src="http://docs.google.com/viewer?url=$_url" width="770" height="550" style="border: none;"></iframe>
+<iframe id="handover" src="http://docs.google.com/viewer?url=$_url&amp;embedded=true" width="770" height="550" style="border: none;"></iframe>
 HTML;
 break;
 

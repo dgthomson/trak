@@ -1753,7 +1753,7 @@ var trak = {
 								
 								// Auto-login
 								 $("#formLogin input[name=pw]").val('trak');
-								 //$("#formLogin").submit();
+								 $("#formLogin").submit();
 								
 							}
 						 );			
@@ -4039,6 +4039,16 @@ $(".patient-job-subtype").qtip('hide');
 
 });
 
+$('.hdrWideButtons24').live('click',function(){
+	fID   = $(this).attr("data-code");
+	fName = $(this).attr('data-name');
+	$( ".hdrFilter" ).button( "option", "label", fName );
+	$("#action-lists").qtip('hide');
+	$("#lists-other").qtip('hide');
+	$("#lists-bydestination").qtip('hide');
+    trak.refresh(sID,wID,fID,405);
+
+}); // qTip for destination filter
 
 $('.patient-jobprint').live('click',function(){
 
@@ -4238,6 +4248,11 @@ $(this).qtip({
 });
 			$('#action-print').click(function(){
 
+var _patientList = new Array();
+$('.patient-toggle').each(function(){
+	_patientList.push( $(this).find('img').attr('rel') );
+});
+
  trak.dialogInit();
  dialog.dialog({
   title: 'Working...',
@@ -4254,13 +4269,16 @@ $(this).qtip({
  	ward:		wID,
  	filter:		fID,
  	list:		lID,
- 	viewType:	'adeptol'
+ 	viewType:	'google',
+ 	pid:		_patientList
  
  },function(){
  	dialog.dialog("option","title",'Handover'); // for ' + $('#adeptol').attr('data-name')); 
  });
  return false;
 });
+
+
 			$("#action-add").button({icons:{primary:"ui-icon-plusthick"},text:true}).click(function(){
 
  trak.dialogInit();
@@ -4693,6 +4711,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 				},function(){
 					$('#extraslist .dialogButtons').buttonset().css('font-size','12px');
 				});
+				$('#joblist ._small').empty();
  				
  			});
  			$('.patient-job-subtype').css({"font-size":"13px","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
@@ -6150,6 +6169,56 @@ trak.fn.decode('textarea[name=jobs]');
       			}
 },event);
 			});
+			$("#lists-bydestination").live('click',function(event){
+				$("#lists-other").qtip('hide');
+				$(this).qtip({
+	overwrite:	true,
+	hide: {
+      event: 'unfocus'
+    },
+	show: 		{
+         event: event.type,
+         ready: true
+      },
+	content:	{
+      text: '<div id="'+trak.dialog+'"><img src="gfx/fbThrobber.gif" /></div>',
+      ajax: {
+         url: trak.url,
+         type: 'POST',
+         data: 	{
+    					act:	"ajax",
+    					type:	"lists-dest",
+						site:	sID,
+						ward:	wID,
+						filter: fID     		
+         		}, 
+         success:	function(data, status) {
+         	this.set('content.text', data);
+  			$("#lists-destination div").css({"font-size":"14px","width":"200px","text-align":"left"}).button({icons:{primary:"ui-icon-tag"}});
+			$("#lists-destination").qtip('reposition');
+         }
+
+
+
+      }
+  				 },
+	position:	{
+				viewport: $(window),
+				my: 'left center',
+        		at: 'center'
+  	  			},
+  	style:		{
+				classes: 'ui-tooltip-dark qtOverride',
+        		tip:	{
+         				corner: true
+         				},
+         		xwidth:	function(){  $("#lists-destination .hdrWideButtons24").css('width') +8  }
+      			}
+},event);
+			});			
+			
+			
+			
    			$(".patient-followup").live('click',function(event){
  				// Overflow set to avoid flash of scrollbar when opening qTip
  				//$("body").css("overflow", "hidden");
@@ -7094,8 +7163,6 @@ $(".hdrWideButtons23").qtip('reposition');
 		} catch(error) {
 	   			trak.confirm('There was a javascript initialisation error. Sorry.<p>[trak.actions] '+error.message+'.</p>',220)		
 		};
-
-
 
 	},	
 	visRef:			Array(),

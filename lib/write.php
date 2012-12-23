@@ -132,6 +132,18 @@ if ($_REQUEST['list'] > 0) {
 		$_skipFiltering = true;
 		break;
 		};
+		case "405": // Show by destination
+		{
+		$sql = sprintf ("SELECT *,0 AS pred FROM mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='$trakSite'
+		AND v.status != '4'
+		AND v.dward = '%s'
+		ORDER BY v.ward,v.bed;",$_REQUEST['filter']);
+		// $_allWards = true;
+		$_skipFiltering = true;
+		break;
+		};
 		default: // Finds pts waiting to see x
 		{
 		$sql = sprintf ("SELECT *,0 AS pred FROM mau_referral r, mau_patient p, mau_visit v
