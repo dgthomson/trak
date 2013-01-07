@@ -2710,6 +2710,10 @@ $("#dialog").dialog("destroy").remove();
 Save: function() {
  if ($("#addJob").validationEngine('validate')) {
 		$(".ui-dialog-buttonpane button:contains('Save')").button("disable");
+		// These buttons may be disabled; they'll need to be enabled to allow the value to be submitted
+		$('#jobButtons input[name=type]').button( "option", "disabled", false );
+		// Extra styling to hide the flash of the buttons becoming active
+		$('#jobButtons label').addClass( "ui-button-disabled ui-state-disabled" );
 
  		$.ajax({
 
@@ -2723,7 +2727,7 @@ Save: function() {
 													
 												 }),
 										success: function(data){
-
+										
 											//alert(data);
 											trak.refreshRow($("#addJob input[name=vID]").val());
 											$("#dialog").dialog("destroy").remove();
@@ -3320,6 +3324,28 @@ Save: function() {
  				}
 	
 				},
+	dialogs:		{
+	
+		note:	{
+  close: function(){
+  	$('#formAddNote').validationEngine('hideAll');
+  	trak.dialogFinish();
+  },
+  width:640,
+  height:410,
+  modal: true,
+  open: function(){
+  	$('.ui-button').blur();
+  },
+  create:	function() {
+						  
+		$('.ui-dialog-buttonpane').append('<div style="float:left;padding:6px 0 0 8px;"><img border="0" width="32" height="32" src="gfx/Notebook.png"></div>');
+
+  },
+  buttons:  function() {return this.buttons.notes;}
+ }
+	
+	},
 	support:		function() {
 
 try {
@@ -4028,13 +4054,20 @@ _id = $(this).attr('data-code');
 _text = $(this).attr('data-text');
 _width = $(this).attr('data-width');
 
-$('#joblist').find('._small').append(function(){
+$('#ixlist').append(function(){
 
-return '<div class="hdrWideButtons23" data-id="'+_id+'"><input type="hidden" name="ixid" value="'+_id+'"><input type="hidden" name="ixres" value=""><input type="hidden" name="ixtxt" value="'+_text+'">'+_text+'</div>';
-
+return '<div data-id="'+_id+'" class="_cond hdrWideButtons23">'+_text+'<a class="_R" href="#">✕</a><input type="hidden" name="ixid" value="'+_id+'"><input type="hidden" name="ixres" value=""><input type="hidden" name="ixtxt" value="'+_text+'"></div>';
 
 });
-$('#joblist div:last').css({"font-size":"13px","width":_width,"margin-bottom":"0.1em","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
+
+			$('#joblist ._cond ._R').last().hover(function(){
+   				$(this).parent().addClass("_drughover");
+  			},function(){
+   				$(this).parent().removeClass("_drughover");
+   			}).click(function(){
+      			$(this).parent().remove();			
+   			});
+
 $(".patient-job-subtype").qtip('hide');
 
 });
@@ -4578,7 +4611,7 @@ $.ajax({
 				};
 	 		});			
 				$('#_patient-pathway').button({icons:{primary:"ui-icon-contact"}}).css('font-size','13px');
-					
+					//$('#_avail').css('font-size','13px').button();
 	
 	if ($('#_patient-bed-code').val() == '127') {
 
@@ -4626,7 +4659,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
   	$('#addJob').validationEngine('hideAll');
   	trak.dialogFinish();
   },
-  width:730,
+  width:720,
   height:610,
   xheight:410,
   modal: true,
@@ -4655,18 +4688,18 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
  			trak.fn.forms.jobprint();
 		 	$('.dialogButtons').buttonset().css('font-size','12px');
  			$('.dialogButtons#jobButtons .ui-button-text').removeClass('ui-button-text').addClass('refButtonsPad');
-			$('.hdrWideButtons23').css({"font-size":"13px","margin-bottom":"0.2em","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
+			//$('.hdrWideButtons23').css({"font-size":"13px","margin-bottom":"0.2em","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
 			$('.db input[name=db]').click(function(){
 
 				if ($(this).val() == 1)
 				{
-					$('#addJob').show();
+					$('#_jobdata').show();
 					$('#addJobResult').hide();
 				};
 				if ($(this).val() == 2)
 				{
-					$('#addJobResult').show();
-					$('#addJob').hide();									
+					$('#_jobdata').hide();
+					$('#addJobResult').show();									
 				};
 	 		});
 			$("#addJob").validationEngine('init');
@@ -4692,6 +4725,16 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 	});
 
 
+			$('#joblist ._cond ._R').hover(function(){
+   				$(this).parent().addClass("_drughover");
+  			},function(){
+   				$(this).parent().removeClass("_drughover");
+   			}).click(function(){
+      			$(this).parent().remove();			
+   			});
+
+
+
 			$(".refButtonsPad").hover(function(){
 				$('#_jobDesc').html( ' <span style="color:#AAA;">' + $(this).find('img').attr('data-desc') + '</span>' );},function(){
 			
@@ -4711,10 +4754,10 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 				},function(){
 					$('#extraslist .dialogButtons').buttonset().css('font-size','12px');
 				});
-				$('#joblist ._small').empty();
+				$('#ixlist').empty();
  				
  			});
- 			$('.patient-job-subtype').css({"font-size":"13px","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
+ 			//$('.patient-job-subtype').css({"font-size":"13px","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
 
 	if (_jid !=undefined) {
 		$('#jobButtons input[name=type]').button( "option", "disabled", true ).button("refresh");
@@ -4728,7 +4771,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 		$(".refButtonsPad").off('click');
 		dialog.dialog("option","title",$('#addJob').attr('data-desc'));
 	} else {
-		dialog.dialog("option","title",'Add job');	
+		dialog.dialog("option","title",'Add job');
 	};
 
 
@@ -4804,25 +4847,14 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
  				return false;
 			});
 			$('.patient-note').live('click',function() {
- trak.dialogInit();
- dialog.dialog({
-  close: function(){
-  	$('#formAddNote').validationEngine('hideAll');
-  	trak.dialogFinish();
-  },
-  width:640,
-  height:410,
-  modal: true,
-  open: function(){
-  	$('.ui-button').blur();
-  },
-  create:	function() {
-						  
-		$('.ui-dialog-buttonpane').append('<div style="float:left;padding:6px 0 0 8px;"><img border="0" width="32" height="32" src="gfx/Notebook.png"></div>');
 
-  },
-  buttons: trak.buttons.notes
- }).load(trak.url,
+ if ($(this).attr('data-noteid') != undefined) {
+	dialog.dialog( "option", "hide", "fade" );
+	trak.dialogFinish();
+	trak.dialogs.note.show = 'fade';
+};
+ trak.dialogInit();
+ dialog.dialog(trak.dialogs.note).load(trak.url,
  {
 
 	act:	'formAddNote',
@@ -4848,6 +4880,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
   });
  });
  return false;
+ 
 });
 			$('.patient-labcentre').live('click',function(){
 
@@ -5016,6 +5049,7 @@ if ($('#noteTD_'+hid+' ._notes').hasClass('_notesOverflow'))
 
 
 			$(".patient-documents").button({icons:{primary:"ui-icon-clipboard"},text:true});
+			$('.patient-sbar').button({icons:{primary:"ui-icon-comment"},text:true});
 //			$(".patient-consultants-mau").button({icons:{primary:"ui-icon-clipboard"},text:true});
 //			$(".patient-consultants-oc").button({icons:{primary:"ui-icon-clipboard"},text:true});
 				
@@ -6949,7 +6983,7 @@ if ($('#_patient-bed').attr('data-vwr') == '1') {
     	}
   				 },
 	position:	{
-				xviewport: $(window),
+				viewport: $(window),
 				my: 'bottom center',
         		at: 'center'
   	  			},
@@ -7105,15 +7139,18 @@ if ($('#_patient-bed').attr('data-vwr') == '1') {
       text: function(){
       
       var _res = $(this).find('input[name=ixres]').val();
-      var _ix = $(this).find('.ui-button-text').text();
+      var _ix =  $(this).find('input[name=ixtxt]').val();
       return '<label for="result" class="nLabel">Result for '+_ix+'</label><br /><div class="notePaper" style="float:left;width:300px;"><div class="_smaller"><textarea class="_smallNote" name="result" type="text" id="result">'+_res+'</textarea></div></div><div id="_remove" style="display:none;">Remove</div><div id="_save" style="display:none;">Save</div>';
       
       },
   				 },
 	position:	{
 				xviewport: $(window),
-				my: 'left center',
-        		at: 'center'
+				my: 'top center',
+        		at: 'bottom left',
+        		adjust: {
+					x: 10
+				}
   	  			},
   	style:		{
 				classes: 'ui-tooltip-dark qtOverride',
@@ -7127,10 +7164,10 @@ if ($('#_patient-bed').attr('data-vwr') == '1') {
 
 visible:function(){
 
-$("#_remove").css({"font-size":"13px","margin-top":"4px","text-align":"left"}).button({icons:{primary:"ui-icon-script"}}).show().click(function(){
-	_clicked.remove();
-	$(".hdrWideButtons23").qtip('destroy');
-});
+// $("#_remove").css({"font-size":"13px","margin-top":"4px","text-align":"left"}).button({icons:{primary:"ui-icon-script"}}).show().click(function(){
+// 	_clicked.remove();
+// 	$(".hdrWideButtons23").qtip('destroy');
+// });
 $("#_save").css({"font-size":"13px","margin-right":"-2px","margin-top":"4px","text-align":"left","float":"right"}).button({icons:{primary:"ui-icon-script"}}).show().click(function(){
 	_clicked.find('input[name=ixres]').val($('textarea[name=result]').val());
 	$(".hdrWideButtons23").qtip('destroy');

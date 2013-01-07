@@ -130,7 +130,7 @@ $consultantsMAU		= array(
 // per-site, usually the MAU
 $baseDefaultWards = array(
 
-1 => 1,
+1 => 13,
 2 => 1,
 3 => 1,
 4 => 1,
@@ -145,7 +145,7 @@ $baseWards =   array(
 	
 	
 					   13 => array("Acute Medicine Unit","AMU",48),
-					   14 => array("Medical Treatment Unit","MTU",8),
+					   14 => array("Ambulatory Care Unit","ACU",8),
 
 
 				   2 => array("Coronary Care Unit",			"CCU",8),
@@ -522,8 +522,7 @@ $jobType = array(
 	'NSAID'		=>	array(1=>'No',2=>'Yes'),
 	'Warfarin'	=>	array(1=>'No',2=>'Yes'),
 	'Blatchford_score' => array(1=>'>= 8',2=>'< 8'),
-	'Priority' => array(1=>'Normal',2=>'Emergency',3=>'Urgent outpatient'),
-	'Portal_hypertension' => array(1=>'Unknown',2=>'Yes',3=>'No')
+	'Priority' => array(1=>'Normal',2=>'Emergency',3=>'Urgent outpatient')
 
 ))
 

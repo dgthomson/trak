@@ -1252,6 +1252,7 @@ echo '<div id="suggested-ward" >';
 	printf('<div style="margin-bottom:4px;" data-name="%s" data-code="%s" class="hdrWideButtons9">%s</div>','Any medical ward',127,'Any medical ward');
 
 foreach ($baseWards[$_REQUEST['sid']] as $k => $v) {
+	if ($v[0][0] == '(') continue; // Don't show commented-out wards
 	printf('<div data-name="%s" data-code="%s" class="hdrWideButtons9">%s</div><br>',$v[0],$k,$v[0]);
 };
 	printf('<div style="margin-top:4px;" data-name="%s" data-code="%s" class="hdrWideButtons9">%s</div>','Discharge',126,'Discharge');
@@ -1268,7 +1269,7 @@ echo '<div id="pat-ward" >';
 
 
 foreach ($baseWards[$_REQUEST['sid']] as $k => $v) {
-
+	if ($v[0][0] == '(') continue; // Don't show commented-out wards
 	printf('<div data-name="%s" data-code="%s" class="hdrWideButtons12">%s</div><br>',  isset($_REQUEST['short']) ? $v[1] : $v[0],$k,$v[0]);
 
 };
@@ -1827,7 +1828,8 @@ printf ('<td colspan="1"><center>⤷</center></td><td class="_but" colspan="4">'
 
 if ($_REQUEST['status'] == 1 || $_REQUEST['status'] == 0)
 {
-//		printf ('<a class="pBSButtonMove editPat" href="http://'.HOST.'/index.php?act=formEditPat&vid=%s">Move</a>',$_REQUEST['id']);
+		printf ('<div class="patient-sbar" data-visitid="%s">Info</div>',$_REQUEST['id']);
+		//		printf ('<a class="pBSButtonMove editPat" href="http://'.HOST.'/index.php?act=formEditPat&vid=%s">Move</a>',$_REQUEST['id']);
 		printf ('<div class="patient-edit" data-visitid="%s">Move</div>',$_REQUEST['id']);
 
 } else
@@ -1864,8 +1866,8 @@ printf ('<div data-visitid="%s" class="patient-refer">Refer</div>',$_REQUEST['id
 printf ('<div data-visitid="%s" data-patientid="%s" class="patient-jobs">Job</div>',$_REQUEST['id'],$nQuery['id']);
 
 printf ('<div data-visitid="%s" class="patient-note">Entry</div>',$_REQUEST['id']);
-printf ('<div data-pas="%s" class="patient-labcentre">Labs</div>',$nQuery['pas']);
-printf ('<div data-pas="%s" class="patient-prism">Prism</div>',$nQuery['pas']);
+//printf ('<div data-pas="%s" class="patient-labcentre">Labs</div>',$nQuery['pas']);
+//printf ('<div data-pas="%s" class="patient-prism">Prism</div>',$nQuery['pas']);
 //printf ('<div data-visitid="%s" class="document-letter">Letter</div>',$_REQUEST['id']);
 printf ('<div data-visitid="%s" class="patient-documents">Docs</div>',$_REQUEST['id']);
 //printf ('<div class="patient-consultants-mau">Cons MAU</div>');
@@ -2780,6 +2782,11 @@ case "dbAddJob":{
 		$data = multi_parse_str($__AES->decrypt($_REQUEST['data'],$__PW, 256));
 		$req = multi_parse_str($__AES->decrypt($_REQUEST['req'],$__PW, 256));
 		$extras = multi_parse_str($__AES->decrypt($_REQUEST['extras'],$__PW, 256));
+
+//print_r($data);
+//print_r($req);
+//print_r($extras);
+//exit;
 		
 		//print_r($extras);
 		//exit;
@@ -2807,6 +2814,9 @@ case "dbAddJob":{
 				 'event_data'		=> json_encode($req),
 				 'extras'			=> json_encode($extras)
 		);
+
+//print_r($map);
+//exit;
 
 		if ($data['id'][0] == "") {
 			dbPut(INSERT,"mau_events",$map,NULL);
@@ -4658,6 +4668,8 @@ endswitch;
 echo '<div style="float:left;">';
 echo '<label for="_destWard" class="nLabel">Bed</label><br />';
 printf(	'<div data-vwr="1" class="_noselect patient-bed" id="_patient-bed">%s</div>', $_formMovePatBedName	);
+
+//echo '<input type="checkbox" id="_avail" /><label for="_avail">✔</label>';
 printf( '<input type="hidden" value="%s" id="_patient-bed-code" name="patient-bed-code" />', $_formMovePatBed);
 echo '</div>';
 
@@ -6840,7 +6852,7 @@ case "formAddJob":{
 	};
 
 
-echo '<div style="float:left;width:360px;">';
+echo '<div id="_jobdata"><div style="float:left;width:360px;">';
 
 //Job
 if ($map['type'] != "") {
@@ -6905,8 +6917,6 @@ printf ('<input name="event_porter" class="ui-button ui-widget ui-corner-all not
 		$map['event_porter']);
 echo "</div>";
 
-
-
 echo '<div style="float:left;">';
 echo '<label for="type" class="nLabel">Job type<span id="_jobDesc"></span></label><br />';
 echo	'<div class="dialogButtons" id="jobButtons">';
@@ -6918,8 +6928,6 @@ foreach ($jobType as $key => $who) {
 };
 echo	"</div>";
 echo "</div>";
-
-
 
 echo '<br clear="both">';
 echo '<span class="nLabel">Notes</span><br />';
@@ -6948,35 +6956,62 @@ printf( '<input type="hidden" data-text="%s" value="%s" id="_patient-jobstatus-c
 
 
 echo '</form>';
-
 echo '</div>';
 
 echo '<div style="float:left;width:320px;height:480px;margin-left:4px;">';
 
-echo <<<HTML
-<div class="patient-job-subtype">Add an investigation</div>
-<form id="joblist">
-<div class="scrapPaper" style="width:320px;height:261px;margin-top:4px;">
-<img src="gfx/paper-clip-mini.png" style="margin-top:-2px;margin-left:4px;float:left;" />
+// Investigation
+//echo '<div class="patient-job-subtype">Add an investigation</div>';
 
-<div class="_small" style="float:left;">
+	echo '<div style="float:left;">';
+	echo '<label style="padding-left:3px;margin-left:1px;" class="nLabel">Investigations';
+	echo ' <span class="patient-job-subtype">Add</span>';
+	echo '</label><br />';
+	echo '<form id="joblist"><fieldset id="ixlist" class="ui-tabs ui-widget ui-widget-content ui-corner-all" style="overflow-y:auto;overflow-x:hidden;width:300px;height:170px;">';
 
-HTML;
 
 $_data = json_decode($map['event_data'],$assoc = true);
 if (isset($_data['ixid'])) {
 foreach ($_data['ixid'] as $k => $v) {
-	printf ('<div %sclass="hdrWideButtons23" data-id="%s"><input type="hidden" name="ixid" value="%s"><input type="hidden" name="ixres" value="%s"><input type="hidden" name="ixtxt" value="%s">%s</div>',
-	isset($jobType[$map['type']][3]) ? 'style="width:'. $jobType[$map['type']][3] .'px;" ' : 'style="width:80px;" ',
-	$v,$v,  urldecode($_data['ixres'][$k])  ,$jobType[$map['type']][2][$v],$jobType[$map['type']][2][$v]);
+
+printf('<div data-id="%s" class="_cond hdrWideButtons23">%s<a class="_R" href="#">✕</a>',$v,$jobType[$map['type']][2][$v]);
+printf('<input type="hidden" name="ixid" value="%s"><input type="hidden" name="ixres" value="%s"><input type="hidden" name="ixtxt" value="%s">',$v,  urldecode($_data['ixres'][$k])  ,$jobType[$map['type']][2][$v]);
+echo '</div>';
 };
 };
 
+	echo '</fieldset></form>';
+	echo '</div>';
+
+
+
+// End: new
+
+
+// echo <<<HTML
+// <div class="patient-job-subtype">Add an investigation</div>
+// <form id="joblist">
+// <div class="scrapPaper" style="width:320px;height:261px;margin-top:4px;">
+// <img src="gfx/paper-clip-mini.png" style="margin-top:-2px;margin-left:4px;float:left;" />
+// <div class="_small" style="float:left;">
+// HTML;
+// 
+// $_data = json_decode($map['event_data'],$assoc = true);
+// if (isset($_data['ixid'])) {
+// foreach ($_data['ixid'] as $k => $v) {
+// 	printf ('<div %sclass="hdrWideButtons23" data-id="%s"><input type="hidden" name="ixid" value="%s"><input type="hidden" name="ixres" value="%s"><input type="hidden" name="ixtxt" value="%s">%s</div>',
+// 	isset($jobType[$map['type']][3]) ? 'style="width:'. $jobType[$map['type']][3] .'px;" ' : 'style="width:80px;" ',
+// 	$v,$v,  urldecode($_data['ixres'][$k])  ,$jobType[$map['type']][2][$v],$jobType[$map['type']][2][$v]);
+// };
+// };
+
+// End: investigation
 
 
 
 
-echo '</div></div></form>';
+
+//echo '</div></div></form>';
 
 
 
@@ -6984,7 +7019,8 @@ echo '</div></div></form>';
 // Special
 // Variant is found in ajax->jobextras and formAddJob
 $_extras = json_decode($map['extras'],$assoc = true);
-echo '<form id="extraslist">';
+echo '<div id="_el"><form id="extraslist">';
+if ($map['type'] != '') {
 foreach ($jobType[$map['type']][4] as $key => $value) {
 
 	// If a new extras array key doesn't (yet) exist in the database, set the value to
@@ -7010,18 +7046,15 @@ foreach ($jobType[$map['type']][4] as $key => $value) {
 	echo "</div>";
 
 };
-echo '</form>';
+};
+echo '</form></div>';
 // End:Special
 
 
 
 echo '</div>';
 
-
-
-
-
-
+echo '</div>'; // _jobdata
 
 echo '<form id="addJobResult" style="display:none;">';
 
@@ -7033,7 +7066,6 @@ echo '<div class="notePaper" style="width:360px;"><div class="_medium">';
 printf ('<textarea name="event_result" class="_smallNote">%s</textarea>',$__AES->encrypt($map['event_result'] , $__PW, 256));
 
 echo '</div></div>';
-
 
 echo '</form>';
 
