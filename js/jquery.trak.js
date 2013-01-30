@@ -4660,7 +4660,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
   	trak.dialogFinish();
   },
   width:720,
-  height:610,
+  height:410,
   xheight:410,
   modal: true,
   open: function(){
@@ -5491,7 +5491,7 @@ $('textarea',$('#dialog')).change(function(){
   	trak.dialogFinish();
   },
   width:660,
-  height:490,
+  height:500,
   modal: true,
   buttons: trak.buttons.refer.nurse
  }).load(trak.url,{

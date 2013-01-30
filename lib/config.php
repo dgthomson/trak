@@ -610,6 +610,16 @@ $selfcareScale=array(
 );
 
 
+$amb = array(
+
+'Transport:trans' => array('2:Own or public transport','0:None'),
+'Treatments anticipated:rx' => array('2:Oral','0:IV infusions'),
+'Mental state:mental' => array('2:Normal','0:Acutely confused'),
+'Modified early warning score:mews' => array('1:0 (no concerns)','0:≥ 1'),
+'Discharged in last 30 days:dx' => array('1:No','0:Yes')
+
+);
+
 // Format: Score-section -> array; score-value:description[:age-cutoff]
 $scs = array(
 

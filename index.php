@@ -8,6 +8,8 @@
 // problem with css #Date ul (pervades)
 // DONE: if patient moves site, on-call/MAU consultant choice fails. need to detect site change
 //    then select a new consultant for that site
+// nursing notes changes still display old-style error box
+// standard referral doesn't even show change error
 
 
 // DONE (for add only) : stop duplicate AJAX when save etc pressed and network's slow
@@ -5978,7 +5980,7 @@ printf ('%s','Not set');
 echo '</div>';
 echo '</div>';
 };
-printf( '<div style="clear:both;"><label for="_flow" class="nLabel">Simple clinical score</label><br />');
+printf( '<div style="clear:both;float:left;"><label for="_flow" class="nLabel">Simple clinical score</label><br />');
 echo '<fieldset name="_flow" class="_refborder" style="width:280px;">';
 echo '<div style="float:right;" id="_scs"></div>';
 $_ageScore=0;
@@ -6090,6 +6092,92 @@ printf	('<input %svalue="%s" type="radio" id="triage%s" name="triage" /><label s
 echo	"</div>";
 echo	"</div>";
 echo '</fieldset></div>';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+printf( '<div style="float:left;"><label for="_flow" class="nLabel">AMB score (under development)</label><br />');
+echo '<fieldset name="_flowamb" class="_refborder" style="width:260px;">';
+
+if (years_old($nQuery['dob']) >= 80) {
+$_ambAgeScore=-0.5;
+} else {
+$_ambAgeScore=0;
+};
+if ($nQuery['gender'] == '1') {
+$_ambGenScore=-0.5;
+} else {
+$_ambGenScore=0;
+};
+printf('<input type="hidden" name="ambgender" value="%s">',$_ambGenScore);
+printf('<input type="hidden" name="ambage" value="%s">',$_ambAgeScore);
+
+foreach ($amb as $k => $v) {
+$_desc = explode(":",$k); $_loop=0;
+echo '<div style="clear:both;float:left;">';
+printf('<label class="nLabel">%s</label><br />',$_desc[0]);
+echo	'<div class="dialogButtons">';
+foreach ($v as $x) {
+	$_vars = explode(':',$x);
+	printf ('<input class="_ambFlip" %svalue="%s" type="radio" id="%s" name="%s" /><label class="_ambRadio" for="%s">%s</label>',
+	$_loop == 0 ? 'checked="checked" ' : '',
+	$_vars[0],$_desc[1].$_loop,$_desc[1],$_desc[1].$_loop,$_vars[1]
+);
+$_loop++;
+};
+echo '</div>';
+echo '</div>';
+
+};
+
+echo '</fieldset>';
+echo '</div>';
+
+
+$jsFooter .= sprintf('
+
+$("._ambFlip").change(function(){ambFlip()});
+
+
+function ambFlip(){
+
+
+var _a = parseFloat($("input[name=ambgender]").val());
+var _b = parseFloat($("input[name=ambage]").val());
+var _c = parseFloat($("input[name=trans]:checked").val());
+var _d = parseFloat($("input[name=rx]:checked").val());
+var _e = parseFloat($("input[name=mental]:checked").val());
+var _f = parseFloat($("input[name=mews]:checked").val());
+var _g = parseFloat($("input[name=dx]:checked").val());
+var _score = _a+_b+_c+_d+_e+_f+_g;
+trak.fn.statusMessageDialog("Amb score is " + _score);
+
+
+};
+
+
+');
+
+
+
+
+
+
+
 echo	"</div></form>"; // _tri
 
 
