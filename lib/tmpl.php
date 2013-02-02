@@ -51,7 +51,7 @@ echo <<<HEADER
 	   .script("lib/flexpaper/js/flexpaper.js")
 	   .script("js/pdfobject.js")
 	   .script("js/jquery.printElement.js")
-	   .script("js/jquery.countdown.min-1.5-11.js")
+	   .script("js/jquery.countdown.min-1.6-1.js")
 	   .script("js/jquery.badger.min.js")
 	   .script("js/qtip2/jquery.qtip.js")
 	   .script("js/jquery.scrollTo-1.4.2-min.js")
