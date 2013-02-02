@@ -528,13 +528,15 @@ font-size:20pt !important;
 color:blue;
 font-style:normal;
 font-family: "JournalRegular" !important;
+x-font-family: "ClearView3B" !important;
 }
 .notePaper div em {
-font-size:16pt;color:#666;font-style:normal;margin-bottom:8px;font-family: "JournalRegular";
+font-size:16pt;color:#666;font-style:normal;margin-bottom:8px;font-family: "JournalRegular";x-font-family: "ClearView3B";
 }
 
 .notePaper div i {
- font-family: "JournalRegular";font-size: 22pt;color:blue;margin-left:2px;line-height:22pt;
+ font-family: "JournalRegular";x-font-family: "ClearView3B";
+ font-size: 22pt;color:blue;margin-left:2px;line-height:22pt;
  margin-top:4px;font-style: normal;display:block;
 }
 

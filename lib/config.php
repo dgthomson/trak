@@ -96,7 +96,7 @@ $consultantsMAU		= array(
 				6	=>	"Manavalan T",
 				7	=>	"Prakash P",
 				8	=>	"Bhat S",
-				9	=>	"Chandrasekhar H"
+				9	=>	"Chandrasekara H"
 				
 			),
 2	=> array(

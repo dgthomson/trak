@@ -6155,7 +6155,6 @@ $("._ambFlip").change(function(){ambFlip()});
 
 function ambFlip(){
 
-
 var _a = parseFloat($("input[name=ambgender]").val());
 var _b = parseFloat($("input[name=ambage]").val());
 var _c = parseFloat($("input[name=trans]:checked").val());
@@ -6492,7 +6491,7 @@ printf( '<input type="hidden" value="%s" id="_patient-consultants-oc-code" name=
 echo '</div>';
 //MAU Consultant
 echo '<div style="float:left;">';
-echo '<label for="_conButton" class="nLabel">MAU Consultant</label><br />';
+echo '<label for="_conButton" class="nLabel">AMU Consultant</label><br />';
 printf(	'<div class="_noselect patient-consultants-mau" id="_patient-consultants-mau">%s</div>', $query['consmau'] == 0 ? 'Not set' : $consultantsMAU[$query['site']][$query['consmau']]	);
 printf( '<input type="hidden" value="%s" id="_patient-consultants-mau-code" name="patient-consultants-mau-code" />', $query['consmau'] == 0 ? 0 : $query['consmau']);
 echo '</div>';
