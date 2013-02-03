@@ -2219,6 +2219,14 @@ var trak = {
 					jobprint:	function() {
 						$('.ui-dialog-buttonpane').append('<div style="float:left;margin:.5em 0 .5em .6em" class="patient-jobprint">Print</div>');		
 						$('.patient-jobprint').button({icons:{primary:"ui-icon-print"}});									
+					},
+					scs:		function() {
+					
+					$('._scsButtonSelected').button({icons:{primary:"ui-icon-heart"}}).css('font-size','13px');
+	 				$('input[name=triage]').click(function(){
+	 					$('#_scs').html('');
+	 				});				
+					
 					}
 				
 		},
@@ -2231,6 +2239,39 @@ var trak = {
 
 			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 
+		},
+		calcScs:		function(_tri) {
+				
+				_total = 0;
+				$('._scsButtonSelected').each(function(){	
+					_total += Number($(this).attr('data-set'));				
+				});
+				$('#_scs').html(function(){
+				
+					if (_total.between(0,7))
+					{
+						if (_tri) { $('#triage3').attr('checked','checked').button('refresh'); };						
+						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/green_light.png\" width=\"22\" height=\"22\">';
+					};
+					if (_total.between(8,11))
+					{
+						if (_tri) { $('#triage2').attr('checked','checked').button('refresh'); };
+						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/yellow_light.png\" width=\"22\" height=\"22\">';
+					};				
+					if (_total.between(12,40))
+					{
+						if (_tri) { $('#triage1').attr('checked','checked').button('refresh'); };
+						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/red_light.png\" width=\"22\" height=\"22\">';
+					};
+				});
+		
+		
+		
+		
+		
+		
+		
+		
 		},
 		loginThrobberOn:		function() {
 			loginThrobberTimeout = setTimeout(function(){
@@ -2641,11 +2682,12 @@ $("#dialog").dialog("destroy").remove(); //dialogClose(dialog);
 													ews:		$('#editPat input[name=patient-ews-code]').val(),
 													dv: 		$('#editPat input[name=dv]:checked').val(),
 													bn: 		$('#editPat input[name=bn]:checked').val(),
+													scs:		$('#_scsform').serialize()
 													
 												 }),
 										success: function(data){
 
-
+//alert(data);
 try {
 
 // Have we changed site?
@@ -3086,7 +3128,8 @@ _rxChanged = 0;
 													status:	$("#formEditNursing input[name=patient-status-code]").val(),
 													frailty:	$('#formEditNursing input[name=patient-frailty-code]').val(),
 													mobility:	$('#formEditNursing input[name=patient-mobility-code]').val(),
-													nldc:	$('#_formnld').serialize()
+													nldc:	$('#_formnld').serialize(),
+													scs:	$('#_scsform').serialize()
 
 													
 												 }),
@@ -4113,7 +4156,59 @@ $('.patient-jobprint').live('click',function(){
  });
  return false;
 });
+$('._scsButton').live('click',function(){
 
+			var _attr = $(this).attr('data-type'); var _aval = _attr.substr(0,2);
+			$('#scsDefault_'+$(this).attr('data-type')).attr('data-set',$(this).attr('data-value'));
+			$('input[name=\"_'+ _aval +'\"]').val($(this).attr('data-choice'));
+			$('#scsDefault_'+$(this).attr('data-type')).button('option','label',$('.ui-button-text',this).html());
+			$('#scsDefault_'+$(this).attr('data-type')).qtip('hide');
+			trak.fn.calcScs(true);
+	
+	 });
+	
+$('._scsButtonSelected').live('click',function(){
+	$(this).qtip({
+	overwrite:	true,
+	hide:	 	{
+    	event:	'unfocus'
+    },
+	show: 		{
+		event:	'click',
+		ready:	true
+      },
+	content:	{
+      text: $('#id_'+$(this).attr('data-type'))
+      },
+	position:	{
+				viewport: $(window),
+				my: 'left center',
+        		at: 'center'
+  	  			},
+  	style:		{
+				width:	200,
+				classes: 'ui-tooltip-dark qtOverride',
+        		tip:	{
+         				corner: true
+         				}
+      			},
+    events:		{
+		render:	function(event,api){
+
+$('._scsButton').button({icons:{primary:'ui-icon-link'}}).css('font-size','13px').css('width','180px').css('text-align','left');
+
+}
+    }
+})});	
+	
+	
+	
+	
+	
+	
+	
+	 
+	 
 		} catch(error) {
 	   			trak.confirm('There was a javascript initialisation error. Sorry.<p>[trak.support] '+error.message+'.</p>',220)		
 		};
@@ -4841,8 +4936,11 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 					// if (  $('#editPat input[name=nBed]:checked').val() == 0 ) {
 					//	$("#editPat #nBedNum").attr("disabled", true).css({opacity:0.6});
 					// };
+
 					trak.fn.forms.move();
-					    $('#_patient-ews').button({icons:{primary:"ui-icon-alert"}}).css('font-size','13px');
+					trak.fn.forms.scs();
+					trak.fn.calcScs(false);
+					$('#_patient-ews').button({icons:{primary:"ui-icon-alert"}}).css('font-size','13px');
 				 });
  				return false;
 			});
@@ -5566,6 +5664,8 @@ trak.fn.decode('textarea[name=jobs]');
   trak.fn.forms.common();
   trak.fn.forms.pmhx();
   trak.fn.forms.activehx();
+  					trak.fn.forms.scs();
+					trak.fn.calcScs(false);
 	
   // End move from index.php
 });

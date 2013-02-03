@@ -745,8 +745,8 @@ if (!empty($_REQUEST['data'])) {
 'visitid' => $_REQUEST['vid'],
 
 'plan'     => $_REQUEST['plan'],
-'jobs'     => $_REQUEST['jobs']
-
+'jobs'     => $_REQUEST['jobs'],
+'scs'   => $_REQUEST['scs']
 );
  if ($_REQUEST['nid'] == "") {
    dbPut(INSERT,'mau_data',$notemap,NULL);			
@@ -2849,8 +2849,6 @@ case "dbEditPat":{
 		global $baseSites;
 		global $baseWards;
 
-
-
 		$map		= array(
 					'status'    => $_REQUEST['reftype'],
 					'dsite'     => $_REQUEST['destSite'],
@@ -2861,7 +2859,8 @@ case "dbEditPat":{
 					);
 		$mapData	= array(
 					'dv'    => $_REQUEST['dv'],
-					'bn'    => $_REQUEST['bn']
+					'bn'    => $_REQUEST['bn'],
+					'scs'   => $_REQUEST['scs']
 					);
 
 		if ($_REQUEST['reftype'] == "2") {
@@ -4071,7 +4070,19 @@ case "formEditPat":{
 	$query = dbGet("mau_visit",$_REQUEST['vid']);
 	$nQuery = dbGet("mau_patient",$query['patient']);
 	$notes = dbGetByVisit('mau_data',$_REQUEST['vid']);
-
+//new
+	$_scs=array('Ag'=>'','Ai'=>'','Br'=>'','Ci'=>'','Di'=>'','EC'=>'','Fe'=>'');
+	if ($notes['scs']!='') {
+		$_s = multi_parse_str($notes['scs']);
+		foreach($_scs as $k => $v) {
+			$_scs[$k] = $_s['_'.$k][0];
+		};
+	} else {
+		foreach($_scs as $k => $v) {
+			$_scs[$k] = '-1';
+		};
+	};
+//	
 if ($query['dsite'] == 0 || $query['dsite'] == "127") {
 // No predicted destination (or destination home/today), so use current location
 	// $_formMovePatSite = $query['site'];
@@ -4327,33 +4338,33 @@ echo '</div>';
 // echo '</div>';
 
 echo '<div style="float:left;">';
-
-$jsFooter='';
 foreach ($scs as $k => $v) {
 printf ('<div style="display:none;" id="id_%s">',$k);
+$_loop = 0;
 foreach ($v as $x) {
 	$_vars = explode(':',$x);
 	if (!isset($_vars[2])) {
-		printf ('<div class="_scsButton" data-type="%s" data-value="%s">',$k,$_vars[0]);
+		printf ('<div class="_scsButton" data-type="%s" data-value="%s" data-choice="%s">',$k,$_vars[0],$_loop);
 		printf ('%s',$_vars[1]);
 		echo '</div>';
 	}
 	else
 	{
 		if (years_old($nQuery['dob']) >= $_vars[2]) {
-			printf ('<div class="_scsButton" data-type="%s" data-value="%s">',$k,$_vars[0]);
+			printf ('<div class="_scsButton" data-type="%s" data-value="%s" data-choice="%s">',$k,$_vars[0],$_loop);
 			printf ('%s',$_vars[1]);
 			echo '</div>';		
 		}
 	};
+$_loop++;
 };
-printf ('<div style="margin-top:4px;" class="_scsButton" data-type="%s" data-value="%s">',$k,0);
+printf ('<div style="margin-top:4px;" class="_scsButton" data-type="%s" data-value="%s" data-choice="-1">',$k,0);
 printf ('%s','Not set');
 echo '</div>';
 echo '</div>';
 };
 printf( '<div style="clear:both;"><label for="_flow" class="nLabel">Simple clinical score</label><br />');
-echo '<fieldset name="_flow" class="_refborder" style="width:280px;">';
+echo '<fieldset id="_scsform" class="_refborder" style="width:280px;">';
 echo '<div style="float:right;" id="_scs"></div>';	
 $_ageScore=0;
 if (years_old($nQuery['dob']) > 75) {
@@ -4375,76 +4386,31 @@ if (years_old($nQuery['dob']) <= 75) {
 	};
 };
 printf ('<div style="display:none;" data-set="%s" class="_scsButtonSelected" id="scsDefault_Age"></div>',$_ageScore);
+//new
+printf ('<input type="hidden" name="_Ag" value="%s">',$_ageScore);
+//
 foreach ($scs as $k => $v) {
 echo '<div>';
 printf( '<label for="label_%s" class="nLabel">%s</label><br />',$k,$k);
-printf ('<div data-set="%s" class="_scsButtonSelected" id="scsDefault_%s">Not set</div>',0,$k);
+//new
+if ($_scs[substr($k,0,2)]=='-1') {
+	$_desc='Not set';
+	$_dval='0';
+} else {
+	$_temp = explode(':',$scs[$k][$_scs[substr($k,0,2)]]);
+	$_desc = $_temp[1];
+	$_dval = $_temp[0];
+};
+printf ('<div data-type="%s" data-set="%s" class="_scsButtonSelected" id="scsDefault_%s">%s</div>',$k,$_dval,$k,$_desc);
+printf ('<input type="hidden" name="_%s" value="%s">',substr($k,0,2),$_scs[substr($k,0,2)]);
+//
 echo '</div>';
-$jsFooter .= sprintf ("$('#scsDefault_%s').click(function(){
-	$(this).qtip({
-	overwrite:	true,
-	hide:	 	{
-    	event:	'unfocus'
-    },
-	show: 		{
-		event:	'click',
-		ready:	true
-      },
-	content:	{
-      text: $('#id_%s')
-      },
-	position:	{
-				viewport: $(window),
-				my: 'left center',
-        		at: 'center'
-  	  			},
-  	style:		{
-				width:	200,
-				classes: 'ui-tooltip-dark qtOverride',
-        		tip:	{
-         				corner: true
-         				}
-      			},
-    events:		{
-		render:	function(event,api){
 
-	 $('._scsButton').click(function(){
-
-			$('#scsDefault_'+$(this).attr('data-type')).attr('data-set',$(this).attr('data-value'));
-			$('#scsDefault_'+$(this).attr('data-type')).button('option','label',$('.ui-button-text',this).html());
-			$('#scsDefault_'+$(this).attr('data-type')).qtip('hide');
-			
-				_total = 0; $('._scsButtonSelected').each(function(){	
-					_total += Number($(this).attr('data-set'));				
-				});
-				$('#_scs').html(function(){
-				
-					if (_total.between(0,7))
-					{
-						$('#triage3').attr('checked','checked').button('refresh');						
-						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/green_light.png\" width=\"22\" height=\"22\">';
-					};
-					if (_total.between(8,11))
-					{
-						$('#triage2').attr('checked','checked').button('refresh');
-						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/yellow_light.png\" width=\"22\" height=\"22\">';
-					};				
-					if (_total.between(12,40))
-					{
-						$('#triage1').attr('checked','checked').button('refresh');
-						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/red_light.png\" width=\"22\" height=\"22\">';
-					};
-				});
-	
-	 }).button({icons:{primary:'ui-icon-link'}}).css('font-size','13px');
-}
-    }
-})});",$k,$k,$k,$k);
 };
 echo '</fieldset></div>';
-
-
 echo	"</div>";
+
+
 
 echo <<<HTML
 			
@@ -4452,18 +4418,6 @@ echo <<<HTML
         </div>
 </div>
 </form>
-<script type="text/javascript">
-
-  $(function() {
-
-	 $("._scsButton").css('width','180px').css('text-align','left');
-	 $('._scsButtonSelected').button({icons:{primary:"ui-icon-heart"}}).css('font-size','13px');
-	 $('input[name=triage]').click(function(){
-	 	$('#_scs').html('');
-	 });
-	 $jsFooter
- });
-</script>
 HTML;
 
 //	 $('.ui-dialog-buttonpane').prepend('{$icon}');
@@ -5950,39 +5904,50 @@ echo '</div>'; // _hx
 // echo	"</div>";
 
 
+//new
+	$_scs=array('Ag'=>'','Ai'=>'','Br'=>'','Ci'=>'','Di'=>'','EC'=>'','Fe'=>'');
+	if ($notes['scs']!='') {
+		$_s = multi_parse_str($notes['scs']);
+		foreach($_scs as $k => $v) {
+			$_scs[$k] = $_s['_'.$k][0];
+		};
+	} else {
+		foreach($_scs as $k => $v) {
+			$_scs[$k] = '-1';
+		};
+	};
+//
 
-
-
+//echo '<div style="float:left;">';
 echo '<div id="_tri" style="display:none;">';
-
-
-$jsFooter='';
 foreach ($scs as $k => $v) {
 printf ('<div style="display:none;" id="id_%s">',$k);
+$_loop = 0;
 foreach ($v as $x) {
 	$_vars = explode(':',$x);
 	if (!isset($_vars[2])) {
-		printf ('<div class="_scsButton" data-type="%s" data-value="%s">',$k,$_vars[0]);
+		printf ('<div class="_scsButton" data-type="%s" data-value="%s" data-choice="%s">',$k,$_vars[0],$_loop);
 		printf ('%s',$_vars[1]);
 		echo '</div>';
 	}
 	else
 	{
 		if (years_old($nQuery['dob']) >= $_vars[2]) {
-			printf ('<div class="_scsButton" data-type="%s" data-value="%s">',$k,$_vars[0]);
+			printf ('<div class="_scsButton" data-type="%s" data-value="%s" data-choice="%s">',$k,$_vars[0],$_loop);
 			printf ('%s',$_vars[1]);
 			echo '</div>';		
 		}
 	};
+$_loop++;
 };
-printf ('<div style="margin-top:4px;" class="_scsButton" data-type="%s" data-value="%s">',$k,0);
+printf ('<div style="margin-top:4px;" class="_scsButton" data-type="%s" data-value="%s" data-choice="-1">',$k,0);
 printf ('%s','Not set');
 echo '</div>';
 echo '</div>';
 };
 printf( '<div style="clear:both;float:left;"><label for="_flow" class="nLabel">Simple clinical score</label><br />');
-echo '<fieldset name="_flow" class="_refborder" style="width:280px;">';
-echo '<div style="float:right;" id="_scs"></div>';
+echo '<fieldset id="_scsform" class="_refborder" style="width:280px;">';
+echo '<div style="float:right;" id="_scs"></div>';	
 $_ageScore=0;
 if (years_old($nQuery['dob']) > 75) {
 	$_ageScore=4;
@@ -6003,79 +5968,29 @@ if (years_old($nQuery['dob']) <= 75) {
 	};
 };
 printf ('<div style="display:none;" data-set="%s" class="_scsButtonSelected" id="scsDefault_Age"></div>',$_ageScore);
+//new
+printf ('<input type="hidden" name="_Ag" value="%s">',$_ageScore);
+//
 foreach ($scs as $k => $v) {
 echo '<div>';
 printf( '<label for="label_%s" class="nLabel">%s</label><br />',$k,$k);
-printf ('<div data-set="%s" class="_scsButtonSelected" id="scsDefault_%s">Not set</div>',0,$k);
+//new
+if ($_scs[substr($k,0,2)]=='-1') {
+	$_desc='Not set';
+	$_dval='0';
+} else {
+	$_temp = explode(':',$scs[$k][$_scs[substr($k,0,2)]]);
+	$_desc = $_temp[1];
+	$_dval = $_temp[0];
+};
+printf ('<div data-type="%s" data-set="%s" class="_scsButtonSelected" id="scsDefault_%s">%s</div>',$k,$_dval,$k,$_desc);
+printf ('<input type="hidden" name="_%s" value="%s">',substr($k,0,2),$_scs[substr($k,0,2)]);
+//
 echo '</div>';
-$jsFooter .= sprintf ("$('#scsDefault_%s').click(function(){
-	$(this).qtip({
-	overwrite:	true,
-	hide:	 	{
-    	event:	'unfocus'
-    },
-	show: 		{
-		event:	'click',
-		ready:	true
-      },
-	content:	{
-      text: $('#id_%s')
-      },
-	position:	{
-				viewport: $(window),
-				my: 'left center',
-        		at: 'center'
-  	  			},
-  	style:		{
-				width:	200,
-				classes: 'ui-tooltip-dark qtOverride',
-        		tip:	{
-         				corner: true
-         				}
-      			},
-    events:		{
-		render:	function(event,api){
 
-	 $('._scsButton').click(function(){
-
-			$('#scsDefault_'+$(this).attr('data-type')).attr('data-set',$(this).attr('data-value'));
-			$('#scsDefault_'+$(this).attr('data-type')).button('option','label',$('.ui-button-text',this).html());
-			$('#scsDefault_'+$(this).attr('data-type')).qtip('hide');
-			
-				_total = 0; $('._scsButtonSelected').each(function(){	
-					_total += Number($(this).attr('data-set'));				
-				});
-				$('#_scs').html(function(){
-				
-					if (_total.between(0,7))
-					{
-						$('#triage3').attr('checked','checked').button('refresh');						
-						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/green_light.png\" width=\"22\" height=\"22\">';
-					};
-					if (_total.between(8,11))
-					{
-						$('#triage2').attr('checked','checked').button('refresh');
-						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/yellow_light.png\" width=\"22\" height=\"22\">';
-					};				
-					if (_total.between(12,40))
-					{
-						$('#triage1').attr('checked','checked').button('refresh');
-						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/red_light.png\" width=\"22\" height=\"22\">';
-					};
-				});
-	
-	 }).button({icons:{primary:'ui-icon-link'}}).css('font-size','13px');
-}
-    }
-})});",$k,$k,$k,$k);
 };
 
 
-// triage = 127 when admitted but triage not set
-// make it 0 when displaying nursing page
-// in db, if triage = 127 but due to be set to 0, will not be changed
-// ie. can only be cleared from 127 when set to something other than 0
-//     when triage is assessed
 if ($query['triage'] == 127) {
 	$query['triage'] = 0;
 };
@@ -6091,7 +6006,9 @@ printf	('<input %svalue="%s" type="radio" id="triage%s" name="triage" /><label s
 				0,0,0,'None');			
 echo	"</div>";
 echo	"</div>";
+
 echo '</fieldset></div>';
+echo	"</div>";
 
 
 
@@ -6102,7 +6019,143 @@ echo '</fieldset></div>';
 
 
 
-
+// echo '<div id="_tri" style="display:none;">';
+$jsFooter='';
+// foreach ($scs as $k => $v) {
+// printf ('<div style="display:none;" id="id_%s">',$k);
+// foreach ($v as $x) {
+// 	$_vars = explode(':',$x);
+// 	if (!isset($_vars[2])) {
+// 		printf ('<div class="_scsButton" data-type="%s" data-value="%s">',$k,$_vars[0]);
+// 		printf ('%s',$_vars[1]);
+// 		echo '</div>';
+// 	}
+// 	else
+// 	{
+// 		if (years_old($nQuery['dob']) >= $_vars[2]) {
+// 			printf ('<div class="_scsButton" data-type="%s" data-value="%s">',$k,$_vars[0]);
+// 			printf ('%s',$_vars[1]);
+// 			echo '</div>';		
+// 		}
+// 	};
+// };
+// printf ('<div style="margin-top:4px;" class="_scsButton" data-type="%s" data-value="%s">',$k,0);
+// printf ('%s','Not set');
+// echo '</div>';
+// echo '</div>';
+// };
+// printf( '<div style="clear:both;float:left;"><label for="_flow" class="nLabel">Simple clinical score</label><br />');
+// echo '<fieldset name="_flow" class="_refborder" style="width:280px;">';
+// echo '<div style="float:right;" id="_scs"></div>';
+// $_ageScore=0;
+// if (years_old($nQuery['dob']) > 75) {
+// 	$_ageScore=4;
+// };
+// if (years_old($nQuery['dob']) <= 75) {
+// 	if ($nQuery['gender'] == '1') {
+// 		// Male
+// 		if (years_old($nQuery['dob']) >=50) {
+// 			$_ageScore=2;	
+// 		};
+// 	}
+// 	else
+// 	{
+// 		// Female
+// 		if (years_old($nQuery['dob']) >=55) {
+// 			$_ageScore=2;		
+// 		};
+// 	};
+// };
+// printf ('<div style="display:none;" data-set="%s" class="_scsButtonSelected" id="scsDefault_Age"></div>',$_ageScore);
+// foreach ($scs as $k => $v) {
+// echo '<div>';
+// printf( '<label for="label_%s" class="nLabel">%s</label><br />',$k,$k);
+// printf ('<div data-set="%s" class="_scsButtonSelected" id="scsDefault_%s">Not set</div>',0,$k);
+// echo '</div>';
+// $jsFooter .= sprintf ("$('#scsDefault_%s').click(function(){
+// 	$(this).qtip({
+// 	overwrite:	true,
+// 	hide:	 	{
+//     	event:	'unfocus'
+//     },
+// 	show: 		{
+// 		event:	'click',
+// 		ready:	true
+//       },
+// 	content:	{
+//       text: $('#id_%s')
+//       },
+// 	position:	{
+// 				viewport: $(window),
+// 				my: 'left center',
+//         		at: 'center'
+//   	  			},
+//   	style:		{
+// 				width:	200,
+// 				classes: 'ui-tooltip-dark qtOverride',
+//         		tip:	{
+//          				corner: true
+//          				}
+//       			},
+//     events:		{
+// 		render:	function(event,api){
+// 
+// 	 $('._scsButton').click(function(){
+// 
+// 			$('#scsDefault_'+$(this).attr('data-type')).attr('data-set',$(this).attr('data-value'));
+// 			$('#scsDefault_'+$(this).attr('data-type')).button('option','label',$('.ui-button-text',this).html());
+// 			$('#scsDefault_'+$(this).attr('data-type')).qtip('hide');
+// 			
+// 				_total = 0; $('._scsButtonSelected').each(function(){	
+// 					_total += Number($(this).attr('data-set'));				
+// 				});
+// 				$('#_scs').html(function(){
+// 				
+// 					if (_total.between(0,7))
+// 					{
+// 						$('#triage3').attr('checked','checked').button('refresh');						
+// 						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/green_light.png\" width=\"22\" height=\"22\">';
+// 					};
+// 					if (_total.between(8,11))
+// 					{
+// 						$('#triage2').attr('checked','checked').button('refresh');
+// 						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/yellow_light.png\" width=\"22\" height=\"22\">';
+// 					};				
+// 					if (_total.between(12,40))
+// 					{
+// 						$('#triage1').attr('checked','checked').button('refresh');
+// 						return '<img style=\"margin-left:6px;margin-top:4px;\" src=\"gfx/red_light.png\" width=\"22\" height=\"22\">';
+// 					};
+// 				});
+// 	
+// 	 }).button({icons:{primary:'ui-icon-link'}}).css('font-size','13px');
+// }
+//     }
+// })});",$k,$k,$k,$k);
+// };
+// 
+// 
+// // triage = 127 when admitted but triage not set
+// // make it 0 when displaying nursing page
+// // in db, if triage = 127 but due to be set to 0, will not be changed
+// // ie. can only be cleared from 127 when set to something other than 0
+// //     when triage is assessed
+// if ($query['triage'] == 127) {
+// 	$query['triage'] = 0;
+// };
+// echo '<div style="float:left;">';
+// echo '<label for="triage" class="nLabel">Triage</label><br />';
+// echo	'<div class="dialogButtons">';
+// foreach ($baseTriage as $k => $v) {
+// 	printf	('<input %svalue="%s" type="radio" id="triage%s" name="triage" /><label for="triage%s"><span style="color:#%s">&#9679; </span>%s</label>',
+// 				$query['triage'] == $k ? 'checked="checked" ' : "",
+// 				$k,$k,$k,$v[1],$v[0]);};
+// printf	('<input %svalue="%s" type="radio" id="triage%s" name="triage" /><label style="margin-left:6px" for="triage%s">%s</label>',
+// 				$query['triage'] == 0 ? 'checked="checked" ' : "",
+// 				0,0,0,'None');			
+// echo	"</div>";
+// echo	"</div>";
+// echo '</fieldset></div>';
 
 
 
@@ -6172,11 +6225,6 @@ trak.fn.statusMessageDialog("Amb score is " + _score);
 ');
 
 
-
-
-
-
-
 echo	"</div></form>"; // _tri
 
 
@@ -6194,11 +6242,6 @@ echo <<<HTML
 
   $(function() {
 	 $('.ui-dialog-buttonpane').prepend('{$icon}');
-	 $("._scsButton").css('width','180px').css('text-align','left');
-	 $('._scsButtonSelected').button({icons:{primary:"ui-icon-heart"}}).css('font-size','13px');
-	 $('input[name=triage]').click(function(){
-	 	$('#_scs').html('');
-	 });
 	 $jsFooter
  });
 </script>
