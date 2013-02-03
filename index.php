@@ -4074,12 +4074,12 @@ case "formEditPat":{
 	$_scs=array('Ag'=>'','Ai'=>'','Br'=>'','Ci'=>'','Di'=>'','EC'=>'','Fe'=>'');
 	if ($notes['scs']!='') {
 		$_s = multi_parse_str($notes['scs']);
-		foreach($_scs as $k => &$v) {
-			$v = $_s['_'.$k][0];
+		foreach($_scs as $key => &$val) {
+			$val = $_s['_'.$key][0];
 		};
 	} else {
-		foreach($_scs as $k => &$v) {
-			$v = '-1';
+		foreach($_scs as $key => &$val) {
+			$val = '-1';
 		};
 	};
 //	
@@ -5908,15 +5908,17 @@ echo '</div>'; // _hx
 	$_scs=array('Ag'=>'','Ai'=>'','Br'=>'','Ci'=>'','Di'=>'','EC'=>'','Fe'=>'');
 	if ($notes['scs']!='') {
 		$_s = multi_parse_str($notes['scs']);
-		foreach($_scs as $k => &$v) {
-			$v = $_s['_'.$k][0];
+		foreach($_scs as $key => &$val) {
+			$val = $_s['_'.$key][0];
 		};
 	} else {
-		foreach($_scs as $k => &$v) {
-			$v = '-1';
+		foreach($_scs as $key => &$val) {
+			$val = '-1';
 		};
 	};
 //
+
+
 
 //echo '<div style="float:left;">';
 echo '<div id="_tri" style="display:none;">';
