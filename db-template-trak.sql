@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `mau_data` (
   `nldcrityn4` tinyint(1) NOT NULL,
   `nldcrityn5` tinyint(1) NOT NULL,
   `nldcrityn6` tinyint(1) NOT NULL,
-  `scs` varchar(32) NOT NULL,
+  `scs` varchar(64) NOT NULL,
   KEY `id` (`id`),
   KEY `pid` (`patient`),
   KEY `vid` (`visitid`)
