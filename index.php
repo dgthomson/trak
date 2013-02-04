@@ -1122,8 +1122,8 @@ break;
 if (!isset($_REQUEST['jid']))
 {
 	echo '<script type="text/javascript"><!--' . "\n";
-	echo '  trak.fn.statusMessageDialog("Please choose a <em>job type</em> before adding an investigation!");' . "\n";
-	echo "  $('.patient-job-subtype').qtip('destroy');\n";
+	echo '  trak.fn.statusMessageDiv(".patient-job-subtype","Please choose a <em>job type</em> before adding an investigation!");' . "\n";
+//	echo "  $('.patient-job-subtype').qtip('destroy');\n";
 	echo '--></script>' . "\n";
 	exit;
 };
@@ -3661,6 +3661,7 @@ formWrite("","hidden","zwho",$ref['who']);
 
 $query = dbGet("mau_visit",$_REQUEST['vid']);
 echo '<div id="refOutcome">';
+//echo '<div style="overflow-y:auto;overflow-x:hidden;height:100%;">'; //new
 echo '<div style="float:left;width:300px;margin-right:12px;">';
 echo '<div class="nLabel" style="padding-top:6px;">Active diagnosis</div>';
 form_listActiveDiagnosis($query['patient']);
@@ -3669,20 +3670,12 @@ form_listPastMedicalHistory($query['patient']);
 echo '<div class="nLabel" style="padding-top:6px;">Referral history</div>';
 echo '<div id="_AES_refHx" class="_smallNote" style="padding-top:6px;">';
 echo $__AES->encrypt($noteHx['note'], $__PW, 256);
-
-
-
-
-
-
-
-
 echo '</div>';
 
 echo '<br><div class="_smallNote" style="margin-right:16px;color:green;text-align:right;-webkit-transform: rotate(-5deg); -moz-transform: rotate(-5deg);transform: rotate(-5deg);">';
 printf ('Many thanks!<br>%s %s',$noteHx['author'] == '' ? '' : $noteHx['author'], $noteHx['bleep'] == '' ? '' : '(' . $noteHx['bleep'] . ')');
 echo '</div>';
-
+//echo '</div>';// new
 
 echo '</div>';
 
@@ -7097,7 +7090,7 @@ echo '<div style="float:left;width:320px;height:480px;margin-left:4px;">';
 
 	echo '<div style="float:left;">';
 	echo '<label style="padding-left:3px;margin-left:1px;" class="nLabel">Investigations';
-	echo ' <span class="patient-job-subtype">Add</span>';
+//	echo ' <span class="patient-job-subtype">Add</span>';
 	echo '</label><br />';
 	echo '<form id="joblist"><fieldset id="ixlist" class="ui-tabs ui-widget ui-widget-content ui-corner-all" style="overflow-y:auto;overflow-x:hidden;width:300px;height:170px;">';
 

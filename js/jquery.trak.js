@@ -2220,6 +2220,10 @@ var trak = {
 						$('.ui-dialog-buttonpane').append('<div style="float:left;margin:.5em 0 .5em .6em" class="patient-jobprint">Print</div>');		
 						$('.patient-jobprint').button({icons:{primary:"ui-icon-print"}});									
 					},
+					jobaddsub:	function() {
+						$('.ui-dialog-buttonpane').append('<div style="float:left;margin:.5em 0 .5em .3em" class="patient-job-subtype">Add</div>');		
+						$('.patient-job-subtype').button({icons:{primary:"ui-icon-plus"}});									
+					},					
 					scs:		function() {
 					
 					$('._scsButtonSelected').button({icons:{primary:"ui-icon-heart"}}).css('font-size','13px');
@@ -2364,6 +2368,51 @@ window.setTimeout(function(){$('#trakButtons').qtip('destroy')}, 8000);
     }
 }).qtip('show');
 				window.setTimeout(function(){$('.ui-dialog-titlebar').qtip('destroy')}, 8000);
+
+		} catch(error) {
+		
+		};	
+			
+		},
+		statusMessageDiv:		function(_div,_message) {
+		
+	// This errors in Firefox	         event: event.type,
+	try {	
+		
+				$(_div).qtip({
+	overwrite:	true,
+	show: 		{
+         ready: true
+      },
+    hide:	 	{
+    	event:	'unfocus'
+    },
+    content:	{
+      text: '<div id="_trakTip" style="text-align:center;width:280px;">'+_message+'</div>',
+
+  				 },
+	position:	{
+				viewport: $(window),
+				my: 'bottom center',
+        		at: 'top center'
+  	  			},
+  	style:		{
+				classes: 'ui-tooltip-dark',
+        		tip:	{
+         				corner: true
+         				}
+      			},
+    events:		{
+    	render:	function() {
+    				$('.ui-tooltip-content').addClass('qtStripe');//.css('width','360px');
+    				$('#_trakTip').button({icons:{primary:"ui-icon-info"}}).css('font-size','14px');
+    				$('.ui-tooltip-content').css('max-width','1000px');
+
+
+    			} 
+    }
+}).qtip('show');
+				window.setTimeout(function(){$(_div).qtip('destroy')}, 8000);
 
 		} catch(error) {
 		
@@ -4781,6 +4830,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
  			var _selected = '';
  			trak.fn.forms.jobstatus();
  			trak.fn.forms.jobprint();
+ 
 		 	$('.dialogButtons').buttonset().css('font-size','12px');
  			$('.dialogButtons#jobButtons .ui-button-text').removeClass('ui-button-text').addClass('refButtonsPad');
 			//$('.hdrWideButtons23').css({"font-size":"13px","margin-bottom":"0.2em","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
@@ -4852,6 +4902,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 				$('#ixlist').empty();
  				
  			});
+ 						trak.fn.forms.jobaddsub();
  			//$('.patient-job-subtype').css({"font-size":"13px","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
 
 	if (_jid !=undefined) {
