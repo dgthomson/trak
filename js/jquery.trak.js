@@ -2231,7 +2231,30 @@ var trak = {
 	 					$('#_scs').html('');
 	 				});				
 					
-					}
+					},
+					savewarn:	function() {
+					
+					if (_rxChanged == 1) {
+					 	trak.fn.statusMessageDialog("The record has been altered. Press <strong>Save</strong> to remember the changes or click ✖ again to discard them.");
+ 						_rxChanged = 0;
+  						return false;
+  					} else
+  					{
+  						return true;
+  					};
+					
+					},
+					savesetup:	function() {
+					
+					$(':input',$('#dialog')).click(function(){
+	_rxChanged= 1;
+});
+					$(':input',$('#dialog')).change(function(){
+	_rxChanged= 1;
+});
+					_rxChanged = 0;
+					
+					},
 				
 		},
 		name:			function(id) {
@@ -3426,6 +3449,9 @@ Save: function() {
   width:640,
   height:410,
   modal: true,
+  beforeClose: function(){
+  	return trak.fn.forms.savewarn();
+  },
   open: function(){
   	$('.ui-button').blur();
   },
@@ -3434,7 +3460,7 @@ Save: function() {
 		$('.ui-dialog-buttonpane').append('<div style="float:left;padding:6px 0 0 8px;"><img border="0" width="32" height="32" src="gfx/Notebook.png"></div>');
 
   },
-  buttons:  function() {return this.buttons.notes;}
+  xbuttons:  function() {return this.buttons.notes;}
  }
 	
 	},
@@ -3918,7 +3944,7 @@ _name = $(this).attr('data-name');
 
 //alert(_id);
 
-$('#_patient-consultants-oc-code').val(_id);
+$('#_patient-consultants-oc-code').val(_id).change();
 $('#_patient-consultants-oc').button('option','label',_name).button('refresh');
 $(".patient-consultants-oc").qtip('hide');
 
@@ -3941,7 +3967,7 @@ _name = $(this).attr('data-name');
 
 //alert(_id);
 
-$('#_patient-consultants-mau-code').val(_id);
+$('#_patient-consultants-mau-code').val(_id).change();
 $('#_patient-consultants-mau').button('option','label',_name).button('refresh');
 $(".patient-consultants-mau").qtip('hide');
 
@@ -3953,7 +3979,7 @@ _name = $(this).attr('data-name');
 
 //alert(_id);
 
-$('#_suggested-ward-code').val(_id);
+$('#_suggested-ward-code').val(_id).change();
 $('#_suggested-ward').button('option','label',_name).button('refresh');
 $(".suggested-ward").qtip('hide');
 if (_id == 126) {
@@ -3970,7 +3996,7 @@ _name = $(this).attr('data-name');
 
 //alert(_id);
 
-$('#_patient-frailty-code').val(_id);
+$('#_patient-frailty-code').val(_id).change();
 $('#_patient-frailty').button('option','label',_name).button('refresh');
 $(".patient-frailty").qtip('hide');
 
@@ -3982,7 +4008,7 @@ _name = $(this).attr('data-name');
 
 //alert(_id);
 
-$('#_patient-mobility-code').val(_id);
+$('#_patient-mobility-code').val(_id).change();
 $('#_patient-mobility').button('option','label',_name).button('refresh');
 $(".patient-mobility").qtip('hide');
 
@@ -4012,7 +4038,7 @@ $('.hdrWideButtons16').live('click',function(){
 
 _id = $(this).attr('data-status');
 _text = $(this).attr('data-text');
-$('#_patient-status-code').val(_id);
+$('#_patient-status-code').val(_id).change();
 $('.patient-status').button('option','label',_text).button('refresh');
 $(".patient-status").qtip('hide');
 
@@ -4021,7 +4047,7 @@ $('.hdrWideButtons17').live('click',function(){
 
 _id = $(this).attr('data-code');
 _text = $(this).attr('data-text');
-$('#_patient-eotbt-code').val(_id);
+$('#_patient-eotbt-code').val(_id).change();
 $('.patient-eotbt').button('option','label',_text).button('refresh');
 $(".patient-eotbt").qtip('hide');
 
@@ -4030,7 +4056,7 @@ $('.hdrWideButtons18').live('click',function(){
 
 _id = $(this).attr('data-code');
 _text = $(this).attr('data-text');
-$('#_patient-pathway-code').val(_id);
+$('#_patient-pathway-code').val(_id).change();
 $('.patient-pathway').button('option','label',_text).button('refresh');
 $(".patient-pathway").qtip('hide');
 
@@ -4126,7 +4152,7 @@ $('.hdrWideButtons20').live('click',function(){
 
 _id = $(this).attr('data-code');
 _text = $(this).attr('data-name');
-$('#_patient-dischargedestination-code').val(_id);
+$('#_patient-dischargedestination-code').val(_id).change();
 $('.patient-dischargedestination').button('option','label',_text).button('refresh');
 $(".patient-dischargedestination").qtip('hide');
 
@@ -4135,7 +4161,7 @@ $('.hdrWideButtons21').live('click',function(){
 
 _id = $(this).attr('data-code');
 _text = $(this).attr('data-name');
-$('#_patient-followup-code').val(_id);
+$('#_patient-followup-code').val(_id).change();
 $('.patient-followup').button('option','label',_text).button('refresh');
 $(".patient-followup").qtip('hide');
 
@@ -4803,6 +4829,9 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
   	$('#addJob').validationEngine('hideAll');
   	trak.dialogFinish();
   },
+  beforeClose: function(){
+  	return trak.fn.forms.savewarn();
+  },
   width:720,
   height:410,
   xheight:410,
@@ -4830,6 +4859,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
  			var _selected = '';
  			trak.fn.forms.jobstatus();
  			trak.fn.forms.jobprint();
+ 			trak.fn.forms.savesetup();
  
 		 	$('.dialogButtons').buttonset().css('font-size','12px');
  			$('.dialogButtons#jobButtons .ui-button-text').removeClass('ui-button-text').addClass('refButtonsPad');
@@ -5003,6 +5033,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 	trak.dialogs.note.show = 'fade';
 };
  trak.dialogInit();
+ trak.dialogs.note.buttons = trak.buttons.notes; // bodge; can't reference object from object
  dialog.dialog(trak.dialogs.note).load(trak.url,
  {
 
@@ -5014,6 +5045,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
  {
   dialog.dialog("option","title",'Entry for ' + $('#formAddNote').attr('rel'));
   trak.fn.decode('#formAddNote textarea[name=formID_note]');
+  trak.fn.forms.savesetup();
   $("#formAddNote").validationEngine('init');
   $("#formAddNote").validationEngine('attach', {scroll: false, validationEventTrigger: ''});
   $('#refButtons').buttonset();
@@ -5383,6 +5415,9 @@ if ($('#noteTD_'+hid+' ._notes').hasClass('x_notesOverflow'))
 				$('#formAddRef').validationEngine('hideAll');
 				trak.dialogFinish();
 			},
+			beforeClose: function(){
+  	return trak.fn.forms.savewarn();
+  },
 			width: 640,
 			height:410,
 			modal: true,
@@ -5404,7 +5439,7 @@ if ($('#noteTD_'+hid+' ._notes').hasClass('x_notesOverflow'))
 		},function()
 		{
 		 dialog.dialog("option","title",'Referral for ' + $('#formAddRef').attr('rel'));
-
+			trak.fn.forms.savesetup();
 		 $('.dialogButtons').buttonset();
 		 $('#refButtons .ui-button-text').removeClass('ui-button-text').addClass('refButtonsPad').hover(function(){
 		  refEle = $(this);
@@ -5523,12 +5558,7 @@ if ($('#noteTD_'+hid+' ._notes').hasClass('x_notesOverflow'))
   	
   },
   beforeClose: function(){
-  	if (_rxChanged == 1) {
- // 		trak.confirm("The record has been altered. Press <strong>Save</strong> to remember the changes or <strong>Cancel</strong> to discard them.",190);
- 	trak.fn.statusMessageDialog("The record has been altered. Press <strong>Save</strong> to remember the changes or click ✖ again to discard them.");
- 	_rxChanged = 0;
-  		return false;
-  	};
+  	return trak.fn.forms.savewarn();
   },
   create:	function(){
   		$('.ui-dialog-buttonpane').append('<div style="float:left;margin:.5em 0 .5em .8em" class="db ui-dialog-buttonset"><input checked="checked" type="radio" value="1" name="db" id="db1" /><label for="db1">Summary</label><input type="radio" value="2" name="db" id="db2" /><label for="db2">Quality</label></div><div id="notes-throbber" style="display:none;float:left;padding:14px 0 0 12px;"><img src="gfx/fbThrobber.gif" /></div>');
@@ -5553,17 +5583,17 @@ if ($('#noteTD_'+hid+' ._notes').hasClass('x_notesOverflow'))
  },function() 
  		{
 
-trak.fn.decode('textarea[name=hodetails]');
+	trak.fn.decode('textarea[name=hodetails]');
     $('.patient-status').button('option','label',$('#_patient-status-code').attr('data-text')).button('refresh');
 	$('#_patient-eotbt').button({icons:{primary:"ui-icon-lightbulb"}}).css('font-size','13px');
 	$('#_patient-pathway').button({icons:{primary:"ui-icon-contact"}}).css('font-size','13px');
 	dialog.dialog("option","title",'Clerking information for ' + trak.fn.name(_name));
 	$('.dialogButtons').buttonset().css('font-size','13px');	
-  trak.fn.forms.common();
-  trak.fn.forms.pmhx();
-  trak.fn.forms.activehx();
-  $('.patient-sbar').attr('data-visitid', $('#formEditDoc input[name=vid]').val() );
-
+	trak.fn.forms.common();
+	trak.fn.forms.pmhx();
+	trak.fn.forms.activehx();
+	$('.patient-sbar').attr('data-visitid', $('#formEditDoc input[name=vid]').val() );
+ 	trak.fn.forms.savesetup();
  if ($('#formEditDoc input[name=ho]:checked').val() == '1') {
  	$('#formEditDoc input[name=edd]').prop("disabled",false).addClass('validate[required,groupRequired[exp]]').button('refresh');
  	$('#formEditDoc textarea[name=hodetails]').prop("disabled",false);
@@ -5576,7 +5606,7 @@ trak.fn.decode('textarea[name=hodetails]');
   	$('#_hopaper').css('opacity','0.6');
   	trak.fn.buttonset.bordersoff('fieldset[name=_ho]'); 	
  }; 
-$('#formEditDoc input[name=ho]').click(function(){
+ $('#formEditDoc input[name=ho]').click(function(){
  if ($(this).val() == '1') {
  	$('#formEditDoc input[name=edd]').prop("disabled",false).addClass('validate[required,groupRequired[exp]]').button('refresh');
  	$('#formEditDoc textarea[name=hodetails]').prop("disabled",false);
@@ -5593,22 +5623,6 @@ $('#formEditDoc input[name=ho]').click(function(){
 
 });
 
-  //$("#formEditDoc").validationEngine('init');
-  //$("#formEditDoc").validationEngine('attach', {scroll: false, validationEventTrigger: ''});
-
- // $('#_patient-status-code, #_patient-pathway-code, _R, #activecondAddButton, #condAddButton, input[name=board], input[name=edd], input[name=ho], .patient-eotbt, .patient-status').click(function(){
-//  	 _rxChanged = 1;
-//  });
-//  $('textarea[name=hodetails], input[name=alert]').change(function(){
-// 	 _rxChanged = 1;
-//  });
-
-$('input',$('#dialog')).click(function(){
-	_rxChanged= 1;
-});
-$('textarea',$('#dialog')).change(function(){
-	_rxChanged= 1;
-});
 
  });
 		break;
@@ -5630,10 +5644,11 @@ $('textarea',$('#dialog')).change(function(){
   	$('.ui-button').blur();
   },
   beforeClose: function(){
- 	if (_rxChanged == 1) {
- 		trak.confirm("The notes have been altered. Press <strong>Save</strong> to remember the changes or <strong>Cancel</strong> to discard them.",190);
- 		return false;
- 	};
+ 	return trak.fn.forms.savewarn();
+//  	if (_rxChanged == 1) {
+//  		trak.confirm("The notes have been altered. Press <strong>Save</strong> to remember the changes or <strong>Cancel</strong> to discard them.",190);
+//  		return false;
+//  	};
   },
   close: function(){
   	$('#formEditNursing').validationEngine('hideAll');
@@ -5705,13 +5720,14 @@ trak.fn.decode('textarea[name=jobs]');
 		$('#db3').prop("disabled",true).button('refresh');
 		trak.fn.buttonset.bordersoff('.ui-dialog-buttonpane');
  };
- $('input[name=ews],input[name=triage],input[name=resus]').click(function(){
- 	 _rxChanged = 1;
- });
- $('.SBARfield, .SBARfieldTall, .noteAuthorField').change(function(){
-	 _rxChanged = 1;
- });
- 
+ // $('input[name=ews],input[name=triage],input[name=resus]').click(function(){
+//  	 _rxChanged = 1;
+//  });
+//  $('.SBARfield, .SBARfieldTall, .noteAuthorField').change(function(){
+// 	 _rxChanged = 1;
+//  });
+// 
+  trak.fn.forms.savesetup();
   trak.fn.forms.common();
   trak.fn.forms.pmhx();
   trak.fn.forms.activehx();
@@ -5732,10 +5748,7 @@ trak.fn.decode('textarea[name=jobs]');
   	$('.ui-button').blur();
   },
   beforeClose: function(){
-  	if (_rxChanged == 1) {
-  		trak.confirm("The prescription has been altered. Press <strong>Save</strong> to remember the changes or <strong>Cancel</strong> to discard them.",190);
-  		return false;
-  	};
+  	return trak.fn.forms.savewarn();
   },
   width:760,
   height:440,
@@ -5754,6 +5767,7 @@ trak.fn.decode('textarea[name=jobs]');
   $("#formEditRx").validationEngine('init');
   $("#formEditRx").validationEngine('attach', {scroll: false, validationEventTrigger: ''});
   $('#dialog').css('overflow','hidden'); // gets rid of the scrollbars in #dialog
+  trak.fn.forms.savesetup();
  });
 		break;
 	case "18":
@@ -5769,12 +5783,7 @@ trak.fn.decode('textarea[name=jobs]');
 	  	
   },
   beforeClose: function(){
-  	if (_rxChanged == 1) {
- // 		trak.confirm("The record has been altered. Press <strong>Save</strong> to remember the changes or <strong>Cancel</strong> to discard them.",190);
- 	trak.fn.statusMessageDialog("The record has been altered. Press <strong>Save</strong> to remember the changes or click ✖ again to discard them.");
- 	_rxChanged = 0;
-  		return false;
-  	};
+  	return trak.fn.forms.savewarn();
   },
   create:	function(){
 		// db2 used in post-load fn
@@ -5852,12 +5861,13 @@ trak.fn.decode('textarea[name=jobs]');
 		$('#db2').prop("disabled",true).button('refresh');
 		trak.fn.buttonset.bordersoff('.ui-dialog-buttonpane');
 	};
-  $('#_patient-status-code, _R, #activecondAddButton, #condAddButton, input[name=resus], input[name=nld], input[name=board], .patient-status, .patient-consultants-oc, .patient-consultants-mau, .suggested-ward').click(function(){
- 	 _rxChanged = 1;
- });
-  $('input[name=edd], input[name=alert]').change(function(){
-	 _rxChanged = 1;
- });
+//   $('#_patient-status-code, _R, #activecondAddButton, #condAddButton, input[name=resus], input[name=nld], input[name=board], .patient-status, .patient-consultants-oc, .patient-consultants-mau, .suggested-ward').click(function(){
+//  	 _rxChanged = 1;
+//  });
+//   $('input[name=edd], input[name=alert]').change(function(){
+// 	 _rxChanged = 1;
+//  });
+trak.fn.forms.savesetup();
  });
 		break;
  	default:
@@ -5869,6 +5879,9 @@ trak.fn.decode('textarea[name=jobs]');
   close: function(){
   	trak.dialogFinish();
   },
+  beforeClose: function(){
+  	return trak.fn.forms.savewarn();
+  },
   width: 658,
   height:460,
   modal: true,
@@ -5876,6 +5889,7 @@ trak.fn.decode('textarea[name=jobs]');
   		$('.ui-dialog-buttonpane').append('<div style="float:left;margin:.5em 0 .5em .8em" class="db ui-dialog-buttonset"><input checked="checked" type="radio" value="1" name="db" id="db1" /><label for="db1">Outcome</label><input type="radio" value="2" name="db" id="db2" /><label for="db2">Referral</label></div><div id="notes-throbber" style="display:none;float:left;padding:14px 0 0 12px;"><img src="gfx/fbThrobber.gif" /></div>');
 		$(".db").buttonset();
 		trak.fn.forms.status();
+
 	},
   buttons: trak.buttons.refer.edit
  }).load(trak.url,{
@@ -5904,7 +5918,7 @@ trak.fn.decode('textarea[name=jobs]');
 	 		});
 			$('textarea[name=formID_refnote]').val( $('#_AES_refHx').html() );
 			$('.patient-status').button('option','label',$('#_patient-status-code').attr('data-text')).button('refresh');
-
+			trak.fn.forms.savesetup();
  
  });
  		break;
@@ -5919,6 +5933,9 @@ trak.fn.decode('textarea[name=jobs]');
  dialog.dialog({
   close: function() {
   	$('#discPat').validationEngine('hideAll');trak.dialogFinish();
+  },
+  beforeClose: function(){
+  	return trak.fn.forms.savewarn();
   },
   width:660,
   height:480,
@@ -5948,6 +5965,7 @@ trak.fn.decode('textarea[name=jobs]');
 	trak.fn.decode('textarea[name=patadv]');
     $('#_patient-dischargedestination').button({icons:{primary:"ui-icon-suitcase"}}).css('font-size','13px');
     $('#_patient-followup').button({icons:{primary:"ui-icon-calendar"}}).css('font-size','13px');
+    trak.fn.forms.savesetup();
 
  });
  return false;

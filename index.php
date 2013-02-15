@@ -6,10 +6,6 @@
 
 // validate PAS number
 // problem with css #Date ul (pervades)
-// DONE: if patient moves site, on-call/MAU consultant choice fails. need to detect site change
-//    then select a new consultant for that site
-// nursing notes changes still display old-style error box
-// standard referral doesn't even show change error
 
 
 // DONE (for add only) : stop duplicate AJAX when save etc pressed and network's slow
