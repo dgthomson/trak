@@ -4876,6 +4876,9 @@ echo '</div>';
 
 
 	echo '</form>';
+printf('<div style="display:none;"><div id="_print-gp" data-description="Discharge summary" data-visitid="%s" data-type="2" class="hdrWideButtons5"></div>
+<div id="_print-pat" data-description="Patient-held admission information" data-visitid="%s" data-type="4" class="hdrWideButtons5"></div></div>
+',$_REQUEST['vid'],$_REQUEST['vid']);
 
 break; // formDiscPat
 };

@@ -2256,7 +2256,14 @@ var trak = {
 					_rxChanged = 0;
 					
 					},
-				
+					dprintgp:	function() {
+						$('.ui-dialog-buttonpane').append('<div style="float:left;margin:.5em 0 .5em .6em" class="patient-dischprint-gp">GP</div>');		
+						$('.patient-dischprint-gp').button({icons:{primary:"ui-icon-print"}});									
+					},
+					dprintpat:	function() {
+						$('.ui-dialog-buttonpane').append('<div style="float:left;margin:.5em 0 .5em .6em" class="patient-dischprint-pat">Patient</div>');		
+						$('.patient-dischprint-pat').button({icons:{primary:"ui-icon-print"}});									
+					},
 		},
 		name:			function(id) {
 		
@@ -2460,7 +2467,35 @@ window.setTimeout(function(){$('#trakButtons').qtip('destroy')}, 8000);
 			
 			}
 		
-		}	
+		},
+		discharge: 		function(fn_action) {
+			
+		$.ajax({
+
+			data:    ({
+						act:	 	"dbDiscPat",
+						disctype:	1,
+						id:			$("#discPat input[name=id]").val(),
+						nid:		$("#discPat input[name=nid]").val(),
+						add:		$("#discPat input[name=eddd]").val(),
+						gpadv:		Aes.Ctr.encrypt(  $("#discPat textarea[name=gpadv]").val()  ,__PW,256),
+						patadv:		Aes.Ctr.encrypt(  $("#discPat textarea[name=patadv]").val()  ,__PW,256),
+						ccom:		Aes.Ctr.encrypt(  $("#discPat textarea[name=ccom]").val()  ,__PW,256),
+						ddest:		$("#discPat input[name=patient-dischargedestination-code]").val(),
+						rxchange:			$("#discPat input[name=rxchange]").val(),
+						followup:	$("#discPat input[name=patient-followup-code]").val()
+					 }),
+			success: function(data) {
+						fn_action(data);
+						},
+			error:	 function(jqXHR, textStatus, errorThrown) {
+						updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+					 }
+					 
+		}); // $.ajax	
+					
+			}
+
 
 	},
 	buttons:		{
@@ -3365,43 +3400,25 @@ _rxChanged = 0;
  							},
  				discharge:	{
   
-
-				
 	Save: function() {
-		if ($("#discPat").validationEngine('validate')) {
-		$.ajax({
 
-			data:    ({
-						act:	 	"dbDiscPat",
-						disctype:	1,
-						id:			$("#discPat input[name=id]").val(),
-						nid:		$("#discPat input[name=nid]").val(),
-						add:		$("#discPat input[name=eddd]").val(),
-						gpadv:		Aes.Ctr.encrypt(  $("#discPat textarea[name=gpadv]").val()  ,__PW,256),
-						patadv:		Aes.Ctr.encrypt(  $("#discPat textarea[name=patadv]").val()  ,__PW,256),
-						ccom:		Aes.Ctr.encrypt(  $("#discPat textarea[name=ccom]").val()  ,__PW,256),
-						ddest:		$("#discPat input[name=patient-dischargedestination-code]").val(),
-						rxchange:			$("#discPat input[name=rxchange]").val(),
-						followup:	$("#discPat input[name=patient-followup-code]").val()
-					 }),
-			success: function(data){
-			//alert(data);
-						//location.reload();
-						//trakRefresh(sID,wID,fID);
-						trak.refreshRow($("#discPat input[name=id]").val());
-						$("#dialog").dialog("destroy").remove();
-						//dialogClose(dialog)
-					 },
-			error:	 function(jqXHR, textStatus, errorThrown) {
-						updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
-					 }
-					 
-		}); // $.ajax
-		} else
-									{
-										window.setTimeout(function(){$('#discPat').validationEngine('hideAll')}, 6000);
-									}; // validationEngine
+		if ($("#discPat").validationEngine('validate')) {
+
+			trak.fn.discharge(function(){
+				trak.refreshRow($("#discPat input[name=id]").val());
+				$("#dialog").dialog("destroy").remove();		
+			});
+
+		}
+		else
+		{
+
+			window.setTimeout(function(){$('#discPat').validationEngine('hideAll')}, 6000);
+
+		}; // validationEngine
+
 	}
+
   },
  				beds:		{},
  				demo:		{
@@ -3938,6 +3955,8 @@ $('.hdrWideButtons5').live('click',function(){
  });
  return false;
 }); // qTip for Documents
+
+
 $('.hdrWideButtons7').live('click',function(){
 
 _id = $(this).attr('data-code');
@@ -5967,7 +5986,8 @@ trak.fn.forms.savesetup();
     $('#_patient-dischargedestination').button({icons:{primary:"ui-icon-suitcase"}}).css('font-size','13px');
     $('#_patient-followup').button({icons:{primary:"ui-icon-calendar"}}).css('font-size','13px');
     trak.fn.forms.savesetup();
-
+    trak.fn.forms.dprintgp();
+    trak.fn.forms.dprintpat();
  });
  return false;
 });
@@ -6421,8 +6441,21 @@ trak.fn.forms.savesetup();
 },event);
 			});			
 			
-			
-			
+$(".patient-dischprint-gp").live('click',function() {
+
+			trak.fn.discharge(function(){
+				$('#_print-pat').click();
+			});
+
+});
+$(".patient-dischprint-pat").live('click',function() {
+
+			trak.fn.discharge(function(){
+				$('#_print-gp').click();
+			});
+
+});
+		
    			$(".patient-followup").live('click',function(event){
  				// Overflow set to avoid flash of scrollbar when opening qTip
  				//$("body").css("overflow", "hidden");
