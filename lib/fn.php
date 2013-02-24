@@ -674,17 +674,26 @@ function filter_showButtons($site,$ward) {
 	printf ('<div class="hdrWideButtons2" data-fid="%s" data-text="%s">Chairs</div><br>',126,"Chairs");
 	printf ('<div id="_vWard" class="hdrWideButtons2" data-fid="%s" data-text="%s">Virtual</div>',127,"Virtual");
 
-$sql = sprintf("SELECT * FROM `mau_visit` WHERE `site` = %s AND `ward` = %s AND `bed` = 127",$site,$ward);
+// $sql = sprintf("SELECT * FROM `mau_visit` WHERE `site` = %s AND `ward` = %s AND `bed` = 127",$site,$ward);
+// $_vQuery = mysql_query($sql);
+// if (mysql_num_rows($_vQuery) != 0) {
+// $_number = mysql_num_rows($_vQuery);
+// echo <<<HTML
+// <script type="text/javascript">
+// 	 $('#_vWard').badger('$_number');
+// </script>
+// HTML;
+// };
+
+
+};
+function ward_calculatevirtual() {
+
+$sql = sprintf("SELECT * FROM `mau_visit` WHERE `site` = %s AND `ward` = %s AND `bed` = 127",$_REQUEST['site'],$_REQUEST['ward']);
 $_vQuery = mysql_query($sql);
 if (mysql_num_rows($_vQuery) != 0) {
-$_number = mysql_num_rows($_vQuery);
-echo <<<HTML
-<script type="text/javascript">
-	 $('#_vWard').badger('$_number');
-</script>
-HTML;
+return mysql_num_rows($_vQuery);
 };
-
 
 };
 

@@ -21,7 +21,7 @@
 
 //error_reporting(E_ALL); ini_set('display_errors', '1');
 
-session_cache_limiter('public');;
+session_cache_limiter('public');
 session_start();
 if (!isset($_SESSION['LAST_ACTIVITY'])) {
 	$_SESSION['LAST_ACTIVITY'] = time();
@@ -106,7 +106,8 @@ case "bedbash":{
 				'dward'	=>	$_visit['dward'],
 				'dbed'	=>	$_visit['dbed'],
 				'edd'	=>	$_visit['edd'],
-				'id'	=>	$_visit['id']
+				'id'	=>	$_visit['id'],
+				'status'	=>	$_visit['status'],
 						
 			);
 		};
@@ -140,11 +141,13 @@ case "bedbash":{
 				//printf(' going home today (%s)',$_result[$loop]['edd']);
 				
 				};
+				if ($_result[$loop]['status'] != '0' && $_result[$loop]['status'] != '1') {
 				// ...and output
 				echo bedBash_number($k,$bedBash_color,$_REQUEST['ssite'],$_REQUEST['sward'],$_result[$loop]['id']);
 				echo bedBash_name($_result[$loop]['name'],$_result[$loop]['dsite'],$_result[$loop]['dward'],$_result[$loop]['dbed']);
 				$_found = 1;
-
+				};
+				
 			};
 
 
@@ -334,9 +337,10 @@ case "dologin":{
 		// Bootstrap		
 		if ($__AES->decrypt($_REQUEST['_pw'],$__PW, 256) == $__PW) {
 $_SESSION['LAST_ACTIVITY'] = time();
+$_vw = ward_calculatevirtual();
 echo <<<HTML
 <script type="text/javascript">
-	trak.boot.ok();
+	trak.vw = '$_vw'; trak.boot.ok();
 </script>
 HTML;
 

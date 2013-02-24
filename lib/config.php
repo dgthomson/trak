@@ -3,7 +3,7 @@
 // echo $_SERVER['SERVER_NAME'];
 // echo dirname($_SERVER['SCRIPT_NAME']);
 
-define('VERSION','0.6 © David Thomson 23-December-2012');
+define('VERSION','0.62 © David Thomson 24-February-2013');
 define('HOST',$_SERVER['SERVER_NAME'].dirname($_SERVER['SCRIPT_NAME']).'/');
 define('CONFIGFILE',__FILE__);
 date_default_timezone_set('Europe/London');
@@ -211,8 +211,6 @@ $wardFilter = array(
 	6=>  array('Bay 6','31,32,33,34,35,36'),
 	7=>  array('Bay 7','37,38,39,40,41,42'),
 	8=>  array('Bay 8','43,44,45,46,47,48'),
-	9=>  array('Acute','1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,21,22,23,24'),
-	10=> array('Short Stay','25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48')
 ),			
 14 => array(
 	1=>  array('Bay 1','1,2,3,4'),
@@ -222,6 +220,9 @@ $wardFilter = array(
 			),
 
 );
+
+//	9=>  array('Acute','1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,21,22,23,24'),
+//	10=> array('Short Stay','25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48')
 
 // Format: Source name, icon, short source name
 $baseSource = array(
