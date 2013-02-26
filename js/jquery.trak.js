@@ -2224,6 +2224,10 @@ var trak = {
 					jobaddsub:	function() {
 						$('.ui-dialog-buttonpane').append('<div style="float:left;margin:.5em 0 .5em .3em" class="patient-job-subtype">Add</div>');		
 						$('.patient-job-subtype').button({icons:{primary:"ui-icon-plus"}});									
+					},
+					jobrecipe:	function() {
+						$('.ui-dialog-buttonpane').append('<div style="float:left;margin:.5em 0 .5em .3em" class="patient-job-recipe">Recipe</div>');		
+						$('.patient-job-recipe').button({icons:{primary:"ui-icon-signal-diag"}});									
 					},					
 					scs:		function() {
 					
@@ -4220,6 +4224,23 @@ $('.hdrWideButtons24').live('click',function(){
     trak.refresh(sID,wID,fID,405);
 
 }); // qTip for destination filter
+$('.hdrWideButtons25').live('click',function(){
+
+_list = eval($(this).attr('data-list'));
+for (var i in _list)
+{
+	_ix = _list[i].split(':');
+	$('#ixlist').append('<div data-id="'+_ix[0]+'" class="_cond hdrWideButtons23">'+_ix[1]+'<a class="_R" href="#">✕</a><input type="hidden" name="ixid" value="'+_ix[0]+'"><input type="hidden" name="ixres" value=""><input type="hidden" name="ixtxt" value="'+_ix[1]+'"></div>');
+	$('#ixlist ._cond ._R').last().hover(function(){
+   				$(this).parent().addClass("_drughover");
+  			},function(){
+   				$(this).parent().removeClass("_drughover");
+   			}).click(function(){
+      			$(this).parent().remove();			
+   			});
+};
+$(".patient-job-recipe").qtip('hide');
+});
 
 $('.patient-jobprint').live('click',function(){
 
@@ -4936,8 +4957,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 				$('#_jobDesc').html( ' <span style="color:#AAA;">' + _selected + '</span>' );
 			
 			}).click(function(){
-
- 				var _selected	=	$(this).find('img').attr('data-desc');
+				var _selected	=	$(this).find('img').attr('data-desc');
  				var _pressed	=	$(this).find('img').attr('data-type');
  				$('#_jobDesc').html( ' <span style="color:#AAA;">' + _selected + '</span>' );
  				$('#extraslist').load(trak.url,{
@@ -4950,9 +4970,34 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
 					$('#extraslist .dialogButtons').buttonset().css('font-size','12px');
 				});
 				$('#ixlist').empty();
- 				
- 			});
- 						trak.fn.forms.jobaddsub();
+  			});
+  			
+  			$('#addJob input[name=type]').change(function(){
+  				if ($(this).val() == '1') {
+  					$('.patient-job-recipe').button('enable');
+				} else {
+  					$('.patient-job-recipe').button('disable');				
+				};
+  			});
+ 	trak.fn.forms.jobaddsub(); trak.fn.forms.jobrecipe();
+ if ($('#addJob input[name=type]:checked').val() == '1' )
+ {
+   					$('.patient-job-recipe').button('enable');
+ }
+ else
+ {
+   					$('.patient-job-recipe').button('disable');	
+ };		
+
+ 
+ 	
+//  	 			if ($('#addJob input[name=type]:checked').val() == '1') {
+//   					$('.patient-job-recipe').button('enable');
+// 				} else {
+//   					$('.patient-job-recipe').button('disable');				
+// 				};
+ 	
+ 
  			//$('.patient-job-subtype').css({"font-size":"13px","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
 
 	if (_jid !=undefined) {
@@ -7325,6 +7370,75 @@ if ($('#_patient-bed').attr('data-vwr') == '1') {
 },event);
 				//$("body").css("overflow", "auto");
 			});
+   			$(".patient-job-recipe").live('click',function(event){
+ 				// Overflow set to avoid flash of scrollbar when opening qTip
+ 				//$("body").css("overflow", "hidden");
+
+//if ($('#addJob input[name=type]:checked').val() == '1')
+//{
+
+				$(this).qtip({
+	overwrite:	true,
+	hide:	 	{
+    	event:	'unfocus'
+    },
+	show: 		{
+		event:	event.type,
+		ready:	true
+      },
+	content:	{
+      text: '<div id="'+trak.dialog+'"><img src="gfx/fbThrobber.gif" /></div>',
+      ajax: {
+      	url: trak.url,
+        type:		'POST',
+    	data: 		{
+    					act:	"ajax",
+    					type:	"jobrecipe",
+    					jid:	 $('#addJob input[name=type]:checked').val()		
+         		},
+        success:	function(data, status) {
+         	this.set('content.text', data);
+    		$("#pat-jobrecipe .hdrWideButtons25").css({"font-size":"13px","width":"140","text-align":"left"}).button({icons:{primary:"ui-icon-script"}});
+       		$(".patient-job-recipe").qtip('reposition');
+         }
+    	}
+  				 },
+	position:	{
+				viewport: $(window),
+				my: 'left center',
+        		at: 'center'
+  	  			},
+  	style:		{
+				classes: 'ui-tooltip-dark qtOverride',
+        		tip:	{
+         				corner: true
+         				},
+         		width:	function(){  $("#pat-jobrecipe").css('width')  },
+         		xwidth: 580
+      			},
+    events:		{
+    	show:	function(){ $('.ui-tooltip').css('max-width','1000px');
+    				if (!($("body").height() > $(window).height()))
+    				{
+    					// Prevent a flash of scrollbar
+    					$("body").css("overflow", "hidden");
+    				};
+    			},
+    	hide:	function(){
+    				$("body").css("overflow", "auto");
+//    				$(this).qtip('destroy'); // unique in this qtip
+    			}   
+    }
+},event);
+
+//};
+
+				//$("body").css("overflow", "auto");
+			});
+
+
+
+
    			$(".hdrWideButtons23").live('click',function(event){
  				// Overflow set to avoid flash of scrollbar when opening qTip
  				//$("body").css("overflow", "hidden");

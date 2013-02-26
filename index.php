@@ -1143,6 +1143,45 @@ echo '</div>';
 
 break;
 };
+
+			case "jobrecipe":{
+
+if (!isset($_REQUEST['jid']))
+{
+	echo '<script type="text/javascript"><!--' . "\n";
+	echo '  trak.fn.statusMessageDiv(".patient-job-recipe","Please choose a <em>job type</em> before adding an investigation recipe!");' . "\n";
+	echo '--></script>' . "\n";
+	exit;
+};
+
+echo '<div id="pat-jobrecipe">';
+
+foreach ($recipe as $k => $v) {
+
+
+	$_sub = explode(',',$v[1]);
+	foreach ($_sub as &$k) {
+		$k = "'" . $k . ':' . $jobType[1][2][$k] . "'";
+	};
+
+	$_list  = '[';
+	$_list .= implode(',',$_sub);
+	$_list .= ']';
+
+
+	printf('<div data-list="%s" data-text="%s" class="hdrWideButtons25">%s</div><br>',
+	$_list,$v[0],$v[0]);
+};
+
+echo '</div>';
+
+
+
+
+break;
+};
+
+
 			case "sbar":{
 
 		require_once 'lib/AES/aes.class.php';     // AES PHP implementation

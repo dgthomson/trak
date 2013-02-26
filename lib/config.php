@@ -412,8 +412,16 @@ $oxStart = array(
 
 );
 
-$jobType = array(
 
+$recipe = array(
+
+1 => array('Chest pain','1,2,7'),
+2 => array('Jaundice','1,2,3,11')
+
+);
+
+
+$jobType = array(
 
 1	=>	array("Blood",'gfx/ix/Syringe.png',array(
 
