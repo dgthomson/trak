@@ -237,6 +237,11 @@ if (!isset($filter)) {
 		echo '<tbody class="trakPatient">';
 		echo '<tr style="display:none;" id="trakDashRow"><td class="tdStripeR" colspan="5"></td></tr>';
 	};
+	
+	// Force display of detailed bed information
+	if ($_REQUEST['aw'] == 'true') {
+		$_allWards		= true;
+	};
 
 	// Output HTML data
 	while ($_visit = mysql_fetch_array($dbQuery, MYSQL_ASSOC)) {
