@@ -2085,6 +2085,7 @@ var trak = {
 					
 	$("#condAddButton").button({icons:{primary: "ui-icon-plus"}}).click(function(){
 
+	if ($('input[name=pmhxauto]').val() != '') {
 		_rxChanged = 1;
 		$('#hlist').append(function(){
 			_s = '<span class="_cond">';
@@ -2095,19 +2096,18 @@ var trak = {
 			_remove = '<a class="_R" href="#">✪</a>';
 			return (_s + _name + _id + _nameid + _remove + _e);
 		});
-		
-			$('#hlist ._cond ._R').last().hover(function(){
+		$('#hlist ._cond ._R').last().hover(function(){
    				$(this).parent().addClass("_drughover");
   			},function(){
    				$(this).parent().removeClass("_drughover");
    			}).click(function(){
       			$(this).parent().remove();			
    			});
-
- 		$('input[name=pmhxauto]').val('');  
+ 		$('input[name=pmhxauto]').val('');
+ 	};
    
-   }).css({'font-size':'12px','padding-top':'2px','padding-bottom':'1px'});
- 	$('input[name=pmhxauto]').autocomplete(
+   }).css({'font-size':'12px','padding-top':'2px','padding-bottom':'1px'});	
+	$('input[name=pmhxauto]').autocomplete(
     {
 			source: trak.url + "?act=ajax&type=nursing",
 			minLength: 4,
@@ -2145,6 +2145,7 @@ var trak = {
 					
  $("#activecondAddButton").button({icons:{primary: "ui-icon-plus"}}).click(function(){
 
+	if ($('input[name=activehxauto]').val() != '') {
 		_rxChanged = 1;
 		$('#ahlist').append(function(){
 			_s = '<span class="_cond">';
@@ -2154,9 +2155,8 @@ var trak = {
 			_nameid	= '<input value="'+ $('input[name=activehxauto]').val() +'" type="hidden" name="acthxname">';
 			_remove = '<a class="_R" href="#">✕</a>';
 			return (_s + _name + _id + _nameid + _remove + _e);
-		});
-		
-			$('#ahlist ._cond ._R').last().hover(function(){
+		});		
+		$('#ahlist ._cond ._R').last().hover(function(){
    				$(this).parent().addClass("_drughover");
   			},function(){
    				$(this).parent().removeClass("_drughover");
@@ -2164,8 +2164,8 @@ var trak = {
       			$(this).parent().remove();
       			return false;
    			});
-
  		$('input[name=activehxauto]').val('');  
+	};
    
    }).css({'font-size':'12px','padding-top':'2px','padding-bottom':'1px'});
  $('input[name=activehxauto]').autocomplete(
@@ -5464,9 +5464,14 @@ if ($('#noteTD_'+hid+' ._notes').hasClass('x_notesOverflow'))
 			},
 			width: 350,
 			height:470,
-			modal: true,
-			buttons: objRefEditButtonsHAN
-		}).load(url,function()
+			modal: true
+		}).load(trak.url,{
+		
+			act:	'formAddRef',
+			vid:	$(this).attr('data-visitid'),
+			type:	127		
+		
+		},function()
 		{
   		 $('.dialogButtons').buttonset();
 		 $('#formAddRef #formID_hx').focus();

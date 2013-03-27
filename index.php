@@ -1892,7 +1892,8 @@ if ($_REQUEST['status'] == 1 || $_REQUEST['status'] == 0)
 //		printf ('<a class="pBSButtonNursing nursingEdit" href="http://'.HOST.'/index.php?act=formEditNursing&amp;vid=%s">Nursing</a>',$_REQUEST['id']);
 //		printf ('<a style="float:right;" class="pBSButtonDisc discPat" href="http://'.HOST.'/index.php?act=formDiscPat&vid=%s" data-visitid="%s">Discharge</a>',$_REQUEST['id'],$_REQUEST['id']);
 
-printf ('<div data-visitid="%s" class="patient-discharge">Discharge</div>',$_REQUEST['id']);
+//printf ('<div data-visitid="%s" class="patient-discharge">Discharge</div>',$_REQUEST['id']);
+printf ('<div data-type="127" data-visitid="%s" class="patient-refer">HAN</div>',$_REQUEST['id']);
 
 //printf ('<a class="pBSButtonNote noteEdit" href="http://'.HOST.'/index.php?act=formAddNote&amp;vid=%s">Note</a>',$_REQUEST['id']);
 //echo '&nbsp;&nbsp;';
