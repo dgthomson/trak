@@ -1884,6 +1884,7 @@ var trak = {
 						vid:	vid,
 						site:	sID,
 						ward:	wID,
+						aw:		$("#patBoxID_"+vid+" td:first-child").hasClass('_smallTag'),
 						_pw:	Aes.Ctr.encrypt(__PW,__PW,256)
 					 }),
 			success: function(data){
