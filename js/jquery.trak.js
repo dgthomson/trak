@@ -1690,7 +1690,7 @@ var trak = {
 		};
 		$('.hdrDialogButtons').buttonset().css('font-size','13px');		
 		$('#hdrWardList div').button().css('font-size','14px').css('width','80px');
-		$('#hdrFilterList div').button().css('font-size','14px').css('width','80px');
+		$('#hdrFilterList div').button().css('font-size','14px').css('width','90px');
 		$('.hdrSelWard').button().css('font-size','14px');
 		$('.hdrFilter').button().css('font-size','14px');
 		//intervalRefresh = setInterval(trak.interval,trak.refreshTime*1000);
@@ -1858,7 +1858,7 @@ var trak = {
 							};
 							for (var x in jobsRefOverdueList) {
 								$('#jobID_' + jobsRefOverdueList[x]).addClass('_fl');											
-							}; 			  				  			    			  			
+							};  				  			    			  			
     					}
 			}
 		}); // $.ajax	
@@ -1981,8 +1981,8 @@ var trak = {
 				onTick:		trak.fn.longWait,
 				serverSync:	trak.fn.serverTime,
 				since:		new Date(Y,m,d,G,i,s),
-				format:		'HMS',
-				layout:		'➘ {hn}<span id="xpoint">{sep}</span>{mnn}<span id="xpoint">{sep}</span>{snn}'
+				format:		'dHMS',
+				layout:		'➘ {d<}{dn}d {d>}{hn}<span id="xpoint">{sep}</span>{mnn}<span id="xpoint">{sep}</span>{snn}'
 			
 			});
 
@@ -3764,9 +3764,12 @@ $('.hdrWideButtons').live('click',function(){
 			$('#hdrFilterList').html(''); // used later to hide the qtip bubble
 		}else{
 						$('#hdrFilterList').html(data);
-						$('#hdrFilterList .hdrWideButtons2').button().css('font-size','14px').css('width','80px');
+						$('#hdrFilterList .hdrWideButtons2').button().css('font-size','14px').css('width','90px');
 						$( ".hdrFilter" ).button( "option", "label", "All" );
 						$('.hdrFilter').fadeIn('fast');
+						
+						$('#_vWard').badger($('#_vWard').attr('data-number'));
+						
 			};
 					},
 		error: 		function(jqXHR, textStatus, errorThrown) {
@@ -5465,7 +5468,8 @@ if ($('#noteTD_'+hid+' ._notes').hasClass('x_notesOverflow'))
 			},
 			width: 350,
 			height:470,
-			modal: true
+			modal: true,
+			buttons: trak.buttons.refer.han
 		}).load(trak.url,{
 		
 			act:	'formAddRef',

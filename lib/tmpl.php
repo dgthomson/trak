@@ -144,8 +144,8 @@ printf ('<div id="action-lists">Lists</div>');
 //echo PHP_EOL;
 printf ('<div id="action-pathways">Documents</div>');
 //echo PHP_EOL;
-// printf ('<div id="action-han">HAN</div>');
-// echo PHP_EOL;
+//printf ('<div id="action-han">HAN</div>');
+//echo PHP_EOL;
 
 //printf ('<a href="http://'.HOST.'/index.php?act=HANlist" id="dispHAN">HAN</a>',$_REQUEST['site']);
 //echo PHP_EOL;

@@ -675,10 +675,10 @@ display:none;
 
 .clock { color:#black; float:left; margin: 8px 0px 0px 8px;}
 
-#Date { font-family:'Trebuchet MS',sans-serif; font-size:13px; text-align:left; font-weight:bold;}
+.clock #Date { font-family:'Trebuchet MS',sans-serif; font-size:13px; text-align:left; font-weight:bold;}
 
-#Date ul { display:inline;margin:0 auto; padding:0px; list-style:none; text-align:center; }
-#Date ul li { display:inline; font-size:13px; text-align:left; font-family:'Trebuchet MS',sans-serif; font-weight:bold;}
+.clock ul { float:left;display:inline;margin:0 auto; padding:0px; list-style:none; text-align:center; }
+.clock ul li { display:inline; font-size:13px; text-align:left; font-family:'Trebuchet MS',sans-serif; font-weight:bold;}
 
 #point, ._fl {
 position:relative;

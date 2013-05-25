@@ -239,8 +239,10 @@ if (!isset($filter)) {
 	};
 	
 	// Force display of detailed bed information
-	if ($_REQUEST['aw'] == 'true') {
-		$_allWards		= true;
+	if (isset($_REQUEST['aw'])) {
+		if ($_REQUEST['aw'] == 'true') {
+			$_allWards		= true;
+		};
 	};
 
 	// Output HTML data
@@ -794,6 +796,7 @@ else
 
 //$jsFooter.= 'var visRefRewriteIDList = [' . implode(',',$visRefRewrite) . '];';
 
+//$jsFooter .= sprintf("trak.vw = '%s';",ward_calculatevirtual($trakSite,$trakWard));
 
 echo <<<FOOTER
 <script type="text/javascript"><!--

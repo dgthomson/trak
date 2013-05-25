@@ -672,7 +672,7 @@ function filter_showButtons($site,$ward) {
 	};
 	};
 	printf ('<div class="hdrWideButtons2" data-fid="%s" data-text="%s">Chairs</div><br>',126,"Chairs");
-	printf ('<div id="_vWard" class="hdrWideButtons2" data-fid="%s" data-text="%s">Virtual</div>',127,"Virtual");
+	printf ('<div id="_vWard" class="hdrWideButtons2" data-fid="%s" data-text="%s" data-number="%s">Virtual</div>',127,"Virtual",ward_calculatevirtual($site,$ward));
 
 // $sql = sprintf("SELECT * FROM `mau_visit` WHERE `site` = %s AND `ward` = %s AND `bed` = 127",$site,$ward);
 // $_vQuery = mysql_query($sql);
@@ -687,13 +687,11 @@ function filter_showButtons($site,$ward) {
 
 
 };
-function ward_calculatevirtual() {
+function ward_calculatevirtual($_s,$_w) {
 
-$sql = sprintf("SELECT * FROM `mau_visit` WHERE `site` = %s AND `ward` = %s AND `bed` = 127",$_REQUEST['site'],$_REQUEST['ward']);
+$sql = sprintf("SELECT * FROM `mau_visit` WHERE `site` = %s AND `ward` = %s AND `bed` = 127",$_s,$_w);
 $_vQuery = mysql_query($sql);
-if (mysql_num_rows($_vQuery) != 0) {
 return mysql_num_rows($_vQuery);
-};
 
 };
 

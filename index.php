@@ -337,7 +337,7 @@ case "dologin":{
 		// Bootstrap		
 		if ($__AES->decrypt($_REQUEST['_pw'],$__PW, 256) == $__PW) {
 $_SESSION['LAST_ACTIVITY'] = time();
-$_vw = ward_calculatevirtual();
+$_vw = ward_calculatevirtual($_REQUEST['site'],$_REQUEST['ward']);
 echo <<<HTML
 <script type="text/javascript">
 	trak.vw = '$_vw'; trak.boot.ok();
@@ -1012,8 +1012,8 @@ printf ('<td class="_loc _lochanward"><em>%s</em></td>',$baseWards[$_han['site']
 		printf ('<dd>%s %s %s%s</dd></dl></td>',$_han['pas'],date("j/n/Y",strtotime($_han['dob'])),$_han['gender'] == 0 ? "♀" : "♂",years_old($_han['dob']));
 
 		//printf ('<td id="han_%s" class="_ref" rowspan="2" style="display:none;"><div class="">History<p>%s</p></div><div class="">Action<p>%s</p></div></td></tr>',$_han['id'],$_han['hx'],$_han['req']);
-//		printf ('<tr><td></td><td></td><td class="_note _stat" style="width:30px;">Hx </td><td id="hanhx_%s" class="_note _stat">%s</td></tr>',$_han['id'],$_han['hx']);
-//		printf ('<tr><td></td><td></td><td class="_note _stat" style="width:30px;">Job</td><td id="hanjob_%s" class="_note _stat">%s</td></tr>',$_han['id'],$_han['req']);
+		printf ('<tr><td></td><td></td><td class="_note _stat" style="width:30px;">Hx </td><td id="hanhx_%s" class="_note _stat">%s</td></tr>',$_han['id'],$_han['hx']);
+		printf ('<tr><td></td><td></td><td class="_note _stat" style="width:30px;">Job</td><td id="hanjob_%s" class="_note _stat">%s</td></tr>',$_han['id'],$_han['req']);
 
 
 // printf ("<strong>%s<br />%s</strong>",$baseWards[$_han['site']][$_han['ward']][1],$_han['bed']);
