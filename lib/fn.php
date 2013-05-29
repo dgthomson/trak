@@ -554,7 +554,7 @@ else
 	$extra="";
 };
 
-printf	(	'<dt data-visitid="%s" data-site="%s" data-ward="%s" data-bed="%s" style="background-color:%s;%s">',
+printf	(	'<dt class="bedbash-info" data-visitid="%s" data-site="%s" data-ward="%s" data-bed="%s" style="background-color:%s;%s">',
 			$id,
 			$site,
 			$ward,
@@ -671,7 +671,11 @@ function filter_showButtons($site,$ward) {
 		printf ('<div class="hdrWideButtons2" data-fid="%s" data-text="%s">%s</div><br>',$k,$v[0],$v[0]);
 	};
 	};
-	printf ('<div class="hdrWideButtons2" data-fid="%s" data-text="%s">Chairs</div><br>',126,"Chairs");
+	//printf ('<div class="hdrWideButtons2" data-fid="%s" data-text="%s">Chairs</div><br>',126,"Chairs");
+	printf ('<div id="_cWard" class="hdrWideButtons2" data-fid="%s" data-text="%s" data-number="%s">Chairs</div><br>',126,"Chairs",ward_calculatechairs($site,$ward));
+
+
+
 	printf ('<div id="_vWard" class="hdrWideButtons2" data-fid="%s" data-text="%s" data-number="%s">Virtual</div>',127,"Virtual",ward_calculatevirtual($site,$ward));
 
 // $sql = sprintf("SELECT * FROM `mau_visit` WHERE `site` = %s AND `ward` = %s AND `bed` = 127",$site,$ward);
@@ -689,12 +693,18 @@ function filter_showButtons($site,$ward) {
 };
 function ward_calculatevirtual($_s,$_w) {
 
-$sql = sprintf("SELECT * FROM `mau_visit` WHERE `site` = %s AND `ward` = %s AND `bed` = 127",$_s,$_w);
+$sql = sprintf("SELECT * FROM `mau_visit` WHERE `site` = %s AND `ward` = %s AND `bed` = 127 AND `status` != 4",$_s,$_w);
 $_vQuery = mysql_query($sql);
 return mysql_num_rows($_vQuery);
 
 };
+function ward_calculatechairs($_s,$_w) {
 
+$sql = sprintf("SELECT * FROM `mau_visit` WHERE `site` = %s AND `ward` = %s AND `bed` = 0 AND `status` != 4",$_s,$_w);
+$_vQuery = mysql_query($sql);
+return mysql_num_rows($_vQuery);
+
+};
 function form_ews($_ews) {
 
 echo '<div style="float:left;">';
@@ -731,6 +741,46 @@ function cache_control() {
 
 };
 
+function form_ActiveDiagnosisSimple($_patient) {
 
+	$sql = sprintf(	"SELECT * FROM mau_activehx, med_activehx
+					 WHERE patient = %s
+					 AND mau_activehx.cond = med_activehx.id
+					 ORDER BY mau_activehx.id;",
+					 $_patient);
+	$dbQuery = mysql_query($sql);
+	if (!$dbQuery) {
+		echo 'Could not run query (form_ActiveDiagnosisSimple): ' . mysql_error();
+		exit;
+	};
+	if (mysql_num_rows($dbQuery) != 0) {
+		while ($_ActiveDiagnosis = mysql_fetch_array($dbQuery, MYSQL_ASSOC)) {
+	
+				echo $_ActiveDiagnosis['comorb'] . "<br />";
 
+		}
+	}
+
+};
+function form_PastMedicalHistorySimple($_patient) {
+
+	$sql = sprintf(	"SELECT * FROM mau_pmhx, med_pmhx
+					 WHERE patient = %s
+					 AND mau_pmhx.cond = med_pmhx.id
+					 ORDER BY mau_pmhx.id;",
+					 $_patient);
+	$dbQuery = mysql_query($sql);
+	if (!$dbQuery) {
+		echo 'Could not run query (form_PastMedicalHistorySimple): ' . mysql_error();
+		exit;
+	};
+	if (mysql_num_rows($dbQuery) != 0) {
+		while ($_ActiveDiagnosis = mysql_fetch_array($dbQuery, MYSQL_ASSOC)) {
+	
+				echo $_ActiveDiagnosis['comorb'] . "<br />";
+
+		}
+	}
+
+};
 ?>

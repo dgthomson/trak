@@ -1696,6 +1696,7 @@ var trak = {
 		//intervalRefresh = setInterval(trak.interval,trak.refreshTime*1000);
 		$('#trakButtons').fadeIn('slow');
 		$('#_vWard').badger(trak.vw);
+		$('#_cWard').badger(trak.cw);
 		window.onerror = function(msg, url, line) {
 	   		trak.confirm('There was a javascript runtime error. Sorry.<p>[global:'+line+'] '+msg+'.</p>',220)
 			//alert("Error: " + msg + "\nurl: " + url + "\nline #: " + line);
@@ -3767,7 +3768,7 @@ $('.hdrWideButtons').live('click',function(){
 						$('#hdrFilterList .hdrWideButtons2').button().css('font-size','14px').css('width','90px');
 						$( ".hdrFilter" ).button( "option", "label", "All" );
 						$('.hdrFilter').fadeIn('fast');
-						
+						$('#_cWard').badger($('#_cWard').attr('data-number'));
 						$('#_vWard').badger($('#_vWard').attr('data-number'));
 						
 			};
@@ -7211,9 +7212,12 @@ if ($('#_patient-bed').attr('data-vwr') == '1') {
 },event);
 				//$("body").css("overflow", "auto");
 			});
-   			$(".patient-sbar").live('click',function(event){
+   			$(".patient-sbar, .bedbash-info").live('click',function(event){
  				// Overflow set to avoid flash of scrollbar when opening qTip
  				//$("body").css("overflow", "hidden");
+
+if ($(this).attr('data-visitid') != '') {
+
 				$(this).qtip({
 	overwrite:	true,
 	hide:	 	{
@@ -7231,12 +7235,14 @@ if ($('#_patient-bed').attr('data-vwr') == '1') {
     	data: 		{
     					act:	"ajax",
     					type:	"sbar",
-    					vid:	$(this).attr('data-visitid') 		
+    					vid:	$(this).attr('data-visitid'),
+    					bb:		$(this).attr('data-site')		
          		},
         success:	function(data, status) {
          	this.set('content.text', data);
          	trak.fn.decode('#_AESName');
        		$(".patient-sbar").qtip('reposition');
+       		$(".bedbash-info").qtip('reposition');
          }
     	}
   				 },
@@ -7262,9 +7268,16 @@ if ($('#_patient-bed').attr('data-vwr') == '1') {
     			},
     	hide:	function(){
     				$("body").css("overflow", "auto");
+    				$(".bedbash-info").qtip('destroy');
+    				$(".patient-sbar").qtip('destroy');
+
     			}   
     }
 },event);
+
+};
+
+
 				//$("body").css("overflow", "auto");
 			});	
    			$(".patient-jobstatus").live('click',function(event){

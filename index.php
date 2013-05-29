@@ -338,9 +338,10 @@ case "dologin":{
 		if ($__AES->decrypt($_REQUEST['_pw'],$__PW, 256) == $__PW) {
 $_SESSION['LAST_ACTIVITY'] = time();
 $_vw = ward_calculatevirtual($_REQUEST['site'],$_REQUEST['ward']);
+$_cw = ward_calculatechairs($_REQUEST['site'],$_REQUEST['ward']);
 echo <<<HTML
 <script type="text/javascript">
-	trak.vw = '$_vw'; trak.boot.ok();
+	trak.vw = '$_vw'; trak.cw = '$_cw'; trak.boot.ok();
 </script>
 HTML;
 
@@ -1215,6 +1216,28 @@ echo '</td></tr>';
 echo '<tr><td>A</td><td>';
 echo nl2br($notes['SBARr']);
 echo '</td></tr>';
+
+// bb will include the site_id; this only exist for bedbash and not for SBARinfo
+if (isset($_REQUEST['bb'])) {
+if ($_REQUEST['bb'] != 'null') {
+
+echo '</tbody></table>';
+echo '<span class="nLabel">Clincal summary</span><br>';
+echo '<table class="_noteSummary"><tbody>';
+echo '<tr><td>Dx</td><td>';
+form_ActiveDiagnosisSimple($query['patient']);
+echo '</td></tr>';
+echo '<tr><td>Hx</td><td>';
+form_PastMedicalHistorySimple($query['patient']);
+echo '</td></tr>';
+
+};
+};
+
+
+
+
+
 echo '</tbody></table>';
 
 
