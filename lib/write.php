@@ -140,7 +140,19 @@ if ($_REQUEST['list'] > 0) {
 		AND v.status != '4'
 		AND v.dward = '%s'
 		ORDER BY v.ward,v.bed;",$_REQUEST['filter']);
-		// $_allWards = true;
+		$_allWards = true;
+		$_skipFiltering = true;
+		break;
+		};
+		case "406": // Show by suggested ward
+		{
+		$sql = sprintf ("SELECT *,0 AS pred FROM mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='$trakSite'
+		AND v.status != '4'
+		AND v.sugward = '%s'
+		ORDER BY v.ward,v.bed;",$_REQUEST['filter']);
+		$_allWards = true;
 		$_skipFiltering = true;
 		break;
 		};

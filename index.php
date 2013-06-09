@@ -341,7 +341,7 @@ $_vw = ward_calculatevirtual($_REQUEST['site'],$_REQUEST['ward']);
 $_cw = ward_calculatechairs($_REQUEST['site'],$_REQUEST['ward']);
 echo <<<HTML
 <script type="text/javascript">
-	trak.vw = '$_vw'; trak.cw = '$_cw'; trak.boot.ok();
+	trak.boot.ok('$_cw','$_vw');
 </script>
 HTML;
 
@@ -1690,6 +1690,7 @@ ORDER BY v.triage, r.rtime;",$_REQUEST['site'],$_REQUEST['ward'],$k);
 printf('<div id="lists-other">Other…</div><br>');
 printf('<div style="margin-top:4px;" id="lists-byconsultant">By consultant…</div><br>');
 printf('<div id="lists-bydestination">By destination…</div><br>');
+printf('<div id="lists-bysuggested">By suggested ward…</div><br>');
 
 $sql = sprintf("SELECT * FROM `mau_visit` WHERE `handover` = '1' AND `handate` >= '%s' AND `site` = '%s' AND status != '4'",date('Y-m-d 11:00:00'),$_REQUEST['site']);
 $listQuery = mysql_query($sql);
@@ -1848,7 +1849,12 @@ break;};
 	asort($_list, SORT_STRING);		
 	echo '<div id="lists-consultant" >';
 	foreach ($_list as $k => $v) {
-		printf('<div data-code="%s" data-name="%s" class="hdrWideButtons8">%s</div><br>',$k,$v,$v);
+
+$sql = sprintf("SELECT * FROM mau_visit WHERE consoc = '%s' AND site = '%s' AND status != '4';",$k,$_REQUEST['site']);
+$listQuery = mysql_query($sql);
+
+
+		printf('<div data-number="%s" data-code="%s" data-name="%s" class="hdrWideButtons8">%s</div><br>',mysql_num_rows($listQuery),$k,$v,$v);
 	};
 	printf('<div style="margin-top:4px;" data-code="127" data-name="Locum" class="hdrWideButtons8">Locum</div><br>');
 	printf('<div style="margin-top:4px;" data-code="0" data-name="No consultant" class="hdrWideButtons8">Not set</div><br>');
@@ -1866,7 +1872,13 @@ break;
 	echo '<div id="lists-destination" >';
 	foreach ($baseWards[$_REQUEST['site']] as $k => $v) {
 		if ($v[0][0] == '(') continue; // Don't show commented-out wards
-		printf('<div data-code="%s" data-name="%s" class="hdrWideButtons24">%s</div><br>',$k,'➟'.$v[1],$v[0]);
+
+
+$sql = sprintf("SELECT * FROM mau_visit WHERE dward = '%s' AND dsite = '%s' AND status != '4';",$k,$_REQUEST['site']);
+$listQuery = mysql_query($sql);
+
+
+		printf('<div data-number="%s" data-code="%s" data-name="%s" class="hdrWideButtons24">%s</div><br>',mysql_num_rows($listQuery),$k,'➟'.$v[1],$v[0]);
 	};
 
 
@@ -1882,7 +1894,45 @@ break;
 			
 			
 			};
+			case "lists-sug":{
+			
+	$_list = $consultantsOncall[$_REQUEST['site']];
+	asort($_list, SORT_STRING);		
+	echo '<div id="lists-suggested" >';
 
+	//printf('<div style="margin-bottom:4px;" data-name="%s" data-code="%s" class="hdrWideButtons26">%s</div>','Any medical ward',127,'Any medical ward');
+
+
+	foreach ($baseWards[$_REQUEST['site']] as $k => $v) {
+		if ($v[0][0] == '(') continue; // Don't show commented-out wards
+
+
+
+$sql = sprintf("SELECT * FROM mau_visit WHERE sugward = '%s' AND site = '%s' AND status != '4';",$k,$_REQUEST['site']);
+$listQuery = mysql_query($sql);
+
+
+		printf('<div data-number="%s" data-code="%s" data-name="%s" class="hdrWideButtons26">%s</div><br>',mysql_num_rows($listQuery),$k,'♥ '.$v[1],$v[0]);
+
+
+
+
+
+
+	};
+	printf('<div style="margin-top:4px;" data-name="%s" data-code="%s" class="hdrWideButtons26">%s</div>','Any medical ward',127,'Any medical ward');
+
+	// printf('<div style="margin-top:4px;" data-name="%s" data-code="%s" class="hdrWideButtons26">%s</div>','Discharge',126,'Discharge');
+	// printf('<div style="margin-top:4px;" data-name="%s" data-code="%s" class="hdrWideButtons26">%s</div>','Not set',0,'Not set');
+
+
+	echo '</div>';
+
+
+break;
+			
+			
+			};
 
 
 
@@ -1915,7 +1965,7 @@ if ($_REQUEST['status'] == 1 || $_REQUEST['status'] == 0)
 //		printf ('<a class="pBSButtonNursing nursingEdit" href="http://'.HOST.'/index.php?act=formEditNursing&amp;vid=%s">Nursing</a>',$_REQUEST['id']);
 //		printf ('<a style="float:right;" class="pBSButtonDisc discPat" href="http://'.HOST.'/index.php?act=formDiscPat&vid=%s" data-visitid="%s">Discharge</a>',$_REQUEST['id'],$_REQUEST['id']);
 
-//printf ('<div data-visitid="%s" class="patient-discharge">Discharge</div>',$_REQUEST['id']);
+printf ('<div data-visitid="%s" class="patient-discharge">Discharge</div>',$_REQUEST['id']);
 printf ('<div data-type="127" data-visitid="%s" class="patient-refer">HAN</div>',$_REQUEST['id']);
 
 //printf ('<a class="pBSButtonNote noteEdit" href="http://'.HOST.'/index.php?act=formAddNote&amp;vid=%s">Note</a>',$_REQUEST['id']);

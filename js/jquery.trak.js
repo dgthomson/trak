@@ -1673,7 +1673,7 @@ var trak = {
 					},
 	boot:			{
 	
-		ok:			function(){
+		ok:			function(_cw,_vw){
 
 
 	try {
@@ -1695,8 +1695,8 @@ var trak = {
 		$('.hdrFilter').button().css('font-size','14px');
 		//intervalRefresh = setInterval(trak.interval,trak.refreshTime*1000);
 		$('#trakButtons').fadeIn('slow');
-		$('#_vWard').badger(trak.vw);
-		$('#_cWard').badger(trak.cw);
+		$('#_vWard').badger(_vw);
+		$('#_cWard').badger(_cw);
 		window.onerror = function(msg, url, line) {
 	   		trak.confirm('There was a javascript runtime error. Sorry.<p>[global:'+line+'] '+msg+'.</p>',220)
 			//alert("Error: " + msg + "\nurl: " + url + "\nline #: " + line);
@@ -4226,6 +4226,7 @@ $('.hdrWideButtons24').live('click',function(){
 	$("#action-lists").qtip('hide');
 	$("#lists-other").qtip('hide');
 	$("#lists-bydestination").qtip('hide');
+	$("#lists-bysuggested").qtip('hide');
     trak.refresh(sID,wID,fID,405);
 
 }); // qTip for destination filter
@@ -4246,6 +4247,20 @@ for (var i in _list)
 };
 $(".patient-job-recipe").qtip('hide');
 });
+
+
+$('.hdrWideButtons26').live('click',function(){
+	fID   = $(this).attr("data-code");
+	fName = $(this).attr('data-name');
+	$( ".hdrFilter" ).button( "option", "label", fName );
+	$("#action-lists").qtip('hide');
+	$("#lists-other").qtip('hide');
+	$("#lists-bydestination").qtip('hide');
+	$("#lists-bysuggested").qtip('hide');
+    trak.refresh(sID,wID,fID,406);
+
+});
+
 
 $('.patient-jobprint').live('click',function(){
 
@@ -6400,6 +6415,9 @@ trak.fn.forms.savesetup();
          				},
          		width:	function(){  $("#lists-other .hdrWideButtons3").css('width') +8  }
       			}
+
+
+
 },event);
 			});
 			$("#lists-byconsultant").live('click',function(event){
@@ -6428,6 +6446,13 @@ trak.fn.forms.savesetup();
          success:	function(data, status) {
          	this.set('content.text', data);
   			$("#lists-consultant div").css({"font-size":"14px","width":"140px","text-align":"left"}).button({icons:{primary:"ui-icon-person"}});
+
+$('.hdrWideButtons8',$('#lists-consultant')).each(function(){
+				if ($(this).attr('data-number') != '0') {
+					$(this).badger($(this).attr('data-number'));
+				};
+			});
+
 			$("#lists-byconsultant").qtip('reposition');
          }
 
@@ -6475,6 +6500,14 @@ trak.fn.forms.savesetup();
          success:	function(data, status) {
          	this.set('content.text', data);
   			$("#lists-destination div").css({"font-size":"14px","width":"200px","text-align":"left"}).button({icons:{primary:"ui-icon-tag"}});
+
+$('.hdrWideButtons24',$('#lists-destination')).each(function(){
+				if ($(this).attr('data-number') != '0') {
+					$(this).badger($(this).attr('data-number'));
+				};
+			});
+
+
 			$("#lists-destination").qtip('reposition');
          }
 
@@ -6496,7 +6529,78 @@ trak.fn.forms.savesetup();
       			}
 },event);
 			});			
-			
+			$("#lists-bysuggested").live('click',function(event){
+				$("#lists-other").qtip('hide');
+				$(this).qtip({
+	overwrite:	true,
+	hide: {
+      event: 'unfocus'
+    },
+	show: 		{
+         event: event.type,
+         ready: true
+      },
+	content:	{
+      text: '<div id="'+trak.dialog+'"><img src="gfx/fbThrobber.gif" /></div>',
+      ajax: {
+         url: trak.url,
+         type: 'POST',
+         data: 	{
+    					act:	"ajax",
+    					type:	"lists-sug",
+						site:	sID,
+						ward:	wID,
+						filter: fID     		
+         		}, 
+         success:	function(data, status) {
+         	this.set('content.text', data);
+  			$("#lists-suggested div").css({"font-size":"14px","width":"200px","text-align":"left"}).button({icons:{primary:"ui-icon-tag"}});
+
+
+			$('.hdrWideButtons26',$('#lists-suggested')).each(function(){
+				if ($(this).attr('data-number') != '0') {
+					$(this).badger($(this).attr('data-number'));
+				};
+			});
+
+
+
+			$("#lists-suggested").qtip('reposition');
+         }
+
+
+
+      }
+  				 },
+	position:	{
+				viewport: $(window),
+				my: 'left center',
+        		at: 'center'
+  	  			},
+  	style:		{
+				classes: 'ui-tooltip-dark qtOverride',
+        		tip:	{
+         				corner: true
+         				},
+         		xwidth:	function(){  $("#lists-suggested .hdrWideButtons26").css('width') +8  }
+      			},
+
+xevent:	{
+    	show:	function(){
+    				if (!($("body").height() > $(window).height()))
+    				{
+    					// Prevent a flash of scrollbar
+    					$("body").css("overflow", "hidden");
+    				};
+    			},
+    	hide:	function(){
+    				$("body").css("overflow", "auto");
+    			}   
+    }
+      			
+      			
+},event);
+			});			
 $(".patient-dischprint-gp").live('click',function() {
 
 			trak.fn.discharge(function(){
