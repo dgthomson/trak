@@ -16,6 +16,7 @@ define('UPDATE',0);
 define('PATHWAYS_PATH',dirname($_SERVER['SCRIPT_FILENAME']).'/pathways/');
 define('PATHWAYS_PDF_PATH',dirname($_SERVER['SCRIPT_FILENAME']).'/pathways/pdf/');
 define('PATHWAYS_PDF_EXTERNAL','http://'.HOST.'pathways/pdf/');
+define('JS_PATH',dirname($_SERVER['SCRIPT_FILENAME']).'/js/');
 
 define('NOTE_NOTE',0);
 define('NOTE_REFHX',1);

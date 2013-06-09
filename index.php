@@ -1058,7 +1058,6 @@ case "show":{
 };
 case "write":{
 
-
 		require_once 'lib/AES/aes.class.php';     // AES PHP implementation
 		require_once 'lib/AES/aesctr.class.php';  // AES Counter Mode implementation 
 		global $__PW;$__AES  = new AesCtr;
@@ -1074,7 +1073,8 @@ case "write":{
     		//exit;
 		}
 		else
-		{			
+		{
+			header("X-Trak-Javascript-MD5Hash: " . md5_file( JS_PATH . 'jquery.trak.js' ));
 			writeTrak($_REQUEST['site'],$_REQUEST['ward']);
 			$_SESSION['LAST_ACTIVITY'] = time();
 		};

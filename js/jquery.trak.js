@@ -1836,7 +1836,7 @@ var trak = {
     			  			trak.boot.logout();
     			  			trak.fn.statusMessageDialog("You've been logged out.");
     					},
-  				200:	function(data) {
+  				200:	function(data,status,xhr) {
 							trak.visRef=[];
 							trak.jobsRefIDList=[];			  			
    							clearTimeout(refreshTimeout);
@@ -1859,12 +1859,20 @@ var trak = {
 							};
 							for (var x in jobsRefOverdueList) {
 								$('#jobID_' + jobsRefOverdueList[x]).addClass('_fl');											
-							};  				  			    			  			
+							};  	
+							
+							var _hash = xhr.getResponseHeader('X-Trak-Javascript-MD5Hash');	
+							if( trak.jsHash == undefined ) {
+								trak.jsHash = _hash;
+							}
+							else {
+								if ( trak.jsHash != _hash ) {
+									trak.confirm("<p>Trak has been upgraded. To benefit from the new features, the page must be refreshed.</p><p><strong>Press ↻ to continue.</strong></p>",160);
+								}
+							};		  			    			  			
     					}
 			}
 		}); // $.ajax	
-
-
 	},
 	refreshRow:		function(vid) {
 	
@@ -1939,16 +1947,8 @@ var trak = {
 				resizable:	false,
 				height:		height,
 				modal:		true,
-				buttons:	{
-								"OK": function() {
-									confirm.dialog('close');
-									confirm.dialog("destroy");
-									confirm.remove();
-								}
-							}
+				closeOnEscape:	false
 			}).css('font-size','14px');
-			$('.ui-button').blur();
-
 	},
 	fn:				{
 	
