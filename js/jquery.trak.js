@@ -1860,12 +1860,10 @@ var trak = {
 							for (var x in jobsRefOverdueList) {
 								$('#jobID_' + jobsRefOverdueList[x]).addClass('_fl');											
 							};  	
-							
 							var _hash = xhr.getResponseHeader('X-Trak-Javascript-MD5Hash');	
 							if( trak.jsHash == undefined ) {
 								trak.jsHash = _hash;
-							}
-							else {
+							} else {
 								if ( trak.jsHash != _hash ) {
 									trak.confirm("<p>Trak has been upgraded. To benefit from the new features, the page must be refreshed.</p><p><strong>Press ↻ to continue.</strong></p>",160);
 								}
@@ -1957,6 +1955,29 @@ var trak = {
 			return !!('ontouchstart' in window)
 				|| !!('onmsgesturechange' in window);
 			
+		},
+		flipdxdone:		function(_id) {
+		
+		
+if ($(".patient-discharge","#patBoxButID_"+_id).attr('data-dxdone') == "0") {    	
+	$(".patient-discharge","#patBoxButID_"+_id).button({icons:{primary:"ui-icon-trash"},text:true}).badger('!');
+}
+else
+{
+	$(".patient-discharge","#patBoxButID_"+_id).button({icons:{primary:"ui-icon-trash"},text:true}).badger('');
+};
+		
+		
+		
+		},
+		changedxdone:	function(_id) {
+		
+		
+   	
+	$(".patient-discharge","#patBoxButID_"+_id).attr('data-dxdone',$("input[name=db]:checked").val());
+		
+		
+		
 		},
 		decodeName:		function(id) {
 		var _AESObj = $("#_pn"+id).find('dt');
@@ -2489,7 +2510,8 @@ window.setTimeout(function(){$('#trakButtons').qtip('destroy')}, 8000);
 						ccom:		Aes.Ctr.encrypt(  $("#discPat textarea[name=ccom]").val()  ,__PW,256),
 						ddest:		$("#discPat input[name=patient-dischargedestination-code]").val(),
 						rxchange:			$("#discPat input[name=rxchange]").val(),
-						followup:	$("#discPat input[name=patient-followup-code]").val()
+						followup:	$("#discPat input[name=patient-followup-code]").val(),
+						dxdone:		$("input[name=db]:checked").val()
 					 }),
 			success: function(data) {
 						fn_action(data);
@@ -3412,6 +3434,8 @@ _rxChanged = 0;
 
 			trak.fn.discharge(function(){
 				trak.refreshRow($("#discPat input[name=id]").val());
+				trak.fn.changedxdone($("#discPat input[name=id]").val());
+				trak.fn.flipdxdone($("#discPat input[name=id]").val());
 				$("#dialog").dialog("destroy").remove();		
 			});
 
@@ -5289,15 +5313,55 @@ if ($('#noteTD_'+hid+' ._notes').hasClass('_notesOverflow'))
     			act:	'ajax',
     			type:	'patBoxSub',
     			id:		sid,
-    			status:	$(this).find("img").attr("data-status")
+    			status:	$(this).find("img").attr("data-status"),
+    			sID:sID,
+				wID:wID,
+				fID:fID,
+				lID:lID    			
     		},
     		function() 
     		{
  
  // consider changing to $('.id',$('#patBoxButID_'+sid)) to limit to added element
  
-    	
-				$(".patient-discharge").button({icons:{primary:"ui-icon-trash"},text:true});
+				trak.fn.flipdxdone(sid);
+				$('.dialogButtons').buttonset();
+				$('#acc1').button({icons:{primary:"ui-icon-check"},text:false});
+				$('#acc0').button({icons:{primary:"ui-icon-close"},text:false});
+				$('input[name=action-accept]').click(function(){
+ 	 			$.ajax({
+
+				data:    ({
+						act:	 	"dbAccept",
+						id:			$(this).attr('data-visitid'),
+						value:		$(this).val()					
+					 }),
+				success: function(data){
+			
+				var _data = jQuery.parseJSON(data)
+				if (_data.value == "0")
+				{
+					$("#_pn" + _data.id).removeClass('_green');
+				}
+				else
+				{
+					$("#_pn" + _data.id).addClass('_green');
+				};
+			
+			},
+				error:	 function(jqXHR, textStatus, errorThrown) {
+						updateTips("Error sending data! Try again shortly. [" + textStatus + ": " + errorThrown +"]");
+					 }
+					 
+				}); // $.ajax	
+ 
+ 
+ 
+ 
+ 
+ });
+
+
 				$(".pBSButtonHAN").button({icons:{primary:"ui-icon-lightbulb"},text:true});
 
 //				$('.document-clerking').button({icons:{primary:"ui-icon-document"},text:true});
@@ -6032,6 +6096,10 @@ trak.fn.forms.savesetup();
   height:480,
   modal: true,
   open: function() {
+    $('.ui-dialog-buttonpane').append('<div style="float:right;margin:.5em 0.8em .5em 0em" class="db ui-dialog-buttonset"><input checked="checked" type="radio" value="1" name="db" id="db1" /><label for="db1">Complete</label><input type="radio" value="0" name="db" id="db0" /><label for="db0">Incomplete</label></div>');
+	$(".db").buttonset();
+	$("#db1").button({icons: {primary:'ui-icon-mail-closed'}});
+	$("#db0").button({icons: {primary:'ui-icon-mail-open'}});
   	$('.ui-button').blur();
   },
   buttons: trak.buttons.discharge
@@ -6059,6 +6127,18 @@ trak.fn.forms.savesetup();
     trak.fn.forms.savesetup();
     trak.fn.forms.dprintgp();
     trak.fn.forms.dprintpat();
+    
+     if ($('input[name=dxdone]').val() == 0) {
+		// Discharge incomplete
+		$('#db0').prop("checked",true).button('refresh');
+		$('#db1').prop("checked",false).button('refresh');
+		} else
+		{
+		$('#db0').prop("checked",false).button('refresh');
+		$('#db1').prop("checked",true).button('refresh');		
+		};
+    
+    
  });
  return false;
 });

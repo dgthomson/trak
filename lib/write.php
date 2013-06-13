@@ -340,6 +340,9 @@ if (!isset($filter)) {
 		} else {
 				$gcss=" _red";
 		};
+		if ($_visit['accept'] == "1") {
+				$gcss=" _green";		
+		};
 		printf ('<td class="_pn%s" id="_pn%s"><dl><dt data-visitid="%s">%s</dt>',$gcss, $_visit['id'] , $_visit['id'], $__AES->encrypt(strtoupper($_visit['name']), $__PW, 256));
 		printf ('<dd>%s %s %s%s</dd></dl></td>',$_visit['pas'],date("j/n/Y",strtotime($_visit['dob'])),$_visit['gender'] == 0 ? "♀" : "♂",years_old($_visit['dob']));
 		$decodeArray[]=$_visit['id'];

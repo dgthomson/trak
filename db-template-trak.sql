@@ -268,6 +268,8 @@ CREATE TABLE IF NOT EXISTS `mau_visit` (
   `handate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `nvwrdate` date NOT NULL,
   `ddest` tinyint(4) NOT NULL,
+  `dxdone` tinyint(1) NOT NULL DEFAULT '0',
+  `accept` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `patient` (`patient`),
   KEY `site` (`site`),

@@ -43,6 +43,25 @@ if (!isset($_REQUEST['ward'])) { $_REQUEST['ward'] = DEFAULTWARD;};
 $whatToDo = isset($_REQUEST['act']) ? $_REQUEST['act'] : '';
 
 switch ($whatToDo):
+case "dbAccept":{
+
+		$map = array(
+
+			'accept'		=> $_REQUEST['value']
+
+		);
+		dbPut(UPDATE,"mau_visit",$map,$_REQUEST['id']);
+		echo json_encode(
+			array(
+				"id"	=> $_REQUEST['id'],
+				"value"	=> $_REQUEST['value']
+		));
+
+
+
+
+break;
+};
 case "bedbash":{
 
 	echo '<div id="_bedbash">';
@@ -1940,6 +1959,45 @@ break;
 
 printf ('<td colspan="1"><center>⤷</center></td><td class="_but" colspan="4">',$_REQUEST['id']);
 
+	$query  = dbGet("mau_visit",$_REQUEST['id']);
+	$nQuery = dbGet("mau_patient",$query['patient']);
+
+			if	(($_REQUEST['fID']=='0') && ($_REQUEST['lID']=='0'))
+			{
+				// echo 'Plain ';
+				if (($query['site'] == $_REQUEST['sID']) && ($query['ward'] == $_REQUEST['wID']))
+				{
+					//echo 'On displayed ward';
+
+
+
+
+				}
+				else
+				{
+					//echo 'Not on displayed ward';		
+					
+					
+					
+
+echo	'<div class="dialogButtons" style="float:left;">';
+foreach ($baseAccept as $k => $v) {
+	printf	('<input %svalue="%s" data-visitid="%s" type="radio" id="acc%s" name="action-accept" /><label for="acc%s">%s</label>',
+				$query['accept'] == $k ? 'checked="checked" ' : "",
+				$k,$_REQUEST['id'],$k,$k,$v);};
+echo	"</div>";
+
+
+
+		
+				};
+			}
+			else
+			{
+				//echo 'Filtered ';
+			};
+
+	
 if ($_REQUEST['status'] == 1 || $_REQUEST['status'] == 0)
 {
 		printf ('<div class="patient-sbar" data-visitid="%s">Info</div>',$_REQUEST['id']);
@@ -1965,7 +2023,6 @@ if ($_REQUEST['status'] == 1 || $_REQUEST['status'] == 0)
 //		printf ('<a class="pBSButtonNursing nursingEdit" href="http://'.HOST.'/index.php?act=formEditNursing&amp;vid=%s">Nursing</a>',$_REQUEST['id']);
 //		printf ('<a style="float:right;" class="pBSButtonDisc discPat" href="http://'.HOST.'/index.php?act=formDiscPat&vid=%s" data-visitid="%s">Discharge</a>',$_REQUEST['id'],$_REQUEST['id']);
 
-printf ('<div data-visitid="%s" class="patient-discharge">Discharge</div>',$_REQUEST['id']);
 printf ('<div data-type="127" data-visitid="%s" class="patient-refer">HAN</div>',$_REQUEST['id']);
 
 //printf ('<a class="pBSButtonNote noteEdit" href="http://'.HOST.'/index.php?act=formAddNote&amp;vid=%s">Note</a>',$_REQUEST['id']);
@@ -1975,8 +2032,6 @@ printf ('<div data-visitid="%s" class="patient-refer">Refer</div>',$_REQUEST['id
 
 //printf ('<div data-visitid="%s" class="document-clerking">Clerking</div>',$_REQUEST['id']);
 
-	$query  = dbGet("mau_visit",$_REQUEST['id']);
-	$nQuery = dbGet("mau_patient",$query['patient']);
 
 printf ('<div data-visitid="%s" data-patientid="%s" class="patient-jobs">Job</div>',$_REQUEST['id'],$nQuery['id']);
 
@@ -2001,6 +2056,11 @@ printf ('<div data-visitid="%s" class="patient-documents">Docs</div>',$_REQUEST[
 			printf ('<div data-number="0" data-visitid="%s" class="patient-notes">Notes</div>',$_REQUEST['id']);
 		};
 		mysql_free_result($noteQuery);
+
+printf ('<div data-dxdone="%s" data-visitid="%s" class="patient-discharge">Discharge%s</div>',$query['dxdone'],$_REQUEST['id'],$query['dxdone'] == 0 ? '' : '');
+
+
+
 
 
 echo "</td>";			
@@ -3100,7 +3160,8 @@ case "dbMovePat":{
 						'bed' 	 	=> $_REQUEST['destBed'],
 						'consmau'	=> 0,
 						'consoc'	=> $_con,
-						'sugward'	=> 0
+						'sugward'	=> 0,
+						'accepted'	=> 0
 						);
 			}	
 			else
@@ -3112,7 +3173,8 @@ case "dbMovePat":{
 						'dbed'  	=> 0,
 						'site'   	=> $_REQUEST['destSite'],
 						'ward'  	=> $_REQUEST['destWard'],
-						'bed' 	 	=> $_REQUEST['destBed']
+						'bed' 	 	=> $_REQUEST['destBed'],
+						'accepted'	=> 0
 						);
 			};
 
@@ -3221,7 +3283,8 @@ case "dbDiscPat":{
 		$map = array(
 						'acdd'		=>	sprintf("%s-%s-%s",$_edd[2],$_edd[1],$_edd[0]),
 						'status'	=> 	2,
-						'ddest'	=>	$_REQUEST['ddest']
+						'ddest'	=>	$_REQUEST['ddest'],
+						'dxdone'	=> $_REQUEST['dxdone']
 					);
 
 //print_r($map);
@@ -4879,6 +4942,7 @@ case "formDiscPat":{
 	echo '<input type="hidden" name="act" value="dbDiscVisit" />';
 	printf ('<input type="hidden" name="id" id="id" value="%s" />',$_REQUEST['vid']);
 	formWrite("","hidden","nid",$notes['id']);
+	formWrite("","hidden","dxdone",$query['dxdone']);
 
 if ($query['acdd'] == "0000-00-00") {
 

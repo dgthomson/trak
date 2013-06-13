@@ -252,6 +252,7 @@ $baseStatus = array(
 
 $baseDNAR = array(0 => "Yes",1 => "No"); // front-end shows 'Resuscitate'
 $baseNLD = array(1 => "Yes",0 => "No");
+$baseAccept = array(1 => "Yes",0 => "No");
 $baseRxChange = array(1 => "Yes",0 => "No");
 $baseBoard = array(1 => "Yes",0 => "No");
 //	1 => array( "Doctor", "Red Stethoscope.png" ),
