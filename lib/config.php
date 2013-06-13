@@ -3,7 +3,7 @@
 // echo $_SERVER['SERVER_NAME'];
 // echo dirname($_SERVER['SCRIPT_NAME']);
 
-define('VERSION','0.62 © David Thomson 24-February-2013');
+define('VERSION','0.70 © David Thomson 13-June-2013');
 define('HOST',$_SERVER['SERVER_NAME'].dirname($_SERVER['SCRIPT_NAME']).'/');
 define('CONFIGFILE',__FILE__);
 date_default_timezone_set('Europe/London');
