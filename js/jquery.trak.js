@@ -1821,6 +1821,7 @@ var trak = {
 						ward:	refreshWard,
 						filter: refreshFilter,
 						list:	refreshList,
+						extra:	arguments[4],
 						_pw:	Aes.Ctr.encrypt(__PW,__PW,256)
 					 }),
 			error:		function(){},
@@ -1867,8 +1868,13 @@ var trak = {
 								if ( trak.jsHash != _hash ) {
 									trak.confirm("<p>Trak has been upgraded. To benefit from the new features, the page must be refreshed.</p><p><strong>Press ↻ to continue.</strong></p>",160);
 								}
-							};		  			    			  			
-    					}
+							};
+							$('.ix-status').buttonset().css('font-size','13px').css('height','26px');
+							$('#ixtX').button({icons:{primary:"ui-icon-search"},text:true}).button('disable');
+							$('label[for=ixtX]').css('margin-right','4px').addClass('ui-corner-all');
+							$('label[for=ixt0]').css('margin-right','4px').addClass('ui-corner-all');
+							$('label[for=ixt1]').addClass('ui-corner-left');
+						}
 			}
 		}); // $.ajax	
 	},
@@ -4285,6 +4291,27 @@ $('.hdrWideButtons26').live('click',function(){
 
 });
 
+$('.hdrWideButtons27').live('click',function(){
+	fID   = $(this).attr("data-code");
+	lName = $(this).attr('data-name');
+	$( ".hdrFilter" ).button( "option", "label", lName );
+	$("#action-lists").qtip('hide');
+	$("#lists-other").qtip('hide');
+	$("#lists-byconsultant").qtip('hide');
+	$("#lists-byinvestigation").qtip('hide');
+	$('.hdrFilter').fadeIn('fast');
+    trak.refresh(sID,wID,fID,407);
+
+
+
+
+});
+$('input[name=action-ix-type]').live('click',function(){
+	eID   = $(this).val();
+	fID   = $(this).attr('data-type');
+    trak.refresh(sID,wID,fID,408,eID);
+});
+
 
 $('.patient-jobprint').live('click',function(){
 
@@ -6680,7 +6707,67 @@ xevent:	{
       			
       			
 },event);
-			});			
+			});
+			$("#lists-byinvestigation").live('click',function(event){
+				$(this).qtip({
+	overwrite:	true,
+	hide: {
+      event: 'unfocus'
+    },
+	show: 		{
+         event: event.type,
+         ready: true
+      },
+	content:	{
+      text: '<div id="'+trak.dialog+'"><img src="gfx/fbThrobber.gif" /></div>',
+      ajax: {
+         url: trak.url,
+         type: 'POST',
+         data: 	{
+    					act:	"ajax",
+    					type:	"lists-ix",
+						site:	sID,
+						ward:	wID    		
+         		}, 
+         success:	function(data, status) {
+         	this.set('content.text', data);
+  			$("#lists-investigation div").css({"font-size":"14px","width":"180px","text-align":"left"}).button({icons:{primary:"ui-icon-search"}});
+			$("#lists-investigation").qtip('reposition');
+         }
+
+
+
+      }
+  				 },
+	position:	{
+				viewport: $(window),
+				my: 'left center',
+        		at: 'center'
+  	  			},
+  	style:		{
+				classes: 'ui-tooltip-dark qtOverride',
+        		tip:	{
+         				corner: true
+         				},
+         		xwidth:	function(){  $("#lists-investigation .hdrWideButtons27").css('width') +8  }
+      			},
+
+xevent:	{
+    	show:	function(){
+    				if (!($("body").height() > $(window).height()))
+    				{
+    					// Prevent a flash of scrollbar
+    					$("body").css("overflow", "hidden");
+    				};
+    			},
+    	hide:	function(){
+    				$("body").css("overflow", "auto");
+    			}   
+    }
+      			
+      			
+},event);
+			});				
 $(".patient-dischprint-gp").live('click',function() {
 
 			trak.fn.discharge(function(){

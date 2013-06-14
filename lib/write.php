@@ -12,6 +12,7 @@ global $basePathway;
 global $wardFilter;
 global $jobType;
 global $jsFooter;
+global $jobStatus;
 
 require_once 'lib/AES/aes.class.php';     // AES PHP implementation
 require_once 'lib/AES/aesctr.class.php';  // AES Counter Mode implementation 
@@ -156,6 +157,33 @@ if ($_REQUEST['list'] > 0) {
 		$_skipFiltering = true;
 		break;
 		};
+		case "407": // Finds all patients waiting for x investigation
+		{
+		$sql = sprintf ("SELECT *,0 AS pred FROM mau_events r, mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='$trakSite'
+		AND v.ward='$trakWard'
+		AND v.status != '4'
+		AND r.type = '%s'
+		AND r.vID = v.id
+		ORDER BY v.triage, r.event_start;",$_REQUEST['filter']);
+		$_extra = 0;
+		break;
+		};
+		case "408": // Finds patients waiting for x investigation with status y
+		{
+		$sql = sprintf ("SELECT *,0 AS pred FROM mau_events r, mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='$trakSite'
+		AND v.ward='$trakWard'
+		AND v.status != '4'
+		AND r.type = '%s'
+		%s
+		AND r.vID = v.id
+		ORDER BY v.triage, r.event_start;",$_REQUEST['filter'],$_REQUEST['extra'] != 0 ? "AND r.status = '" . $_REQUEST['extra'] . "'" : '');
+		$_extra = $_REQUEST['extra'];
+		break;
+		};
 		default: // Finds pts waiting to see x
 		{
 		$sql = sprintf ("SELECT *,0 AS pred FROM mau_referral r, mau_patient p, mau_visit v
@@ -207,7 +235,7 @@ if ($_REQUEST['list'] > 0) {
 	ORDER BY $_ordering";
 };
 
- //$_outSQL = $sql;
+// $_outSQL = $sql;
 
 // Run the query or abort
 // ----------------------
@@ -218,7 +246,7 @@ $dbQuery = mysql_query($sql); if (!$dbQuery) {
 
 // Main loop
 // ---------
-if (mysql_num_rows($dbQuery) != 0) {
+if (mysql_num_rows($dbQuery) != 0 || $_REQUEST['list'] == 408) {
 
 	// Set up filtering if requested
 	if(($_REQUEST['filter'] != '0') && !$_skipFiltering) {
@@ -232,6 +260,11 @@ if ($_REQUEST['filter'] == 127)
 {
 	$filter=array(127);
 	$filtering = TRUE;
+};
+if ($_REQUEST['list'] == 407 || $_REQUEST['list'] == 408)
+{
+	$filter=array(0);
+	$filtering = FALSE;
 };
 if (!isset($filter)) {
  		$filter = explode(',', $wardFilter[$_REQUEST['site']][$_REQUEST['ward']][$_REQUEST['filter']][1] );
@@ -247,6 +280,24 @@ if (!isset($filter)) {
 	// Suppress some HTML output if we're using trakRefreshRow
 	if (!$trakRefreshRow) {	
 		echo '<tbody class="trakPatient">';
+
+if ($_REQUEST['list'] == 407 || $_REQUEST['list'] == 408)
+{
+echo '<tr style="" align="center" id="trakIx"><td class="tdStripe" colspan="5">';
+echo '<div class="ix-status" style="margin-bottom:6px;">';
+$jobStatus = array('X'=>$jobType[$_REQUEST['filter']][0],'0'=>'All') + $jobStatus;
+foreach ($jobStatus as $k => $v) {
+	printf	('<input %svalue="%s" data-type="%s" type="radio" id="ixt%s" name="action-ix-type" /><label for="ixt%s">%s</label>',
+				$_extra == $k ? 'checked="checked" ' : "",
+				$k,$_REQUEST['filter'],$k,$k,$v);
+};
+echo '</div>';
+echo '</td></tr>';
+
+};
+
+
+
 		echo '<tr style="display:none;" id="trakDashRow"><td class="tdStripeR" colspan="5"></td></tr>';
 	};
 	
@@ -820,9 +871,9 @@ echo <<<FOOTER
 FOOTER;
 echo PHP_EOL;
 
-// echo '<!-- ';
-// echo $_outSQL;
-// echo ' -->';
+//echo '<!-- ';
+//echo $_outSQL;
+//echo ' -->';
 
 mysql_free_result($dbQuery);
 };

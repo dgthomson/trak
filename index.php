@@ -1710,6 +1710,7 @@ printf('<div id="lists-other">Other…</div><br>');
 printf('<div style="margin-top:4px;" id="lists-byconsultant">By consultant…</div><br>');
 printf('<div id="lists-bydestination">By destination…</div><br>');
 printf('<div id="lists-bysuggested">By suggested ward…</div><br>');
+printf('<div id="lists-byinvestigation">By investigation…</div><br>');
 
 $sql = sprintf("SELECT * FROM `mau_visit` WHERE `handover` = '1' AND `handate` >= '%s' AND `site` = '%s' AND status != '4'",date('Y-m-d 11:00:00'),$_REQUEST['site']);
 $listQuery = mysql_query($sql);
@@ -1952,7 +1953,21 @@ break;
 			
 			
 			};
+			case "lists-ix":{
+			
+		echo '<div id="lists-investigation" >';
+	foreach ($jobType as $k => $v) {
 
+		printf('<div data-code="%s" data-name="%s" class="hdrWideButtons27">%s</div><br>',$k,'Job',$v[0]);
+
+	};
+	echo '</div>';
+
+
+break;
+			
+			
+			};
 
 
 			case "patBoxSub":{
