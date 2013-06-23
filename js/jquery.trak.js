@@ -3511,7 +3511,10 @@ Save: function() {
   },
   create:	function() {
 						  
-		$('.ui-dialog-buttonpane').append('<div style="float:left;padding:6px 0 0 8px;"><img border="0" width="32" height="32" src="gfx/Notebook.png"></div>');
+		$('.ui-dialog-buttonpane').append('<div style="float:left;padding:6px 0 0 8px;"><img border="0" width="32" height="32" src="gfx/Notebook.png"></div><div class="patient-notes" data-visitid="" style="float:left;margin:.5em 0 .5em .8em" id="_notes">Notes</div>');
+		$('#_notes').button({icons:{primary:"ui-icon-script"},text:true}).click(function(){		
+			trak.dialogs.note.hide = 'fade';
+		});
 
   },
   xbuttons:  function() {return this.buttons.notes;}
@@ -4390,7 +4393,11 @@ $('._scsButton').button({icons:{primary:'ui-icon-link'}}).css('font-size','13px'
 	
 	
 	
-	
+//$("._speak").live('click',function(){
+//var _text =  $($(this).attr('data-text')).val();
+//speechSynthesis.speak(SpeechSynthesisUtterance(_text));
+//chrome.tts.speak(_text);
+//});
 	
 	
 	
@@ -5182,6 +5189,7 @@ trak.fn.buttonset.bordersoff('fieldset[name=_ambu]');
   dialog.dialog("option","title",'Entry for ' + $('#formAddNote').attr('rel'));
   trak.fn.decode('#formAddNote textarea[name=formID_note]');
   trak.fn.forms.savesetup();
+  $("#_notes").attr('data-visitid',$('input[name=formID_visitid]').val());
   $("#formAddNote").validationEngine('init');
   $("#formAddNote").validationEngine('attach', {scroll: false, validationEventTrigger: ''});
   $('#refButtons').buttonset();

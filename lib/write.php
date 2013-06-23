@@ -287,7 +287,7 @@ echo '<tr style="" align="center" id="trakIx"><td class="tdStripe" colspan="5">'
 echo '<div class="ix-status" style="margin-bottom:6px;">';
 $jobStatus = array('X'=>$jobType[$_REQUEST['filter']][0],'0'=>'All') + $jobStatus;
 foreach ($jobStatus as $k => $v) {
-	printf	('<input %svalue="%s" data-type="%s" type="radio" id="ixt%s" name="action-ix-type" /><label for="ixt%s">%s</label>',
+	printf	('<input %svalue="%s" data-type="%s" type="radio" id="ixt%s" name="action-ix-type" /><label class="_noselect" for="ixt%s">%s</label>',
 				$_extra == $k ? 'checked="checked" ' : "",
 				$k,$_REQUEST['filter'],$k,$k,$v);
 };

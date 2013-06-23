@@ -116,6 +116,7 @@ case "bedbash":{
 			)
 			
 			) continue; // Suppress duplicates from query
+
 			$_result[] = array(
 				'name'	=>	$_visit['name'],
 				'site'	=>	$_visit['site'],
@@ -132,6 +133,8 @@ case "bedbash":{
 		};
 	};
 	
+//print_r($_result);
+
 	
 	foreach ($wardFilter[$_REQUEST['ssite']][$_REQUEST['sward']] as $k => $v) {
 	
@@ -145,7 +148,7 @@ case "bedbash":{
  		$_found=0;
  		for ($loop=0;$loop<count($_result);$loop++) {
 
-			if ($_result[$loop]['bed'] == $k) {
+			if (($_result[$loop]['bed'] == $k) && ($_result[$loop]['ward'] == $_REQUEST['sward'])) {
 			
 				// Found a patient in a bed
 				
@@ -1110,7 +1113,7 @@ case "handover":{
 case "ajax":{
 		switch ($_REQUEST['type']):
 
-case "jobextras":{
+			case "jobextras":{
 
 // Variant of formAddJob
 foreach ($jobType[$_REQUEST['job']][4] as $key => $value) {
@@ -1136,7 +1139,6 @@ foreach ($jobType[$_REQUEST['job']][4] as $key => $value) {
 
 break;
 };
-
 			case "jobsubtype":{
 
 if (!isset($_REQUEST['jid']))
@@ -1163,7 +1165,6 @@ echo '</div>';
 
 break;
 };
-
 			case "jobrecipe":{
 
 if (!isset($_REQUEST['jid']))
@@ -1200,8 +1201,6 @@ echo '</div>';
 
 break;
 };
-
-
 			case "sbar":{
 
 		require_once 'lib/AES/aes.class.php';     // AES PHP implementation
@@ -1968,8 +1967,6 @@ break;
 			
 			
 			};
-
-
 			case "patBoxSub":{
 
 printf ('<td colspan="1"><center>⤷</center></td><td class="_but" colspan="4">',$_REQUEST['id']);
@@ -3806,6 +3803,8 @@ echo	"</div>";
 echo "</div>";
 
 echo '</div>'; // float/width300
+
+//<span data-text="#formID_note" class="_speak"> ☊</span>
 
 echo '<div style="float:left">';
 printf ('<label for="formID_note" class="nLabel">Note <span id="refDetails">%s</span></label><br />',
