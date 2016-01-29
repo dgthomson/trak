@@ -45,6 +45,7 @@ if ($_REQUEST['list'] > 0) {
 		AND   v.dsite  = '%s'
 		AND   v.status = '1'
 		ORDER BY v.triage",$_REQUEST['site']);
+		// $_allWards = true;
 		break;
 		};
 		case "200": // Predicted admission
@@ -54,6 +55,7 @@ if ($_REQUEST['list'] > 0) {
 		AND   v.dsite  = '%s'
 		AND   v.status = '0'
 		ORDER BY v.triage",$_REQUEST['site']);
+		// $_allWards = true;
 		break;
 		};
 		case "400": // 18: Waiting to see consultant, any ward
@@ -182,6 +184,42 @@ if ($_REQUEST['list'] > 0) {
 		AND r.vID = v.id
 		ORDER BY v.triage, r.event_start;",$_REQUEST['filter'],$_REQUEST['extra'] != 0 ? "AND r.status = '" . $_REQUEST['extra'] . "'" : '');
 		$_extra = $_REQUEST['extra'];
+		break;
+		};
+		case "409": // Finds discharged patients without a discharge letter
+		{
+		$sql = sprintf ("SELECT *, 0 AS pred FROM mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='$trakSite'
+		AND v.ward='$trakWard'
+		AND v.status = '4'
+		AND v.dxdone = '0'
+		ORDER BY p.id;");
+		$_skipFiltering = true;
+		break;
+		};
+		case "411": // Finds boardable patients
+		{
+		$sql = sprintf ("SELECT *, 0 AS pred FROM mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='$trakSite'
+		AND v.ward='$trakWard'
+		AND v.status != '4'
+		AND v.board = '1'
+		ORDER BY v.admitdate;");
+		$_skipFiltering = true;
+		break;
+		};
+		case "412": // Show by AMU consultant
+		{
+		$sql = sprintf ("SELECT *,0 AS pred FROM mau_patient p, mau_visit v
+		WHERE p.id=v.patient
+		AND v.site='$trakSite'
+		AND v.status != '4'
+		AND v.consmau = '%s'
+		ORDER BY v.ward,v.bed;",$_REQUEST['filter']);
+		$_allWards = true;
+		$_skipFiltering = true;
 		break;
 		};
 		default: // Finds pts waiting to see x
@@ -354,6 +392,12 @@ echo '</td></tr>';
 			$dcss="";
 		};
 		printf ('<tr id="patBoxID_%s"%s>',$_visit['id'],$_css);
+
+if ($_visit['status'] == 4) {
+	printf ('<td class="_loc%s"><em>%s</em>',$dcss,'<div style="padding-top:2px;"><img src="gfx/2-Hot-Home-icon.png" width="34" height="34" /></div>');
+}
+else
+{
 		switch ($_visit['bed']):
 			case 127:	// Virtual
 			{
@@ -383,6 +427,8 @@ echo '</td></tr>';
 				break;
 			};
 		endswitch;
+};
+		
 		printf ('<div class="patient-toggle"><img data-status="%s" rel="%s" src="gfx/document_encrypt.png" width="24" height="24" /></div></td>',$_visit['status'],$_visit['id']);
 
 		// Name, PAS, DoB, age, gender

@@ -13,6 +13,15 @@ global $wardFilter;
 global $jsFooter;
 
 $_URL = 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME'];
+$_WHO = '{';
+foreach ($baseAuthorRole as $key => $who){
+$_WHO .= $key;
+$_WHO .= ':';
+$_WHO .= "'";
+$_WHO .= $who[0];
+$_WHO .= "',";
+};
+$_WHO .= '}';
 
 //	<script src="https://www.google.com/jsapi?key=ABQIAAAAqpgJdSBQ3ikU7mGFmdX6IBR3SwUA46KOq1J18feFyl1tK8y-BxQQURF-VWHff1pNCga_RTeA2EJBVg" type="text/javascript"></script>
 // 	<!--[if IE]>
@@ -38,7 +47,7 @@ echo <<<HEADER
 	<meta charset="UTF-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 	<title>Trak | $baseOrganisation</title>
-	<link type="text/css" rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.16.custom.css" />	
+	<link type="text/css" rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.16.custom.css" />
 	<link type="text/css" rel="stylesheet" href="css/trak.css" media="screen,print"/>
 	<link type="text/css" rel="stylesheet" href="css/badger.min.css" />
 	<link type="text/css" rel="stylesheet" href="js/qtip2/jquery.qtip.css" />
@@ -46,11 +55,13 @@ echo <<<HEADER
 	<script type="text/javascript" src="js/LAB.min.js"></script>
 	<script>
 	   \$LAB
-	   .script("https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
-	   .script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.22/jquery-ui.min.js")
+
+		.script("https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
+		.script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.22/jquery-ui.min.js")
 	   .script("lib/flexpaper/js/flexpaper.js")
 	   .script("js/pdfobject.js")
 	   .script("js/jquery.printElement.js")
+	   .script("js/jquery.printThis.js")
 	   .script("js/jquery.countdown.min-1.6-1.js")
 	   .script("js/jquery.badger.min.js")
 	   .script("js/qtip2/jquery.qtip.js")
@@ -68,6 +79,7 @@ echo <<<HEADER
 	   .script("js/jquery.trak.js").wait(function(){
 	   		try {
 	   			trak.url = '$_URL';
+	   			trak.who = $_WHO;
 	   			trak.init();
 	   		} catch(error) {
 	   			trak.confirm('There was a javascript runtime error. Sorry.<p>[init] '+error.message+'.</p>',220)
@@ -77,6 +89,20 @@ echo <<<HEADER
 </head>
 <body>
 HEADER;
+
+
+
+//	   .script("https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
+//	   .script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.22/jquery-ui.min.js")
+//	<link type="text/css" rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.16.custom.css" />	
+
+// <link type="text/css" rel="stylesheet" href="http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+
+//Latest at 22/2/2014
+//.script('http://code.jquery.com/jquery-1.10.2.min.js')
+//.script('https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.22/jquery-ui.min.js')
+//.script('http://code.jquery.com/jquery-migrate-1.2.1.min.js')
+
 
 echo '<table cellpadding="4" cellspacing="2" width="919" class="patList"><thead style="display:none;" id="trakButtons"><tr><th colspan="5">';
 echo PHP_EOL;

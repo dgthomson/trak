@@ -1,11 +1,14 @@
 <?php
 
+//er!
+
 //sleep(2);
 
 // To do:
 
 // validate PAS number
 // problem with css #Date ul (pervades)
+// qTip popups -> event: show/hide: remove (code in -support removes scrollbars now)
 
 
 // DONE (for add only) : stop duplicate AJAX when save etc pressed and network's slow
@@ -19,7 +22,7 @@
 // Will make referral of type x flash
 // $('._refs div[data-type=x] img').addClass('_fl');
 
-//error_reporting(E_ALL); ini_set('display_errors', '1');
+error_reporting(E_ALL); ini_set('display_errors', '1');
 
 session_cache_limiter('public');
 session_start();
@@ -43,6 +46,1593 @@ if (!isset($_REQUEST['ward'])) { $_REQUEST['ward'] = DEFAULTWARD;};
 $whatToDo = isset($_REQUEST['act']) ? $_REQUEST['act'] : '';
 
 switch ($whatToDo):
+
+
+case 'dialog':{
+
+	require_once 'lib/AES/aes.class.php';
+	require_once 'lib/AES/aesctr.class.php';
+	global $__PW; $__AES  = new AesCtr;
+
+switch ($_REQUEST['type']):
+case 'patient-notes':{
+
+	$query    = dbGet("mau_visit",$_REQUEST['vid']);
+	$nQuery   = dbGet("mau_patient",$query['patient']);
+	$notes    = dbGetByVisit('mau_data',$_REQUEST['vid']);
+	$refQuery = mysql_query("SELECT * FROM mau_referral WHERE visitid=" . $_REQUEST['vid']);
+
+	echo '<div class="notePaper"><div>';
+	echo '<span class="_R"><img src="gfx/patlh.png" width="250" height="30" /></span>';
+	echo '<p class="_noteHeader">';
+	printf ('<span class="__forDecode" id="_noteName_%s">%s</span>',$_REQUEST['vid'],$__AES->encrypt($nQuery['name'], $__PW, 256));
+	echo date(" j/n/Y",strtotime($nQuery['dob'])) . " ";
+	echo $nQuery['pas'];
+	echo '</p>';
+
+$jsFooter ='';
+switch ($_REQUEST['filter']):
+case '1':{
+
+echo '<p class="_noteHeader">Admission Summary</p>';
+
+echo '<table class="_noteSummary"><tbody>';
+echo '<tr>';
+echo '<td style="color:#888">Admission date and time</td>';
+echo '<td style="color:#888">';
+echo date("d/M/Y g:i a", strtotime($query['admitdate']));
+echo '</td>';
+echo '</tr>';
+
+echo '<tr>';
+echo '<td>Presenting complaint</td>';
+echo '<td>';
+//echo $notes['pc'];
+echo $notes['SBARs'];
+
+echo '</td>';
+echo '</tr>';
+
+echo '<tr>';
+echo '<td>Active problems</td>';
+echo '<td>';
+
+$sql = sprintf("SELECT * FROM mau_activehx,med_activehx
+		WHERE patient = %s
+		AND mau_activehx.cond = med_activehx.id
+		ORDER BY mau_activehx.id;",
+		$nQuery['id']);
+$dbQuery = mysql_query($sql);
+if (!$dbQuery) {
+    echo 'Could not run query (activehxDisplay): ' . mysql_error();
+    exit;
+};
+if (mysql_num_rows($dbQuery) != 0) {
+while ($_drug = mysql_fetch_array($dbQuery, MYSQL_ASSOC)) {
+// echo '<ol class="_hxList">';
+echo			$_drug['comorb'] . '<br />';
+//echo '</ol>';
+}
+}
+
+echo '</td>';
+echo '</tr>';
+echo '<tr>';
+echo '<td>Past medical history</td>';
+echo '<td>';
+
+$sql = sprintf("SELECT * FROM mau_pmhx,med_pmhx
+		WHERE patient = %s
+		AND mau_pmhx.cond = med_pmhx.id
+		ORDER BY mau_pmhx.id;",
+		$nQuery['id']);
+$dbQuery = mysql_query($sql);
+if (!$dbQuery) {
+    echo 'Could not run query (pmhxDisplay): ' . mysql_error();
+    exit;
+};
+if (mysql_num_rows($dbQuery) != 0) {
+while ($_drug = mysql_fetch_array($dbQuery, MYSQL_ASSOC)) {
+
+
+echo			$o_name	= $_drug['comorb'];
+echo "<br />";
+
+}
+}
+
+echo '</td>';
+echo '</tr>';
+
+echo '<tr>';
+echo '<td style="color:#888">Estimated date of discharge</td>';
+
+if (strtotime($query['edd']) < time())
+{
+	echo '<td class="_fl">';
+}
+else
+{
+	echo '<td style="color:#888">';
+};
+echo date("d/M/Y", strtotime($query['edd']));
+echo '</td>';
+echo '</tr>';
+
+echo '</tbody></table>';
+
+echo '<p class="_noteHeader">Nursing summary</p>';
+
+echo '<table class="_noteSummary"><tbody>';
+echo '<tr>';
+echo '<td style="color:#888">Plan</td>';
+echo '<td>';
+echo $notes['plan'];
+echo '</td>';
+echo '</tr>';
+echo '<tr>';
+echo '<td style="color:#888">Jobs</td>';
+echo '<td>';
+echo $notes['jobs'];
+echo '</td>';
+echo '</tr>';
+echo '<tr>';
+echo '<td style="color:#888">Frailty</td>';
+echo '<td>';
+echo $query['frailty'] == 0 ? 'Not set' :  $frailtyScale[$query['frailty']];
+echo '</td>';
+echo '</tr>';
+echo '<tr>';
+echo '<td style="color:#888">Mobility</td>';
+echo '<td>';
+echo $query['mobility'] == 0 ? 'Not set' :  $mobilityScale[$query['mobility']];
+echo '</td>';
+echo '</tr>';
+echo '<tr>';
+echo '<td style="color:#888">Clinical risk</td>';
+echo '<td>';
+echo $query['eotbt'] == 0 ? 'Not set' : $baseEOTBT[$query['eotbt']];
+echo '</td>';
+echo '</tr>';
+echo '</table>';
+
+break;
+};
+case '2':{
+
+
+echo '<p class="_noteHeader">Notes</p>';
+
+
+
+
+				$noteQuery = mysql_query("SELECT * FROM mau_note WHERE visitid=" . $_REQUEST['vid']);
+				if (!$noteQuery) {
+    				echo 'Could not run query: ' . mysql_error();
+    				exit;
+				}
+
+				echo '<p class="_noteLinks">';
+				while ($innerrow = mysql_fetch_array($noteQuery, MYSQL_ASSOC)) {
+					printf ('<span class="note-jump ui-button" data-jump="_noteRef_%s">&rarr;</span> %s %s<br />',$innerrow['id'],date("d/M/Y g:i a", strtotime($innerrow['ctime'])),$baseAuthorRole[$innerrow['role']][0]); 
+				};
+				echo '</p>';
+
+				// Reset fetch to allow query to be reused
+				// - error-suppressed in case no results had been returned
+				@mysql_data_seek($noteQuery, 0); 
+				while ($innerrow = mysql_fetch_array($noteQuery, MYSQL_ASSOC)) {
+					printf ('<p class="_noteHeader" id="_noteRef_%s">%s %s (%s) <span class="note-top ui-button">&uarr;</span></p>',$innerrow['id'],date("d/M/Y g:i a", strtotime($innerrow['ctime'])),htmlspecialchars($innerrow['author'],ENT_QUOTES),$baseAuthorRole[$innerrow['role']][0]); // htmlspecialchars($innerrow['author'],ENT_QUOTES)  $baseAuthorRole[$innerrow['role']][0]   date("D M j g:i a", strtotime($innerrow['ctime']))   ;
+//					printf ('<i><span id="noteID_%s">%s</span> <a class="noteEdit" href="http://'.HOST.'/index.php?act=formAddNote&amp;id=%s"><img src="gfx/Edit.png" width="22" height="22" border="0" /></a></i>',$innerrow['id'], nl2br(htmlspecialchars($innerrow['note'],ENT_QUOTES))  ,  $innerrow['id']);
+//					printf ('<i><span id="noteID_%s">%s</span> <a class="noteEdit" href="http://'.HOST.'/index.php?act=formAddNote&amp;id=%s"><img src="gfx/Edit.png" width="22" height="22" border="0" /></a></i>',$innerrow['id'], $__AES->encrypt( nl2br(htmlspecialchars($innerrow['note'],ENT_QUOTES)) , $__PW, 256)  ,  $innerrow['id']);
+
+printf (	'<i><span class="__forDecode" id="noteID_%s">%s</span>',
+			$innerrow['id'],
+			$__AES->encrypt( nl2br(htmlspecialchars($innerrow['note'],ENT_QUOTES)) , $__PW, 256)
+		);
+
+printf (	'<span data-noteid="%s" class="patient-note"> <img src="gfx/Text-Edit-icon.png" width="22" height="22" border="0" /></span></i>',
+			$innerrow['id']
+		);
+
+
+
+
+
+//$jsFooter .= sprintf('trak.fn.decode("#noteID_%s");',  $innerrow['id']  );
+//$decodeArray[] = $innerrow['id'];
+				};
+
+				mysql_free_result($noteQuery);
+
+//			 echo '<script type="text/javascript">' . "\n";
+//			 echo $jsFooter;
+
+// if (isset($decodeArray))
+// {
+// 			 echo 'var decodeIDList = [' . implode(',',$decodeArray) . '];';
+// }
+// else
+// {
+// 			 echo 'var decodeIDList = [];';
+// 
+// };
+//			 echo "\n" . '</script>';
+
+break;
+};
+case '3':{
+
+
+$jsFooter .= 'var decodeIDList = [];';
+
+
+
+echo '<p class="_noteHeader">Referrals Summary</p>';
+echo '<table class="_noteSummary"><tbody>';
+echo '<tr>';
+echo '<td style="color:#888">';
+echo 'To';
+echo '</td>';
+echo '<td style="color:#888">';
+echo 'Referral summary';
+echo '</td>';
+echo '<td style="color:#888">';
+echo 'Advice';
+echo '</td>';
+echo '</tr>';
+
+while ($_referral = mysql_fetch_array($refQuery, MYSQL_ASSOC)) {
+				if (in_array($_referral['who'],array(1,2,5,18))) continue;
+$noteHx = dbGetNote($_referral['id'],NOTE_REFHX);
+$noteDx = dbGetNote($_referral['id'],NOTE_REFDX);
+
+echo '<tr>';
+echo '<td>';
+
+printf ('<img data-type="%s" data-refid="%s" data-visitid="%s" class="patient-referral" src="gfx/%s" width="22" height="22" /><br />%s',
+$_referral['who'],
+$_referral['id'],
+$_REQUEST['vid'],
+$baseAuthorRole[$_referral['who']][1],
+$baseAuthorRole[$_referral['who']][0]);
+
+
+if ($_referral['status']) {
+echo '<br />';
+echo '<span style="color:#888;">' . $refStatus[$_referral['status']] . '</span>';
+};
+echo '</td>';
+echo '<td>';
+
+if (strlen($noteHx['note']) != 0)
+{
+	printf ('<i><span id="_refHx_%s">', $noteHx['id'] );
+	echo $__AES->encrypt($noteHx['note'], $__PW, 256);
+	$jsFooter .= sprintf('trak.fn.decode("#_refHx_%s");',  $noteHx['id']  );
+	echo '</span></i>';
+};
+
+echo '</td>';
+echo '<td>';
+
+if (strlen($noteDx['note']) != 0)
+{
+	printf ('<i><span id="_refDx_%s">', $noteDx['id'] );
+	echo $__AES->encrypt($noteDx['note'], $__PW, 256);
+	$jsFooter .= sprintf('trak.fn.decode("#_refDx_%s");',  $noteDx['id']  );
+	echo '</span></i>';
+};
+
+echo '</td>';
+echo '</tr>';
+
+// if ($noteHx['note'] !="" && $noteDx['note'] !="") {
+// printf ('Consultation by <strong>%s</strong><br />',$baseAuthorRole[$_referral['who']][0]);
+// printf ('<span style="float:left;display:block;"><img border="0" width="48" height="48" src="gfx/%s" /></span>',$baseAuthorRole[$_referral['who']][1]);
+// echo "Referral history: " . $noteHx['note'];
+// echo "<br>";
+// echo "Outcome: " . $noteDx['note'];
+// echo '<div style="clear:both;" />';
+// };
+
+};
+
+echo '<tbody></table>';
+break;
+}
+case '4':{
+echo '<p class="_noteHeader">Jobs Summary</p>';
+
+echo '<table class="_noteSummary"><tbody>';
+echo '<tr>';
+echo '<td style="color:#888">';
+echo 'Job';
+echo '</td>';
+echo '<td style="color:#888">';
+echo 'Due/status';
+echo '</td>';
+echo '<td style="color:#888">';
+echo 'Notes';
+echo '</td>';
+echo '</tr>';
+
+
+		$sql = sprintf ("SELECT * FROM mau_events
+			WHERE mau_events.vid = %s",
+    		$_REQUEST['vid']);
+		$jobsQuery = mysql_query($sql); if (!$jobsQuery) {
+			echo 'Could not run query: ' . mysql_error();
+			exit;
+		}
+
+	
+			while ($_job = mysql_fetch_array($jobsQuery, MYSQL_ASSOC)) {
+
+echo '<tr>';
+echo '<td>';
+printf ('<img data-jobid="%s" class="patient-jobs" src="%s" width="22" height="22" /><br />%s',$_job['id'],$jobType[$_job['type']][1],$jobType[$_job['type']][0]);
+echo '</td>';
+
+echo '<td>';
+echo date('d/m/Y H:i a',strtotime($_job['event_start']));
+echo '<br />';
+
+
+foreach (array_reverse($jobStatus,true) as $k => $v)
+{
+	if ( intval($k&$_job['status'])   )
+	{
+		$_status = $v;
+		$_block  = $k;
+		break;
+	};
+};
+
+if (isset($_block))
+{
+	echo '<span style="letter-spacing:-7px;color:#888;">';
+	foreach ($jobStatus as $k => $v)
+	{
+		if ($k <= $_block)
+		{
+			echo '◼	';
+		}
+		else
+		{
+			echo '◻';		
+		};
+	};
+	echo '</span>&nbsp;&nbsp;';
+};
+if (isset($_status))
+{
+	echo '<span style="color:#888;">' . $_status . '</span>';
+};
+
+
+echo '</td>';
+
+echo '<td>';
+
+// echo $_job['event_desc'];
+// echo '<br />';
+// echo $_job['event_result'];
+
+
+if (  (strlen($_job['event_desc']) + strlen($_job['event_desc']))   != 0)
+{
+	printf ('<i><span id="_event_%s">', $_job['id'] );
+	echo $__AES->encrypt(   $_job['event_desc'] . '<br />' . $_job['event_result'] , $__PW, 256);
+	$jsFooter .= sprintf('trak.fn.decode("#_event_%s");',  $_job['id']  );
+	echo '</span>';
+	
+	echo '</i>';
+};
+
+//printf ('<div data-jobid="%s" class="patient-jobedit"><img src="gfx/Text-Edit-icon.png" width="22" height="22" border="0" /></div>',$_job['id']);
+
+
+
+
+
+echo '</td>';
+
+// printf ('<div id="jobID_%s" data-jobid="%s" class="jobedit"><img src="%s" width="38" height="38"></div>',$_job['id'],$_job['id'], $jobType[$_job['type']][1]);
+
+			};
+
+
+echo '<tbody></table>';
+break;
+};
+endswitch;
+
+	echo '</div></div>';
+	echo '<script type="text/javascript">' . "\n";
+ 	echo $jsFooter;
+	echo '</script>';
+
+break;
+};
+case 'patient-referral':{
+
+switch ($_REQUEST['who']):
+case '1':{	// Doctor
+
+$query = dbGet("mau_visit",$_REQUEST['vid']);
+$nQuery = dbGet("mau_patient",$query['patient']);
+$icon = sprintf ('<div style="float:left;padding:6px 0 0 8px;"><img border="0" width="32" height="32" src="gfx/%s" /></div>',$baseAuthorRole[1][1]);
+$notes = dbGetByVisit('mau_data',$_REQUEST['vid']);
+$ref    = dbGet("mau_referral",$_REQUEST['id']);
+
+printf ('<form id="formEditDoc" action="http:/'.HOST.'/index.php" method="post">');
+formWrite("","hidden","act","dbEditDoc");
+formWrite("","hidden","vid",$_REQUEST['vid']);
+formWrite("","hidden","pid",$nQuery['id']);
+formWrite("","hidden","nid",$notes['id']);
+formWrite("","hidden","rid",$_REQUEST['id']);
+
+echo '<div style="float:left;width:312px;">';
+form_ActiveDiagnosis($nQuery['id']);
+form_PastMedicalHistory($nQuery['id']);
+
+//Whiteboard
+echo '<div style="float:left;">';
+echo '<label for="alert" class="nLabel">Whiteboard alert</label><br />';
+printf ('<input style="width:300px;" name="alert" class="ui-widget ui-state-default ui-corner-all noteAuthorField" type="text" id="alert" value="%s"/>',$query['alert']);
+echo	"</div>";
+
+echo '</div>';
+
+
+echo '<div style="float:left;">';
+echo '<label for="_flow" class="nLabel">Patient information</label><br />';
+echo '<fieldset name="_flow" class="_refborder" style="width:282px;">';
+
+//Resus
+// echo '<div style="float:left;">';
+// echo '<label for="triage" class="nLabel">Resuscitate</label><br />';
+// echo	'<div class="dialogButtons">';
+// foreach ($baseDNAR as $k => $v) {
+// 	printf	('<input %svalue="%s" type="radio" id="resus%s" name="resus" /><label for="resus%s">%s</label>',
+// 				$nQuery['dnar'] == $k ? 'checked="checked" ' : "",
+// 				$k,$k,$k,$v);};
+// echo	"</div>";
+// echo	"</div>";
+//NLD
+// echo '<div style="float:left;">';
+// echo '<label for="triage" class="nLabel">Nurse discharge</label><br />';
+// echo	'<div class="dialogButtons">';
+// foreach ($baseNLD as $k => $v) {
+// 	printf	('<input %svalue="%s" type="radio" id="nld%s" name="nld" /><label for="nld%s">%s</label>',
+// 				$query['nld'] == $k ? 'checked="checked" ' : "",
+// 				$k,$k,$k,$v);};
+// echo	"</div>";
+// echo	"</div>";
+
+//Board
+echo '<div style="float:left;">';
+echo '<label for="triage" class="nLabel">Boardable</label><br />';
+echo	'<div class="dialogButtons">';
+foreach ($baseBoard as $k => $v) {
+	printf	('<input %svalue="%s" type="radio" id="board%s" name="board" /><label for="board%s">%s</label>',
+				$query['board'] == $k ? 'checked="checked" ' : "",
+				$k,$k,$k,$v);};
+echo	"</div>";
+echo	"</div>";
+
+//End of the bed test
+echo '<div style="float:left;">';
+echo '<label for="_conButton" class="nLabel">Clinical risk</label><br />';
+printf(	'<div class="_noselect patient-eotbt" id="_patient-eotbt">%s</div>', $query['eotbt'] == 0 ? 'Not set' : $baseEOTBT[$query['eotbt']]	);
+printf( '<input type="hidden" value="%s" id="_patient-eotbt-code" name="patient-eotbt-code" />', $query['eotbt'] == 0 ? '0' : $query['eotbt']);
+echo '</div>';
+
+//Pathway
+echo '<div style="float:left;">';
+echo '<label for="_conButton" class="nLabel">Ambulatory pathway</label><br />';
+printf(	'<div class="_noselect patient-pathway" id="_patient-pathway">%s</div>', $query['pathway'] == 0 ? 'Inpatient' : $basePathway[$query['pathway']][0]	);
+//printf(	'<div class="_noselect pathway-doc" id="_pathway-doc" data-url="%s">&nbsp;</div>', $query['pathway'] == 0 ? '' : $basePathway[$query['pathway']][1]	);
+printf( '<input type="hidden" value="%s" id="_patient-pathway-code" name="patient-pathway-code" />', $query['pathway'] == 0 ? '0' : $query['pathway']);
+echo '</div>';
+
+
+
+
+
+
+echo '</fieldset>';
+
+echo '<label for="_flow2" class="nLabel">Continuity</label><br />';
+echo '<fieldset name="_ho" class="_refborder" style="width:282px;">';
+
+// echo '<div style="float:left;xwidth:300px;">';
+// //Consultant
+// echo '<div style="float:left;">';
+// echo '<label for="_conButton" class="nLabel">Consultant</label><br />';
+// printf(	'<div class="_noselect patient-consultants-oc" id="_patient-consultants-oc">%s</div>',  $query['consoc'] == 0 ? 'Not set' :  $consultantsOncall[$query['site']][$query['consoc']]	);
+// printf( '<input type="hidden" value="%s" id="_patient-consultants-oc-code" name="patient-consultants-oc-code" />', $query['consoc'] == 0 ? 0 : $query['consoc']);
+// echo '</div>';
+// //MAU Consultant
+// echo '<div style="float:left;">';
+// echo '<label for="_conButton" class="nLabel">MAU Consultant</label><br />';
+// printf(	'<div class="_noselect patient-consultants-mau" id="_patient-consultants-mau">%s</div>', $query['consmau'] == 0 ? 'Not set' : $consultantsMAU[$query['site']][$query['consmau']]	);
+// printf( '<input type="hidden" value="%s" id="_patient-consultants-mau-code" name="patient-consultants-mau-code" />', $query['consmau'] == 0 ? 0 : $query['consmau']);
+// echo '</div>';
+// echo '</div>';
+// echo '<div style="float:left;width:300px;">';
+// //Suggested ward
+// echo '<div style="float:left;">';
+// echo '<label for="_conButton" class="nLabel">Suggested ward</label><br />';
+// printf(	'<div class="_noselect suggested-ward" id="_suggested-ward">%s</div>', $query['sugward'] == 0 ? 'Not set' : $baseWards[$query['site']][$query['sugward']][0]	);
+// printf( '<input type="hidden" value="%s" id="_suggested-ward-code" name="suggested-ward-code" />', $query['sugward'] == 0 ? '0' : $query['sugward']);
+// echo '</div>';
+// echo '</div>';
+// 
+// echo '<div style="float:left;xwidth:300px;">';
+// //EDD
+// echo '<div style="float:left;">';
+// echo '<label for="edd" class="nLabel">Estimated Date of Discharge</label><br />';
+// echo '<div class="dialogButtons">';
+// 
+// printf		('<input %sclass="eddButton" type="radio" value="%s" id="edd1" name="edd" data-date="%s" />',
+// $query['edd'] == date("Y-m-d") ? 'checked="checked" ':""        ,date("Y-m-d"),date("d/m/Y"));
+// 
+// echo 		 '<label for="edd1">Today</label>';
+// 
+// printf		('<input %sclass="eddButton" type="radio" value="%s" id="edd2" name="edd" data-date="%s" />',
+// $query['edd'] == date("Y-m-d",strtotime("+1 day")) ? 'checked="checked" ':"",date("Y-m-d",strtotime("+1 day")),date("d/m/Y",strtotime("+1 day")));
+// 
+// printf 		('<label for="edd2">%s</label>',date("D",strtotime("+1 day")));
+// 
+// printf		('<input %sclass="eddButton" type="radio" value="%s" id="edd3" name="edd" data-date="%s" />',
+// $query['edd'] == date("Y-m-d",strtotime("+2 day")) ? 'checked="checked" ':"",date("Y-m-d",strtotime("+2 day")),date("d/m/Y",strtotime("+2 day")));
+// 
+// printf 		('<label for="edd3">%s</label>',date("D",strtotime("+2 day")));
+// 
+// // printf		('<input type="radio" value="%s" id="edd0" name="edd" />',0);
+// //printf 		('<label for="edd0">→</label>');
+// 
+// echo '</div>';
+// echo "</div>";
+// echo '<div style="float:left;">';
+// echo '<label for="eddd" class="nLabel"></label><br />';
+// @printf ('<input name="eddd" style="width:100px;" class="validate[required,custom[trakEDD]] eddDate ui-button ui-widget ui-corner-all" type="text" id="eddd" value="%s"/>',$query['edd'] == (string) "0000-00-00" ? "" : date("d/m/Y",strtotime($query['edd'])));
+// echo "</div>";
+// echo '</div>';
+
+//Handover?
+echo '<div style="float:left;">';
+echo '<label for="ho" class="nLabel">Handover</label><br />';
+echo	'<div class="dialogButtons">';
+
+
+
+if ( strtotime($query['handate']) < time() )
+{
+	$query['handover'] = 0;
+};
+
+
+foreach ($baseHandover as $k => $v) {
+	printf	('<input %svalue="%s" type="radio" id="ho%s" name="ho" /><label for="ho%s">%s</label>',
+				$query['handover'] == $k ? 'checked="checked" ' : "",
+				$k,$k,$k,$v);};
+echo	"</div>";
+echo	"</div>";
+
+
+//Expire?
+echo '<div style="float:left;">';
+echo '<label for="edd" class="nLabel">Expire listing on</label><br />';
+echo '<div class="dialogButtons">';
+
+// Plan
+//
+// Su		Tomorrow +2 +3
+// MTuW		Tomorrow +2 +3
+// Th		Tomorrow M
+// Sa		Tomorrow M
+// F		Tomorrow +2 +3
+// 
+// < 10:00 today
+
+
+
+
+
+// if (date('G') < 10) {
+// 
+// printf		('<input class="eddButton" type="radio" value="%s" id="edd1" name="edd" %s/>',
+// date("Y-m-d"), $query['handate'] == date("Y-m-d") ? 'checked="checked" ' : '' );
+// //echo 		 '<label for="edd1">Today</label>';
+// printf 		('<label for="edd1">%s</label>',date("D"));
+// };
+
+$_dateSize = 3;
+if (date('G') < 11) {
+printf		('<input class="eddButton" type="radio" value="%s" id="edd1" name="edd" %s/>',
+date("Y-m-d"), date("Y-m-d",strtotime($query['handate'])) == date("Y-m-d") ? 'checked="checked" ' : '' );
+printf 		('<label for="edd1">%s</label>',substr(date("D"), 0, 2));
+$_dateSize = 2;
+};
+
+printf		('<input class="eddButton" type="radio" value="%s" id="edd2" name="edd" %s/>',
+date("Y-m-d",strtotime("+1 day")), date("Y-m-d",strtotime($query['handate'])) == date("Y-m-d",strtotime("+1 day")) ? 'checked="checked" ' : '' );
+printf 		('<label for="edd2">%s</label>',substr(date("D",strtotime("+1 day")),0,$_dateSize));
+
+// +2 +3 Su M Tu W F
+if (in_array(date('N'),array(1,2,3,5,7))) {
+printf		('<input class="eddButton" type="radio" value="%s" id="edd3" name="edd" %s/>',
+date("Y-m-d",strtotime("+2 day")), date("Y-m-d",strtotime($query['handate'])) == date("Y-m-d",strtotime("+2 day")) ? 'checked="checked" ' : '');
+printf 		('<label for="edd3">%s</label>',substr(date("D",strtotime("+2 day")),0,$_dateSize));
+
+printf		('<input class="eddButton" type="radio" value="%s" id="edd4" name="edd" %s/>',
+date("Y-m-d",strtotime("+3 day")), date("Y-m-d",strtotime($query['handate'])) == date("Y-m-d",strtotime("+3 day")) ? 'checked="checked" ' : '');
+printf 		('<label for="edd4">%s</label>',substr(date("D",strtotime("+3 day")),0,$_dateSize));
+};
+
+// next Monday
+if (in_array(date('N'),array(4,6))) {
+printf		('<input class="eddButton" type="radio" value="%s" id="edd5" name="edd" %s/>',
+date("Y-m-d",strtotime("next Monday")), date("Y-m-d",strtotime($query['handate'])) == date("Y-m-d",strtotime("next Monday")) ? 'checked="checked" ' : '');
+printf 		('<label for="edd5">%s</label>',substr(date("D",strtotime("next Monday")),0,$_dateSize));
+};
+
+echo '</div>';
+echo "</div>";
+
+
+echo '<div style="float:left;">';
+echo '<label for="plan" class="nLabel">Details</label><br />';
+echo '<div id="_hopaper" class="notePaper" style="float:left;width:280px;"><div class="_smaller" style="height:120px;">';
+
+//echo '<div style="float:left;">'; 
+
+printf ('<textarea class="__forDecode _smallNote" name="hodetails" type="text" id="hodetails" >%s</textarea>',$__AES->encrypt($notes['handovertxt'] , $__PW, 256));
+//echo "</div>";
+
+echo '</div></div></div>';
+
+
+
+
+
+
+
+// Shim:
+// Old entries use status == 0 == 1
+if ( $ref['status'] == '0' ) { $ref['status'] = '1'; };
+printf( '<input type="hidden" data-text="%s" value="%s" id="_patient-status-code" name="patient-status-code" />', $refStatus[$ref['status']], $ref['status']);
+
+echo '</fieldset>';
+echo '</div>';
+
+
+
+echo <<<HTML
+			
+</form>
+<script type="text/javascript">
+ $(function() {
+	 $('.ui-dialog-buttonpane').prepend('{$icon}');
+ });
+</script>
+HTML;
+break;
+};
+case '2':{	// Nurse
+
+
+$query = dbGet("mau_visit",$_REQUEST['vid']);
+$nQuery = dbGet("mau_patient",$query['patient']);
+// $icon = sprintf ('<div style="float:left;padding:6px 0 0 8px;"><img border="0" width="32" height="32" src="gfx/%s" /></div>',$baseAuthorRole[2][1]);
+$notes = dbGetByVisit('mau_data',$_REQUEST['vid']);
+//
+$ref    = dbGet("mau_referral",$_REQUEST['id']);
+//
+printf ('<form id="formEditNursing" action="http:/'.HOST.'/index.php" method="post">');
+formWrite("","hidden","act","dbEditNursing");
+formWrite("","hidden","rid",$_REQUEST['id']);
+formWrite("","hidden","vid",$_REQUEST['vid']);
+formWrite("","hidden","pid",$nQuery['id']);
+formWrite("","hidden","nid",$notes['id']);
+formWrite("","hidden","nld",$query['nld']);
+
+echo '<div id="_hx">';
+
+echo '<div style="float:left;width:312px;">';
+form_ActiveDiagnosis($nQuery['id']);
+form_PastMedicalHistory($nQuery['id']);
+
+echo '<div style="float:left;">';
+echo '<label for="alert" class="nLabel">Whiteboard alert</label><br />';
+printf ('<input name="alert" class="ui-widget ui-state-default ui-corner-all noteAuthorField" style="width:300px;" type="text" id="alert" value="%s"/>',$query['alert']);
+echo	"</div>";
+echo '</div>';
+
+echo '<label for="plan" class="nLabel">Nursing plan</label><br />';
+echo '<div class="notePaper" style="float:left;width:300px;"><div class="_smaller">';
+
+//echo '<div style="float:left;">'; 
+
+printf ('<textarea class="__forDecode _smallNote" name="plan" type="text" id="plan" >%s</textarea>',$__AES->encrypt($notes['plan'] , $__PW, 256) );
+//echo "</div>";
+
+echo '</div></div>';
+
+
+
+echo '<label for="jobs" class="nLabel">Jobs</label><br />';
+echo '<div class="notePaper" style="float:left;width:300px;"><div class="_smaller">';
+printf ('<textarea class="__forDecode _smallNote" name="jobs" type="text" id="jobs" >%s</textarea>',$__AES->encrypt($notes['jobs'] , $__PW, 256) );
+echo '</div></div>';
+
+
+
+echo '<div style="float:left;width:290px;">';
+echo '<div style="float:left;">';
+echo '<label for="_conButton" class="nLabel">Frailty</label><br />';
+printf(	'<div class="_noselect patient-frailty" id="_patient-frailty">%s</div>',  $query['frailty'] == 0 ? 'Not set' :  $frailtyScale[$query['frailty']]	);
+printf( '<input type="hidden" value="%s" id="_patient-frailty-code" name="patient-frailty-code" />', $query['frailty'] == 0 ? 0 : $query['frailty']);
+echo '</div>';
+
+echo '<div style="float:left;">';
+echo '<label for="triage" class="nLabel">Resuscitate</label><br />';
+echo	'<div class="dialogButtons">';
+foreach ($baseDNAR as $k => $v) {
+	printf	('<input %svalue="%s" type="radio" id="resus%s" name="resus" /><label for="resus%s">%s</label>',
+				$nQuery['dnar'] == $k ? 'checked="checked" ' : "",
+				$k,$k,$k,$v);};
+echo	"</div>";
+echo	"</div>";
+echo	"</div>";
+
+echo '<div style="float:left;width:290px;">';
+echo '<div style="float:left;">';
+echo '<label for="_conButton" class="nLabel">Mobility</label><br />';
+printf(	'<div class="_noselect patient-mobility" id="_patient-mobility">%s</div>',  $query['mobility'] == 0 ? 'Not set' :  $mobilityScale[$query['mobility']]	);
+printf( '<input type="hidden" value="%s" id="_patient-mobility-code" name="patient-mobility-code" />', $query['mobility'] == 0 ? 0 : $query['mobility']);
+echo '</div>';
+
+
+form_ews($query['ews']);
+
+
+
+// Shim:
+// Old entries use status == 0 == 1
+if ( $ref['status'] == '0' ) { $ref['status'] = '1'; };
+printf( '<input type="hidden" data-text="%s" value="%s" id="_patient-status-code" name="patient-status-code" />', $refStatus[$ref['status']], $ref['status']);
+
+
+echo '</div>'; // _hx
+
+
+
+
+//new
+	$_scs=array('Ag'=>'','Ai'=>'','Br'=>'','Ci'=>'','Di'=>'','EC'=>'','Fe'=>'');
+	if ($notes['scs']!='') {
+		$_s = multi_parse_str($notes['scs']);
+		foreach($_scs as $key => &$val) {
+			$val = $_s['_'.$key][0];
+		};
+	} else {
+		foreach($_scs as $key => &$val) {
+			$val = '-1';
+		};
+	};
+//
+
+
+
+//echo '<div style="float:left;">';
+echo '<div id="_tri" style="display:none;">';
+foreach ($scs as $k => $v) {
+printf ('<div style="display:none;" id="id_%s">',$k);
+$_loop = 0;
+foreach ($v as $x) {
+	$_vars = explode(':',$x);
+	if (!isset($_vars[2])) {
+		printf ('<div class="_scsButton" data-type="%s" data-value="%s" data-choice="%s">',$k,$_vars[0],$_loop);
+		printf ('%s',$_vars[1]);
+		echo '</div>';
+	}
+	else
+	{
+		if (years_old($nQuery['dob']) >= $_vars[2]) {
+			printf ('<div class="_scsButton" data-type="%s" data-value="%s" data-choice="%s">',$k,$_vars[0],$_loop);
+			printf ('%s',$_vars[1]);
+			echo '</div>';		
+		}
+	};
+$_loop++;
+};
+printf ('<div style="margin-top:4px;" class="_scsButton" data-type="%s" data-value="%s" data-choice="-1">',$k,0);
+printf ('%s','Not set');
+echo '</div>';
+echo '</div>';
+};
+printf( '<div style="clear:both;float:left;"><label for="_flow" class="nLabel">Simple clinical score</label><br />');
+echo '<fieldset id="_scsform" class="_refborder" style="width:280px;">';
+echo '<div style="float:right;" id="_scs"></div>';	
+$_ageScore=0;
+if (years_old($nQuery['dob']) > 75) {
+	$_ageScore=4;
+};
+if (years_old($nQuery['dob']) <= 75) {
+	if ($nQuery['gender'] == '1') {
+		// Male
+		if (years_old($nQuery['dob']) >=50) {
+			$_ageScore=2;	
+		};
+	}
+	else
+	{
+		// Female
+		if (years_old($nQuery['dob']) >=55) {
+			$_ageScore=2;		
+		};
+	};
+};
+printf ('<div style="display:none;" data-set="%s" class="_scsButtonSelected" id="scsDefault_Age"></div>',$_ageScore);
+//new
+printf ('<input type="hidden" name="_Ag" value="%s">',$_ageScore);
+//
+foreach ($scs as $k => $v) {
+echo '<div>';
+printf( '<label for="label_%s" class="nLabel">%s</label><br />',$k,$k);
+//new
+if ($_scs[substr($k,0,2)]=='-1') {
+	$_desc='Not set';
+	$_dval='0';
+} else {
+	$_temp = explode(':',$scs[$k][$_scs[substr($k,0,2)]]);
+	$_desc = $_temp[1];
+	$_dval = $_temp[0];
+};
+printf ('<div data-type="%s" data-set="%s" class="_scsButtonSelected" id="scsDefault_%s">%s</div>',$k,$_dval,$k,$_desc);
+printf ('<input type="hidden" name="_%s" value="%s">',substr($k,0,2),$_scs[substr($k,0,2)]);
+//
+echo '</div>';
+
+};
+
+
+if ($query['triage'] == 127) {
+	$query['triage'] = 0;
+};
+echo '<div style="float:left;">';
+echo '<label for="triage" class="nLabel">Triage</label><br />';
+echo	'<div class="dialogButtons">';
+foreach ($baseTriage as $k => $v) {
+	printf	('<input %svalue="%s" type="radio" id="triage%s" name="triage" /><label for="triage%s"><span style="color:#%s">&#9679; </span>%s</label>',
+				$query['triage'] == $k ? 'checked="checked" ' : "",
+				$k,$k,$k,$v[1],$v[0]);};
+printf	('<input %svalue="%s" type="radio" id="triage%s" name="triage" /><label style="margin-left:6px" for="triage%s">%s</label>',
+				$query['triage'] == 0 ? 'checked="checked" ' : "",
+				0,0,0,'None');			
+echo	"</div>";
+echo	"</div>";
+
+echo '</fieldset></div>';
+//echo	"</div>";
+
+
+printf( '<div style="float:left;"><label for="_flow" class="nLabel">AMB score (under development)</label><br />');
+echo '<fieldset name="_flowamb" class="_refborder" style="width:260px;">';
+
+if (years_old($nQuery['dob']) >= 80) {
+$_ambAgeScore=-0.5;
+} else {
+$_ambAgeScore=0;
+};
+if ($nQuery['gender'] == '1') {
+$_ambGenScore=-0.5;
+} else {
+$_ambGenScore=0;
+};
+printf('<input type="hidden" name="ambgender" value="%s">',$_ambGenScore);
+printf('<input type="hidden" name="ambage" value="%s">',$_ambAgeScore);
+
+foreach ($amb as $k => $v) {
+$_desc = explode(":",$k); $_loop=0;
+echo '<div style="clear:both;float:left;">';
+printf('<label class="nLabel">%s</label><br />',$_desc[0]);
+echo	'<div class="dialogButtons">';
+foreach ($v as $x) {
+	$_vars = explode(':',$x);
+	printf ('<input class="_ambFlip" %svalue="%s" type="radio" id="%s" name="%s" /><label class="_ambRadio" for="%s">%s</label>',
+	$_loop == 0 ? 'checked="checked" ' : '',
+	$_vars[0],$_desc[1].$_loop,$_desc[1],$_desc[1].$_loop,$_vars[1]
+);
+$_loop++;
+};
+echo '</div>';
+echo '</div>';
+
+};
+
+echo '</fieldset>';
+echo '</div>';
+
+echo	"</div></form>"; // _tri
+
+
+echo '<div id="_nldd" style="display:none;margin-left:100px;">';
+echo '<form id="_formnld">';
+form_nld($notes,1);
+echo '</form>';
+echo '</div>';
+
+
+
+
+
+break;
+};
+case '18':{	// Consultant Physician
+ // Consultant physician
+
+// id, vid, type
+
+$query = dbGet("mau_visit",$_REQUEST['vid']);
+$nQuery = dbGet("mau_patient",$query['patient']);
+// $icon = sprintf ('<div style="float:left;padding:6px 0 0 8px;"><img border="0" width="32" height="32" src="gfx/%s" /></div>',$baseAuthorRole[18][1]);
+$notes = dbGetByVisit('mau_data',$_REQUEST['vid']);
+$ref    = dbGet("mau_referral",$_REQUEST['id']);
+
+printf ('<form id="formEditCP" action="http:/'.HOST.'/index.php" method="post">');
+formWrite("","hidden","act","dbEditCP");
+formWrite("","hidden","vid",$_REQUEST['vid']);
+formWrite("","hidden","pid",$nQuery['id']);
+formWrite("","hidden","nid",$notes['id']);
+formWrite("","hidden","rid",$_REQUEST['id']);
+
+echo '<div id="_ptwr">';
+echo '<div style="float:left;width:312px;">';
+form_ActiveDiagnosis($nQuery['id']);
+form_PastMedicalHistory($nQuery['id']);
+echo '</div>';
+
+
+echo '<div style="float:left;">';
+echo '<label for="_flow" class="nLabel">Patient information</label><br />';
+echo '<fieldset name="_flow" class="_refborder" style="width:282px;">';
+
+//Resus
+echo '<div style="float:left;">';
+echo '<label for="triage" class="nLabel">Resuscitate</label><br />';
+echo	'<div class="dialogButtons">';
+foreach ($baseDNAR as $k => $v) {
+	printf	('<input %svalue="%s" type="radio" id="resus%s" name="resus" /><label for="resus%s">%s</label>',
+				$nQuery['dnar'] == $k ? 'checked="checked" ' : "",
+				$k,$k,$k,$v);};
+echo	"</div>";
+echo	"</div>";
+//NLD
+echo '<div style="float:left;">';
+echo '<label for="nld" class="nLabel">Nurse discharge</label><br />';
+echo	'<div class="dialogButtons">';
+foreach ($baseNLD as $k => $v) {
+	printf	('<input %svalue="%s" type="radio" id="nld%s" name="nld" /><label for="nld%s">%s</label>',
+				$query['nld'] == $k ? 'checked="checked" ' : "",
+				$k,$k,$k,$v);};
+echo	"</div>";
+echo	"</div>";
+
+//Board
+echo '<div style="float:left;">';
+echo '<label for="triage" class="nLabel">Boardable</label><br />';
+echo	'<div class="dialogButtons">';
+foreach ($baseBoard as $k => $v) {
+	printf	('<input %svalue="%s" type="radio" id="board%s" name="board" /><label for="board%s">%s</label>',
+				$query['board'] == $k ? 'checked="checked" ' : "",
+				$k,$k,$k,$v);};
+echo	"</div>";
+echo	"</div>";
+
+//Whiteboard
+echo '<div style="float:left;">';
+echo '<label for="alert" class="nLabel">Whiteboard alert</label><br />';
+printf ('<input name="alert" class="ui-widget ui-state-default ui-corner-all noteAuthorField" type="text" id="alert" value="%s"/>',$query['alert']);
+echo	"</div>";
+
+echo '</fieldset>';
+
+echo '<label for="_flow2" class="nLabel">Flow control</label><br />';
+echo '<fieldset name="_flow2" class="_refborder" style="width:282px;">';
+
+echo '<div style="float:left;xwidth:300px;">';
+//Consultant
+echo '<div style="float:left;">';
+echo '<label for="_conButton" class="nLabel">Consultant</label><br />';
+printf(	'<div class="_noselect patient-consultants-oc" id="_patient-consultants-oc">%s</div>',  $query['consoc'] == 0 ? 'Not set' :  $consultantsOncall[$query['site']][$query['consoc']]	);
+printf( '<input type="hidden" value="%s" id="_patient-consultants-oc-code" name="patient-consultants-oc-code" />', $query['consoc'] == 0 ? 0 : $query['consoc']);
+echo '</div>';
+//MAU Consultant
+echo '<div style="float:left;">';
+echo '<label for="_conButton" class="nLabel">AMU Consultant</label><br />';
+printf(	'<div class="_noselect patient-consultants-mau" id="_patient-consultants-mau">%s</div>', $query['consmau'] == 0 ? 'Not set' : $consultantsMAU[$query['site']][$query['consmau']]	);
+printf( '<input type="hidden" value="%s" id="_patient-consultants-mau-code" name="patient-consultants-mau-code" />', $query['consmau'] == 0 ? 0 : $query['consmau']);
+echo '</div>';
+echo '</div>';
+echo '<div style="float:left;width:300px;">';
+//Suggested ward
+
+switch ($query['sugward']):
+	case 0:
+	$_sugname = 'Not set';
+	break;
+	case 126:
+	$_sugname = 'Discharge';
+	break;
+	case 127:
+	$_sugname = 'Any medical ward';
+	break;
+	default:
+	$_sugname = $baseWards[$query['site']][$query['sugward']][0];
+	break;
+endswitch;
+
+echo '<div style="float:left;">';
+echo '<label for="_conButton" class="nLabel">Suggested ward</label><br />';
+printf(	'<div class="_noselect suggested-ward" id="_suggested-ward">%s</div>', $_sugname	);
+printf( '<input type="hidden" value="%s" id="_suggested-ward-code" name="suggested-ward-code" />', $query['sugward']);
+echo '</div>';
+echo '</div>';
+
+echo '<div style="float:left;xwidth:300px;">';
+//EDD
+echo '<div style="float:left;">';
+echo '<label for="edd" class="nLabel">Estimated Date of Discharge</label><br />';
+echo '<div class="dialogButtons">';
+
+printf		('<input %sclass="eddButton" type="radio" value="%s" id="edd1" name="edd" data-date="%s" />',
+$query['edd'] == date("Y-m-d") ? 'checked="checked" ':""        ,date("Y-m-d"),date("d/m/Y"));
+
+echo 		 '<label for="edd1">Today</label>';
+
+printf		('<input %sclass="eddButton" type="radio" value="%s" id="edd2" name="edd" data-date="%s" />',
+$query['edd'] == date("Y-m-d",strtotime("+1 day")) ? 'checked="checked" ':"",date("Y-m-d",strtotime("+1 day")),date("d/m/Y",strtotime("+1 day")));
+
+printf 		('<label for="edd2">%s</label>',date("D",strtotime("+1 day")));
+
+printf		('<input %sclass="eddButton" type="radio" value="%s" id="edd3" name="edd" data-date="%s" />',
+$query['edd'] == date("Y-m-d",strtotime("+2 day")) ? 'checked="checked" ':"",date("Y-m-d",strtotime("+2 day")),date("d/m/Y",strtotime("+2 day")));
+
+printf 		('<label for="edd3">%s</label>',date("D",strtotime("+2 day")));
+
+// printf		('<input type="radio" value="%s" id="edd0" name="edd" />',0);
+//printf 		('<label for="edd0">→</label>');
+
+echo '</div>';
+echo "</div>";
+echo '<div style="float:left;">';
+echo '<label for="eddd" class="nLabel"></label><br />';
+@printf ('<input name="eddd" style="width:100px;" class="validate[required,custom[trakEDD]] eddDate ui-button ui-widget ui-corner-all" type="text" id="eddd" value="%s"/>',$query['edd'] == (string) "0000-00-00" ? "" : date("d/m/Y",strtotime($query['edd'])));
+echo "</div>";
+echo '</div>';
+
+// Shim:
+// Old entries use status == 0 == 1
+if ( $ref['status'] == '0' ) { $ref['status'] = '1'; };
+printf( '<input type="hidden" data-text="%s" value="%s" id="_patient-status-code" name="patient-status-code" />', $refStatus[$ref['status']], $ref['status']);
+
+echo '</fieldset>';
+echo '</div>';
+
+echo '</div>'; // ptwr
+
+echo '</form>';
+
+
+//printf ('<form id="_formnld">');
+//form_nld($notes);
+
+echo '<form id="_formnld">';
+echo '<div id="_nldd" style="display:none;margin-left:100px;">';
+
+
+form_nld($notes);
+//echo '</form>';
+//echo '</div>';
+
+
+
+
+//Pathway
+echo '<div style="float:left;">';
+echo '<label for="_conButton" class="nLabel">Ambulatory pathway</label><br />';
+printf(	'<div class="_noselect patient-pathway" id="_patient-pathway">%s</div>', $query['pathway'] == 0 ? 'Inpatient' : $basePathway[$query['pathway']][0]	);
+//printf(	'<div class="_noselect pathway-doc" id="_pathway-doc" data-url="%s">&nbsp;</div>', $query['pathway'] == 0 ? '' : $basePathway[$query['pathway']][1]	);
+printf( '<input type="hidden" value="%s" id="_patient-pathway-code" name="patient-pathway-code" />', $query['pathway'] == 0 ? '0' : $query['pathway']);
+echo '</div>';
+
+
+
+
+
+
+
+echo '</div>'; // nldd
+
+
+
+
+
+
+
+break;
+
+};
+case '20':{	// DVT
+
+		
+$query = dbGet("mau_visit",$_REQUEST['vid']);
+$nQuery = dbGet("mau_patient",$query['patient']);
+$notes = dbGetByVisit('mau_data',$_REQUEST['vid']);
+$ref    = dbGet("mau_referral",$_REQUEST['id']);
+
+printf ('<form id="formEditDoc" action="http:/'.HOST.'/index.php" method="post">');
+formWrite("","hidden","act","dbEditDoc");
+formWrite("","hidden","vid",$_REQUEST['vid']);
+formWrite("","hidden","pid",$nQuery['id']);
+formWrite("","hidden","nid",$notes['id']);
+formWrite("","hidden","rid",$_REQUEST['id']);
+
+$_data = json_decode($ref['extras'],$assoc = true);
+$_retrieved = intval($_data['tlwss']);
+$_tlwsr = intval($_data['tlwsr']);
+$_sideRetrieved= $_data['side'];
+$_rfRetrieved = intval($_data['rfs']);
+
+echo '<div id="_ax">';
+echo '<div style="float:left;width:312px;">';
+
+echo '<div style="float:left;">';
+echo '<label class="nLabel">Side</label><br />';
+echo '<div class="tlws-checkbox">';
+foreach ($_dvtSide as $a => $b) {
+printf ('<input %svalue="%s" type="radio" name="dvtside" id="dvtside%s"><label for="dvtside%s">%s</label>',
+$_sideRetrieved == $a ? 'checked="checked" ' : '',
+$a,
+$a, $a, $b
+);
+};
+echo '</div>';
+echo '</div>';
+
+echo '<div style="float:left;">';
+echo '<label class="nLabel">Wells score</label><br />';
+printf(	'<div data-refid="%s" class="_noselect patient-tlws" id="_patient-tlws">%s</div>', $_REQUEST['id'], $_tlwsr < 2 ? 'Unlikely' : 'Likely' 	);
+printf( '<input type="hidden" value="%s" id="_patient-tlws-code" name="patient-tlws-code" />', ''  );
+echo '</div>';
+
+echo '<div style="float:left;">';
+echo '<label class="nLabel">Risk factors</label><br />';
+printf(	'<div data-refid="%s" class="_noselect patient-rf" id="_patient-rf">%s</div>', $_REQUEST['id'], $_rfRetrieved < 1 ? 'Not present' : 'Present' 	);
+printf( '<input type="hidden" value="%s" id="_patient-rf-code" name="patient-rf-code" />', ''  );
+echo '</div>';
+
+echo '<div style="float:left;">';
+echo '<label for="alert" class="nLabel">D-dimer result</label><br />';
+printf ('<input name="ddimer" class="ui-widget ui-state-default ui-corner-all noteAuthorField" style="width:100px;" type="text" id="ddimer" value="%s"/>',$_data['ddimer']);
+echo	"</div>";
+echo '</div>';
+
+form_ActiveDiagnosis($nQuery['id']);
+form_PastMedicalHistory($nQuery['id']);
+
+
+
+
+echo '<label for="plan" class="nLabel">Presenting complaint</label><br />';
+echo '<div class="notePaper" style="float:left;width:300px;"><div class="_smaller">';
+printf ('<textarea class="__forDecode _smallNote" name="plan" type="text" id="plan" >%s</textarea>',$__AES->encrypt($notes['dvtpc'] , $__PW, 256) );
+echo '</div></div>';
+
+echo '<label for="jobs" class="nLabel">Recent issues</label><br />';
+echo '<div class="notePaper" style="float:left;width:300px;"><div class="_smaller">';
+printf ('<textarea class="__forDecode _smallNote" name="jobs" type="text" id="jobs" >%s</textarea>',$__AES->encrypt($notes['dvthx'] , $__PW, 256) );
+echo '</div></div>';
+
+
+
+
+
+
+
+
+
+
+
+
+
+echo '</div>'; // inner float #1
+echo '</div>'; // id="_ax"
+
+echo '<div id="_ix" style="display:none;">';
+echo 'IX';
+echo '</div>'; // id="_ix"
+
+echo '<div id="_rx" style="display:none;">';
+echo 'RX';
+echo '</div>'; // id="_rx"
+
+// Shim: Old entries use status == 0 == 1
+if ( $ref['status'] == '0' ) { $ref['status'] = '1'; };
+printf( '<input type="hidden" data-text="%s" value="%s" id="_patient-status-code" name="patient-status-code" />', $refStatus[$ref['status']], $ref['status']);
+// For TLSWS and RF calculations
+printf('<input type="hidden" value="%s" id="_tlws-result-code" name="tlws-result-code">',$_tlwsr);
+printf('<input type="hidden" value="%s" id="_tlws-select-code" name="tlws-select-code">',$_retrieved);
+printf('<input type="hidden" value="%s" id="_rf-select-code" name="rf-select-code">',$_rfRetrieved);	
+
+echo <<<HTML
+</form>
+HTML;
+
+
+
+
+
+
+break;
+
+};
+default:{
+$ref    = dbGet("mau_referral",$_REQUEST['id']);
+$noteHx = dbGetNote($_REQUEST['id'],NOTE_REFHX);
+$noteDx = dbGetNote($_REQUEST['id'],NOTE_REFDX);
+//echo $noteHx['note'];
+//echo $noteDx['note'];
+
+$icon = sprintf ('<div style="float:left;padding:6px 0 0 8px;"><img border="0" width="32" height="32" src="gfx/%s" /></div>',$baseAuthorRole[$ref['who']][1]);
+//printf ('<span class="nLabel">Referral to %s</span>',$baseAuthorRole[$ref['who']][0]);
+
+echo '<form id="formUpdateRef" action="http:/'.HOST.'/index.php" method="post">';
+formWrite("","hidden","act","dbUpdateRef");
+formWrite("","hidden","formID_refid",$_REQUEST['id']);
+formWrite("","hidden","formID_hxid",$noteHx['id']);
+formWrite("","hidden","formID_dxid",$noteDx['id']);
+formWrite("","hidden","vid",$_REQUEST['vid']);
+formWrite("","hidden","zwho",$ref['who']);
+formWrite("","hidden","twho",$baseAuthorRole[$ref['who']][0]);
+
+$query = dbGet("mau_visit",$_REQUEST['vid']);
+echo '<div id="refOutcome">';
+echo '<div style="float:left;height:380px;overflow-y:auto;overflow-x:hidden;">'; //new
+echo '<div style="float:left;width:300px;margin-right:12px;">';
+
+echo '<div class="nLabel" style="padding-top:6px;">Active diagnosis</div>';
+form_listActiveDiagnosis($query['patient']);
+
+echo '<div class="nLabel">Past medical history</div>';
+form_listPastMedicalHistory($query['patient']);
+
+echo '<div class="nLabel" style="padding-top:6px;">Referral history</div>';
+echo '<div id="_AES_refHx" class="_smallNote" style="padding-top:6px;">';
+echo $__AES->encrypt($noteHx['note'], $__PW, 256);
+echo '</div>';
+
+echo '<div class="_smallNote" style="margin-right:16px;color:green;text-align:right;-webkit-transform: rotate(-5deg); -moz-transform: rotate(-5deg);transform: rotate(-5deg);">';
+printf ('Many thanks!<br>%s %s',$noteHx['author'] == '' ? '' : $noteHx['author'], $noteHx['bleep'] == '' ? '' : '(' . $noteHx['bleep'] . ')');
+echo '</div>';
+echo '</div>';// new
+
+
+
+
+echo '</div>';
+
+echo '<div style="float:left">';
+echo '<div style="float:left;">';
+echo '<label for="formID_author" class="nLabel">Assessor\'s name</label><br />';
+printf ('<input style="width:248px;" name="formID_author" class="validate[required] ui-button ui-widget ui-corner-all _noteAuthor" type="text" id="formID_author" value="%s"/>',$noteDx['author']);
+echo "</div>";
+echo '<div style="float:left;">';
+echo '<label for="formID_bleep" class="nLabel">Bleep</label><br />';
+printf ('<input name="formID_bleep" class="ui-button ui-widget ui-corner-all _noteBleep" type="text" id="formID_bleep" value="%s"/>',$noteDx['bleep']);
+echo "</div>";
+echo "</div>";
+
+echo '<div style="float:left;">';
+printf ('<label for="formID_noteDx" class="nLabel">Advice and recommendations</label><br />');
+echo '<div class="notePaper" style="width:300px;"><div class="_mediumb">';
+printf ('<textarea id="formID_noteDx" name="formID_noteDx" class="validate[required] _smallNote">%s</textarea>', $__AES->encrypt($noteDx['note'], $__PW, 256)   );
+echo '</div></div>';
+// echo '<div style="float:left;">';
+// echo '<label for="status" class="nLabel">Referral status</label><br />';
+// echo	'<div class="dialogButtons" id="statusButtons">';
+// foreach ($refStatus as $k => $v) {
+// 	$_checked = $ref['status'] & $k;
+// 	printf	('<input %svalue="%s" class="validate[required,groupRequired[jobStat]]" type="radio" id="status%s" name="status" /><label for="status%s">%s</label>',
+// 				$_checked ? 'checked="checked" ' : "",
+// 				$k,$k,$k,$v);
+// };
+// echo	"</div>";
+// echo "</div>";
+
+// Shim:
+// Old entries use status == 0 == 1
+if ( $ref['status'] == '0' ) { $ref['status'] = '1'; };
+printf( '<input type="hidden" data-text="%s" value="%s" id="_patient-status-code" name="patient-status-code" />', $refStatus[$ref['status']], $ref['status']);
+
+
+echo "</div>";
+echo "</div>";
+echo '<div id="refInfo" style="display:none;">';
+
+
+
+echo '<div style="float:left;">';
+echo '<label for="formID_Hxauthor" class="nLabel">Referrer\'s name</label><br />';
+printf ('<input style="width:248px;" name="formID_Hxauthor" class="validate[required] ui-button ui-widget ui-corner-all _noteAuthor" type="text" id="formID_Hxauthor" value="%s"/>',$noteHx['author']);
+echo "</div>";
+echo '<div style="float:left;">';
+echo '<label for="formID_Hxbleep" class="nLabel">Bleep</label><br />';
+printf ('<input name="formID_Hxbleep" class="ui-button ui-widget ui-corner-all _noteBleep" type="text" id="formID_Hxbleep" value="%s"/>',$noteHx['bleep']);
+echo "</div>";
+echo '<br style="clear:both;">';
+printf ('<label for="formID_refnote" class="nLabel">Original referral note</label><br />');
+echo '<div class="notePaper" style="width:300px;"><div class="_mediumb">';
+printf ('<textarea id="formID_refnote" name="formID_refnote" class="validate[required] _smallNote">%s</textarea>', '' );
+echo '</div></div>';
+
+
+
+
+echo '</div>';
+echo '</form>';
+
+
+echo <<<END
+<script type="text/javascript">
+ $(function() {
+   $('#formID_noteDx').focus();
+   $('.ui-dialog-buttonpane').prepend('{$icon}');
+   $('#statusButtons').buttonset().css('font-size','12px');
+   trak.fn.decode('#_AES_refHx');
+	trak.fn.decode('#formID_noteDx');
+ });
+</script>
+END;
+
+
+break;
+
+
+}
+endswitch;
+
+break;
+};
+case 'patient-move':{
+//sleep(2);
+	$query  = dbGet("mau_visit",$_REQUEST['vid']);
+	$nQuery = dbGet("mau_patient",$query['patient']);
+	$notes = dbGetByVisit('mau_data',$_REQUEST['vid']);
+
+if ($query['dsite'] == 0 || $query['dsite'] == "127") {
+// No predicted destination (or destination home/today), so use current location
+	$_formMovePatSite = $query['site'];
+	$_formMovePatWard = $query['ward'];
+	$_formMovePatBed  = $query['bed'];
+}else
+{
+// Has predicted destination, so use that
+	$_formMovePatSite = $query['dsite'];
+	$_formMovePatWard = $query['dward'];
+	$_formMovePatBed  = $query['dbed'];
+
+				$sql = "SELECT dsite from mau_visit
+					WHERE site   = $_formMovePatSite
+					AND   ward   = $_formMovePatWard
+					AND   bed    = $_formMovePatBed
+					AND   status = 2
+					LIMIT 1;";
+				$bedQuery = mysql_query($sql);
+				if (mysql_num_rows($bedQuery) != 0) {
+					$_bedOcc = mysql_fetch_array($bedQuery, MYSQL_ASSOC);
+					// Predicted bed is occupied
+					if ($_bedOcc['dsite'] == 127) {
+						// Patient is predicted to go home today
+						$bedTrafficLight = 'tl_amber.png';
+					} else {
+						$bedTrafficLight = 'tl_red.png';
+					};
+				} else {
+				// Bed is empty
+					$bedTrafficLight = 'tl_green.png';
+				};
+	};
+
+	printf ('<form id="movePat" action="http://'.HOST.'/index.php" method="post">');
+	echo '<input type="hidden" name="act" value="dbEditVisit" />';
+	printf ('<input type="hidden" name="id" id="id" value="%s" />',$_REQUEST['vid']);
+	printf ('<input type="hidden" name="nid" id="nid" value="%s" />',$notes['id']);
+	
+echo '<div id="_dest">';
+echo '<label for="_move" class="nLabel">Destination</label><br />';
+echo '<fieldset name="_move" class="_refborder" style="width:310px">';
+
+// Site
+echo '<div style="float:left;">';
+echo '<label for="destSite" class="nLabel">Site</label><br />';
+echo	'<div class="dialogButtons">';
+foreach ($baseSites as $k => $v) {
+	printf	('<input data-defaultward="%s" data-defaultward-code="%s" %svalue="%s" type="radio" class="patient-site" id="destSite%s" name="destSite" /><label for="destSite%s">%s</label>',
+				$baseWards[$k][$baseDefaultWards[$k]][0],$baseDefaultWards[$k],$_formMovePatSite == $k ? 'checked="checked" ' : "",
+				$k,$k,$k,$v[1]);
+};
+
+echo	"</div>";
+echo	"</div>";
+echo '<br style="clear:both;">';
+// Ward
+echo '<div style="float:left;">';
+echo '<label for="_destWard" class="nLabel">Ward</label><br />';
+printf(	'<div class="_noselect patient-ward" id="_patient-ward">%s</div>', $_formMovePatWard == 0 ? 'Not set' : $baseWards[$_formMovePatSite][$_formMovePatWard][0]	);
+printf( '<input type="hidden" value="%s" id="_patient-ward-code" name="patient-ward-code" />', $_formMovePatWard == 0 ? 0 : $_formMovePatWard);
+echo '</div>';
+
+// Bed
+
+switch ($_formMovePatBed):
+	case 0:{
+		$_formMovePatBedName = 'Chair';
+		break;}
+	case 127:{
+		$_formMovePatBedName = 'Virtual';
+		break;}
+	default:{
+		$_formMovePatBedName = $_formMovePatBed;
+		break;}
+endswitch;
+echo '<div style="float:left;">';
+echo '<label for="_destWard" class="nLabel">Bed</label><br />';
+printf(	'<div data-vwr="1" class="_noselect patient-bed" id="_patient-bed">%s</div>', $_formMovePatBedName	);
+
+//echo '<input type="checkbox" id="_avail" /><label for="_avail">✔</label>';
+printf( '<input type="hidden" value="%s" id="_patient-bed-code" name="patient-bed-code" />', $_formMovePatBed);
+echo '</div>';
+
+echo '</fieldset>';
+
+
+echo '<label for="_ambu" class="nLabel">Ambulatory care</label><br />';
+echo '<fieldset name="_ambu" class="_refborder" style="width:310px">';
+
+//Next virtual ward round?
+echo '<div style="float:left;">';
+echo '<label for="edd" class="nLabel">Next virtual ward round</label><br />';
+echo '<div class="dialogButtons">';
+$_loop = 1;$_numb = 0;
+while ($_numb < 5) {
+
+
+$_date = date("Y-m-d",strtotime("+".$_loop." day"));
+
+if (in_array(date('N',strtotime($_date)),array(6,7))) {
+
+	$_loop++;
+
+}
+else
+{
+//	echo $_date;
+//	echo "<br>";
+
+
+printf		('<input type="radio" value="%s" id="nvwr%s" name="nvwr" %s/>',
+date("Y-m-d",strtotime($_date)), $_loop, $query['nvwrdate'] == $_date ? 'checked="checked" ' : '' );
+printf 		('<label for="nvwr%s">%s</label>',$_loop, date("D",strtotime($_date)));
+
+
+	$_numb++;
+	$_loop++;
+
+
+};
+
+
+
+
+
+
+
+};
+echo '</div>';
+
+//Pathway
+echo '<div style="float:left;">';
+echo '<label for="_conButton" class="nLabel">Ambulatory pathway</label><br />';
+printf(	'<div class="_noselect patient-pathway" id="_patient-pathway">%s</div>', $query['pathway'] == 0 ? 'Inpatient' : $basePathway[$query['pathway']][0]	);
+//printf(	'<div class="_noselect pathway-doc" id="_pathway-doc" data-url="%s">&nbsp;</div>', $query['pathway'] == 0 ? '' : $basePathway[$query['pathway']][1]	);
+printf( '<input type="hidden" value="%s" id="_patient-pathway-code" name="patient-pathway-code" />', $query['pathway'] == 0 ? '0' : $query['pathway']);
+echo '</div>';
+
+
+echo '</fieldset>';
+
+
+
+
+echo '</div>';
+echo "</div>";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+echo '</div>';
+
+echo '<div id="_sbar" style="display:none;">';
+echo '<label for="_handover" class="nLabel">Handover</label><br />';
+echo '<fieldset name="_handover" class="_refborder" style="width:310px">';
+echo '<div style="float:left;">';
+echo '<label for="SBARs" class="nLabel">S: Presenting complaint</label><br />';
+printf ('<textarea name="SBARs" class="__forDecode ui-state-default ui-widget ui-corner-all SBARfield" type="text" id="SBARs">%s', $__AES->encrypt( $notes['SBARs'] , $__PW, 256));
+echo "</textarea></div>";
+
+echo '<div style="float:left;">';
+echo '<label for="SBARb" class="nLabel">B: Summary of recent medical history</label><br />';
+printf ('<textarea name="SBARb" class="__forDecode ui-state-default ui-widget ui-corner-all SBARfield" type="text" id="SBARb">%s', $__AES->encrypt( $notes['SBARb'] , $__PW, 256));
+echo "</textarea></div>";
+
+echo '<div style="float:left;">';
+echo '<label for="SBARr" class="nLabel">A: Working diagnosis</label><br />';
+printf ('<textarea name="SBARr" class="__forDecode ui-state-default ui-widget ui-corner-all SBARfield" type="text" id="SBARr">%s', $__AES->encrypt( $notes['SBARr'] , $__PW, 256));
+echo "</textarea></div>";
+echo '</fieldset>';
+echo '</div>';
+
+
+// Required js admin
+$jsFooter='';
+$jsFooter .= "trak.clickRef[$_formMovePatSite] = '{$baseWards[$_formMovePatSite][$_formMovePatWard][0]}';";
+$jsFooter .= "trak.clickRefCode[$_formMovePatSite] = $_formMovePatWard;";
+$jsFooter .= "trak.clickRefBed['b{$_formMovePatSite}_{$_formMovePatWard}'] = $_formMovePatBed;";
+
+
+
+	echo '</form>';
+echo <<<END
+<script type="text/javascript">
+ $jsFooter
+</script>
+
+END;
+
+break; // formMovePatNew
+};
+endswitch;
+break;
+};
 case "dbAccept":{
 
 		$map = array(
@@ -323,8 +1913,9 @@ HTML;
 break;
 };
 case "scheduler":{
-//print_r($_REQUEST);
+
 	include ('js/scheduler/connector/scheduler_connector.php');
+	//include ('js/dhtmlxScheduler/codebase/connector/scheduler_connector.php');
  	$res=dbConnect();
 	mysql_select_db(DBNAME);
  	$calendar = new SchedulerConnector($res);
@@ -696,12 +2287,18 @@ db_PastMedicalHistory($rx);
 break;}
 case "dbEditNursing":{
 
-//print_r($_REQUEST);
+		require_once 'lib/AES/aes.class.php';     // AES PHP implementation
+		require_once 'lib/AES/aesctr.class.php';  // AES Counter Mode implementation 
+		global $__PW; $__AES  = new AesCtr;
 
-if (!empty($_REQUEST['data'])) {
+
+
+if (!empty($_REQUEST['sera'])) {
  dbStartTransaction();
-
- $rx = multi_parse_str($_REQUEST['data']);
+ 
+ $rx = multi_parse_str($_REQUEST['sera']);
+ $dx = multi_parse_str($_REQUEST['serb']);
+ 
  $dbQuery = mysql_query(sprintf("DELETE FROM `mau_pmhx` WHERE `patient` = '%s';",$_REQUEST['pid']));
  if (!$dbQuery) {
   echo 'Could not run query (pmhxDelete): ' . mysql_error();
@@ -714,50 +2311,12 @@ if (!empty($_REQUEST['data'])) {
   dbAbortTransaction();
   exit;
  };
- db_ActiveDiagnosis($rx);
+ db_ActiveDiagnosis($dx);
  db_PastMedicalHistory($rx);
 
-//  if (array_key_exists('pmhx', $rx)) {
-//  for ($loop=0; $loop < count($rx['pmhx']); $loop++)
-//  {
-//   if (!empty($rx['pmhx'][$loop]))
-//   {
-//    // Use existing comorbitidy entry
-//    $map['cond'] = $rx['pmhx'][$loop];
-//   }
-//   else
-//   {
-//    // Make new comorbitidy entry
-//    $dbQuery = mysql_query(sprintf("SELECT * FROM `med_pmhx` WHERE `comorb` LIKE '%s' LIMIT 1;",urldecode($rx['pmhxname'][$loop])));
-//    if (!$dbQuery) {
-//     echo 'Could not run query (pmhxAddMake): ' . mysql_error();
-// 	dbAbortTransaction();
-//     exit;
-//    };
-// 
-//    if (mysql_num_rows($dbQuery) != 0) {
-//     // Comorbitidy exists after all
-//     $_rx = mysql_fetch_array($dbQuery, MYSQL_ASSOC);
-//     $map['cond'] = $_rx['id'];
-//    }
-//    else
-//    {
-//     // Create new comorbitidy
-//     $drugmap = array(
-//     	"comorb"	=> ucfirst(urldecode($rx['pmhxname'][$loop])),
-//     );
-//     dbPut(INSERT,'med_pmhx',$drugmap,NULL);
-//     $map['cond'] = mysql_insert_id();	
-//    };
-//   }; // entry loop for drug name
-// 
-// 
-//   $map['patient'] = $_REQUEST['pid'];
-//   dbPut(INSERT,'mau_pmhx',$map,NULL);
-//  };// pmhx loop
-//  };
-// 'pc'    => $_REQUEST['pc'],
-// 'wd'     => $_REQUEST['wd'],
+ dbEndTransaction();
+};
+
 
 
 
@@ -767,8 +2326,8 @@ if (!empty($_REQUEST['data'])) {
 'patient' => $_REQUEST['pid'],
 'visitid' => $_REQUEST['vid'],
 
-'plan'     => $_REQUEST['plan'],
-'jobs'     => $_REQUEST['jobs'],
+'plan'     => $__AES->decrypt($_REQUEST['plan'],$__PW, 256),
+'jobs'     => $__AES->decrypt($_REQUEST['jobs'],$__PW, 256),
 'scs'   => $_REQUEST['scs']
 );
  if ($_REQUEST['nid'] == "") {
@@ -829,16 +2388,17 @@ if (!empty($_REQUEST['data'])) {
  $visitmap['nldok'] = $_forNLD;
  dbPut(UPDATE,'mau_data',$nldmap,$_REQUEST['nid']);
   dbPut(UPDATE,'mau_visit',$visitmap,$_REQUEST['vid']);
-  dbEndTransaction();
-}; // if empty
+
+
+
 break;};
 case "dbEditCP":{
 
-if (!empty($_REQUEST['data'])) {
+if (!empty($_REQUEST['sera'])) {
  dbStartTransaction();
  
- $rx = multi_parse_str($_REQUEST['data']);
- $nldc = multi_parse_str($_REQUEST['nldc']);
+ $rx = multi_parse_str($_REQUEST['sera']);
+ $dx = multi_parse_str($_REQUEST['serb']);
  
  $dbQuery = mysql_query(sprintf("DELETE FROM `mau_pmhx` WHERE `patient` = '%s';",$_REQUEST['pid']));
  if (!$dbQuery) {
@@ -852,8 +2412,19 @@ if (!empty($_REQUEST['data'])) {
   dbAbortTransaction();
   exit;
  };
- db_ActiveDiagnosis($rx);
+ db_ActiveDiagnosis($dx);
  db_PastMedicalHistory($rx);
+
+ dbEndTransaction();
+};
+
+
+
+
+
+ $nldc = multi_parse_str($_REQUEST['nldc']);
+
+
 
  if ($_REQUEST['eddd']!='') {
  	$_edd = explode("/",$_REQUEST['eddd']); // Array as 0-dd 1-mm 2-yyyy
@@ -914,21 +2485,24 @@ if (!empty($_REQUEST['data'])) {
  //dbPut(UPDATE,'mau_visit',		$map,					$_REQUEST['vid']);
  dbPut(UPDATE,'mau_patient',	$patientmap,			$_REQUEST['pid']); 
  
- dbEndTransaction();
  
-}; // if empty
+
 
 
 break;
 };
 case "dbEditDoc":{
-//print_r($_REQUEST);
-//exit;
 
-if (!empty($_REQUEST['data'])) {
+		require_once 'lib/AES/aes.class.php';     // AES PHP implementation
+		require_once 'lib/AES/aesctr.class.php';  // AES Counter Mode implementation 
+		global $__PW; $__AES  = new AesCtr;
+
+if (!empty($_REQUEST['sera'])) {
  dbStartTransaction();
- $rx = multi_parse_str($_REQUEST['data']);
-
+ 
+ $rx = multi_parse_str($_REQUEST['sera']);
+ $dx = multi_parse_str($_REQUEST['serb']);
+ 
  $dbQuery = mysql_query(sprintf("DELETE FROM `mau_pmhx` WHERE `patient` = '%s';",$_REQUEST['pid']));
  if (!$dbQuery) {
   echo 'Could not run query (pmhxDelete): ' . mysql_error();
@@ -941,18 +2515,11 @@ if (!empty($_REQUEST['data'])) {
   dbAbortTransaction();
   exit;
  };
- db_ActiveDiagnosis($rx);
+ db_ActiveDiagnosis($dx);
  db_PastMedicalHistory($rx);
 
-// 	x board:	$("#formEditDoc input[name=board]:checked").val(),
-// 	x alert:	$("#formEditDoc input[name=alert]").val(),
-// 	x status:	$("#formEditDoc input[name=patient-status-code]").val(),
-// 	x edd:	$('#formEditDoc input[name=edd]').val(),
-// 	x eotbt:	$("#formEditDoc input[name=patient-eotbt-code]").val(),
-// 	x ambu:	$("#formEditDoc input[name=patient-pathway-code]").val(),
-// 	ho:		$("#formEditDoc input[name=ho]:checked").val(),
-// 	hodet:	$("#formEditDoc textarea[name=hodetails]").val()
-
+ dbEndTransaction();
+};
 
 
  $_edd = explode("-",$_REQUEST['edd']); // Array as 0-dd 1-mm 2-yyyy
@@ -977,23 +2544,12 @@ if (!empty($_REQUEST['data'])) {
  );
   $notemap = array(
  
- 'handovertxt' => $_REQUEST['hodet']
+ 'handovertxt' => $__AES->decrypt($_REQUEST['hodet'],$__PW, 256)
  
  );
  dbPut(UPDATE,'mau_referral',$refmap,$_REQUEST['rid']);
  dbPut(UPDATE,'mau_visit',$visitmap,$_REQUEST['vid']);
  dbPut(UPDATE,'mau_data',$notemap,$_REQUEST['nid']);
-
-//print_r($refmap);
-//print_r($visitmap);
-//print_r($notemap);
-
- //dbPut(UPDATE,'mau_patient',$patientmap,$_REQUEST['pid']);
- dbEndTransaction(); 
- 
- 
-}; // if empty
-
 
 break;
 };
@@ -1113,6 +2669,86 @@ case "handover":{
 case "ajax":{
 		switch ($_REQUEST['type']):
 
+
+case "tlws":{
+
+$ref    = dbGet("mau_referral",$_REQUEST['id']);
+$_data = json_decode($ref['extras'],$assoc = true);
+$_retrieved = intval($_data['tlwss']);
+
+echo '<div id="tlws" style="float:left;width:312px;display:none;">' ."\n";
+//echo '<label class="nLabel">Wells score</label><br />';
+echo '<div style="width:310px;">';
+echo '<table><tbody>';
+foreach ($_tlws as $_k => $_x) {
+echo '<tr style="width:100%;margin-bottom:2px;" class="ui-button ui-state-default ui-widget ui-corner-all"><td class="nLabel" style="width:224px;text-align:left;padding:4px;">';
+printf ('%s',$_x[0]);
+echo '</td><td>';
+
+echo '<div class="tlws-checkbox">';
+foreach ($baseAccept as $a => $b) {
+
+printf ('<input %svalue="%s" class="acc%s" type="radio" name="tlws%s" id="tlws%s-%s" data-score="%s"><label for="tlws%s-%s">%s</label>',
+(($_retrieved & $_k) AND $a) || ((~$_retrieved & $_k) AND $b) ? 'checked="checked" ' : '',
+$a == 1 ? $_k : 0, $a, $_k, $_k, $a,  $a == 1 ? $_x[1] : 0, $_k, $a, $b
+);
+};
+echo '</div>';
+
+echo '</td></tr>';
+};
+echo '</tbody></table>';
+echo '</div>';
+
+echo '</div>'; // #tlws
+
+break;
+};
+case "rf":{
+
+$ref    = dbGet("mau_referral",$_REQUEST['id']);
+$_data = json_decode($ref['extras'],$assoc = true);
+$_rfRetrieved = intval($_data['rfs']);
+
+echo '<div id="dvtrf" style="float:left;width:312px;display:none;">' ."\n";
+echo '<div style="width:310px;">';
+echo '<table><tbody>';
+foreach ($_dvtriskfactors as $_k => $_x) {
+
+echo '<tr style="width:100%;margin-bottom:2px;" class="ui-button ui-state-default ui-widget ui-corner-all"><td class="nLabel" style="width:224px;text-align:left;padding:4px;">';
+printf ('%s',$_x);
+echo '</td><td>';
+
+echo '<div class="tlws-checkbox">';
+foreach ($baseAccept as $a => $b) {
+
+printf ('<input %svalue="%s" class="acc%s" type="radio" name="rf%s" id="rf%s-%s"><label for="rf%s-%s">%s</label>',
+(($_rfRetrieved & $_k) AND $a) || ((~$_rfRetrieved & $_k) AND $b) ? 'checked="checked" ' : '',
+$a == 1 ? $_k : 0, $a, $_k, $_k, $a, $_k, $a, $b
+);
+};
+echo '</div>';
+
+echo '</td></tr>';
+};
+echo '</tbody></table>';
+echo '</div>';
+echo '</div>'; // #dvtrf
+
+
+break;
+};
+
+			case "remove":{
+
+					$map		= array(
+								'status'    => 4
+								);
+					dbPut(UPDATE,"mau_visit",$map,$_REQUEST['vid']);
+					dbTime("mau_visit",$_REQUEST['vid'],"dischdate");
+					break;
+		
+			};
 			case "jobextras":{
 
 // Variant of formAddJob
@@ -1141,7 +2777,7 @@ break;
 };
 			case "jobsubtype":{
 
-if (!isset($_REQUEST['jid']))
+if ($_REQUEST['jid'] == 'undefined')
 {
 	echo '<script type="text/javascript"><!--' . "\n";
 	echo '  trak.fn.statusMessageDiv(".patient-job-subtype","Please choose a <em>job type</em> before adding an investigation!");' . "\n";
@@ -1213,15 +2849,17 @@ $notes = dbGetByVisit('mau_data',$_REQUEST['vid']);
 
 
 echo '<div class="_refborder ui-widget ui-widget-content">';
-echo '<span class="nLabel">Patient information</span><br>';
-
-echo '<div class="_rrra"><span id="_AESName">';
+echo '<span class="nLabel">Patient information</span>';
+//echo $baseWards[$query['site']][$query['ward']][1] . ' ';
+//echo $query['bed'];
+//echo '</span></span>';
+printf ('<div class="_rrra"><span class="_AESName" id="_AES_%s">',$_REQUEST['vid']);
 echo $__AES->encrypt($nQuery['name'] , $__PW, 256);
-echo '</span> (';
+echo '</span><span style="float:right;">';
 echo $nQuery['gender'] == 0 ? "♀" : "♂";
 // echo '<br>';
 echo years_old($nQuery['dob']);
-echo ')</div>';
+echo '</span></div>';
 
 printf ('<span class="nLabel">Handover from %s</span><br>',$baseSource[$query['source']][0]);
 echo '<table class="_noteSummary"><tbody>';
@@ -1331,13 +2969,13 @@ echo '</div>';
 			case "sugward":{
 		
 echo '<div id="suggested-ward" >';
-	printf('<div style="margin-bottom:4px;" data-name="%s" data-code="%s" class="hdrWideButtons9">%s</div>','Any medical ward',127,'Any medical ward');
+	printf('<div style="margin-bottom:4px;" data-name="%s" data-code="%s" class="hdrWideButtons9">%s</div><br>','Any medical ward',127,'Any medical ward');
 
 foreach ($baseWards[$_REQUEST['sid']] as $k => $v) {
 	if ($v[0][0] == '(') continue; // Don't show commented-out wards
 	printf('<div data-name="%s" data-code="%s" class="hdrWideButtons9">%s</div><br>',$v[0],$k,$v[0]);
 };
-	printf('<div style="margin-top:4px;" data-name="%s" data-code="%s" class="hdrWideButtons9">%s</div>','Discharge',126,'Discharge');
+	printf('<div style="margin-top:4px;" data-name="%s" data-code="%s" class="hdrWideButtons9">%s</div><br>','Discharge',126,'Discharge');
 	printf('<div style="margin-top:4px;" data-name="%s" data-code="%s" class="hdrWideButtons9">%s</div>','Not set',0,'Not set');
 echo '</div>';
 			break;
@@ -1457,7 +3095,8 @@ echo '</div>';
 
 printf( '<div id="pat-ews">');
 for ($loop=0;$loop <= 6; $loop++) {
-	printf('<div data-ews="%s" class="hdrWideButtons15">%s</div>',$loop,$loop);
+	printf('<div data-ews="%s" class="hdrWideButtons15">%s</div><br>',$loop,$loop);
+	//if ($loop==2) {echo '<br>';};
 };
 echo '</div>';			
 			break;
@@ -1509,7 +3148,7 @@ echo '</div>';
 
 printf( '<div id="pat-stat">');
 foreach ($refStatus as $k => $v) {
-	printf('<div data-text="%s" data-status="%s" class="hdrWideButtons16">%s</div>',$v,$k,$v);
+	printf('<div data-text="%s" data-status="%s" class="hdrWideButtons16">%s</div><br>',$v,$k,$v);
 };
 echo '</div>';			
 			break;
@@ -1669,10 +3308,42 @@ break;
 			
 			
 			};
-			case "lists-sub":{
-$_list = array(1,2,5,18);
-echo '<div id="lists-sub" >';
 
+			case "lists-sub":{
+
+if ((isset($_REQUEST['alt'])) && ($_REQUEST['alt'] == 'true')) {
+echo '<div id="lists-sub" >';
+$sql = sprintf("SELECT * FROM `mau_visit` WHERE `dxdone` = '0' AND `ward` = '%s' AND `site` = '%s' AND status = '4'",$_REQUEST['ward'],$_REQUEST['site']);
+$listQuery = mysql_query($sql);
+if (mysql_num_rows($listQuery) != 0) {
+	printf('<div class="hdrWideButtons3" data-number="%s" data-name="Letter" data-list="409">No discharge letter</div><br>',mysql_num_rows($listQuery));
+
+} else {
+	printf('<div class="hdrWideButtons3" data-name="Letter" data-list="409">No discharge letter</div><br>');
+};
+mysql_free_result($listQuery);
+
+
+
+$sql = sprintf("SELECT * FROM `mau_visit` WHERE `board` = '1' AND `ward` = '%s' AND `site` = '%s' AND status != '4'",$_REQUEST['ward'],$_REQUEST['site']);
+$listQuery = mysql_query($sql);
+if (mysql_num_rows($listQuery) != 0) {
+	printf('<div class="hdrWideButtons3" data-number="%s" data-name="Boardable" data-list="411">Boardable</div><br>',mysql_num_rows($listQuery));
+
+} else {
+	printf('<div class="hdrWideButtons3" data-name="Boardable" data-list="411">Boardable</div><br>');
+};
+mysql_free_result($listQuery);
+
+
+
+
+echo '</div>';
+}
+else
+{
+echo '<div id="lists-sub" >';
+$_list = array(1,2,5,18);
 $_consultantNumberToSee = 0;
 $_forClerking=0;
 foreach ($_list as $k) {
@@ -1705,8 +3376,20 @@ ORDER BY v.triage, r.rtime;",$_REQUEST['site'],$_REQUEST['ward'],$k);
 
 };
 
+$sql = sprintf("SELECT * FROM `mau_visit` WHERE (`sugward` = '126' OR `nldok` = '1') AND `site` = '%s' AND `ward` = '%s' AND status != '4'",$_REQUEST['site'],$_REQUEST['ward']);
+$listQuery = mysql_query($sql);
+if (mysql_num_rows($listQuery) != 0) {
+	printf('<div data-number="%s" data-name="Discharge" data-list="404" class="hdrWideButtons3">Discharge</div><br>',mysql_num_rows($listQuery));
+
+} else {
+	printf('<div style="margin-top:4px;" data-name="Discharge" data-list="404" class="hdrWideButtons3">Discharge</div><br>');
+};
+mysql_free_result($listQuery);
+
+
 printf('<div id="lists-other">Other…</div><br>');
 printf('<div style="margin-top:4px;" id="lists-byconsultant">By consultant…</div><br>');
+printf('<div id="lists-byconsultantamu">By AMU consultant…</div><br>');
 printf('<div id="lists-bydestination">By destination…</div><br>');
 printf('<div id="lists-bysuggested">By suggested ward…</div><br>');
 printf('<div id="lists-byinvestigation">By investigation…</div><br>');
@@ -1731,15 +3414,7 @@ mysql_free_result($listQuery);
 // 		OR v.nldok = '1')
 // 		ORDER BY v.ward,v.bed;");
 
-$sql = sprintf("SELECT * FROM `mau_visit` WHERE (`sugward` = '126' OR `nldok` = '1') AND `site` = '%s' AND `ward` = '%s' AND status != '4'",$_REQUEST['site'],$_REQUEST['ward']);
-$listQuery = mysql_query($sql);
-if (mysql_num_rows($listQuery) != 0) {
-	printf('<div data-number="%s" style="margin-top:4px;" data-name="Discharge" data-list="404" class="hdrWideButtons3 _all">Discharge</div><br>',mysql_num_rows($listQuery));
 
-} else {
-	printf('<div style="margin-top:4px;" data-name="Discharge" data-list="404" class="hdrWideButtons3 _all">Discharge</div><br>');
-};
-mysql_free_result($listQuery);
 
 
 
@@ -1747,17 +3422,17 @@ mysql_free_result($listQuery);
 $sql = sprintf("SELECT * FROM `mau_visit` WHERE `dsite` = %s AND `status` = 1",$_REQUEST['site']);
 $listQuery = mysql_query($sql);
 if (mysql_num_rows($listQuery) != 0) {
-	printf('<div style="margin-top:4px;" data-number="%s" data-name="Referred" data-list="201" class="hdrWideButtons3">Referred</div><br>',mysql_num_rows($listQuery));
+	printf('<div style="margin-top:4px;" data-number="%s" data-name="Referred" data-list="201" class="hdrWideButtons3 _all">Referred</div><br>',mysql_num_rows($listQuery));
 } else {
-	printf('<div data-name="Referred" data-list="201" class="hdrWideButtons3">Referred</div><br>');
+	printf('<div data-name="Referred" data-list="201" class="hdrWideButtons3 _all">Referred</div><br>');
 };
 mysql_free_result($listQuery);
 $sql = sprintf("SELECT * FROM `mau_visit` WHERE `dsite` = %s AND `status` = 0",$_REQUEST['site']);
 $listQuery = mysql_query($sql);
 if (mysql_num_rows($listQuery) != 0) {
-	printf('<div style="margin-bottom:4px;" data-number="%s" data-name="Predicted" data-list="200" class="hdrWideButtons3">Predicted</div><br>',mysql_num_rows($listQuery));
+	printf('<div style="margin-bottom:4px;" data-number="%s" data-name="Predicted" data-list="200" class="hdrWideButtons3 _all">Predicted</div><br>',mysql_num_rows($listQuery));
 } else {
-	printf('<div style="margin-bottom:4px;" data-name="Predicted" data-list="200" class="hdrWideButtons3">Predicted</div><br>');
+	printf('<div style="margin-bottom:4px;" data-name="Predicted" data-list="200" class="hdrWideButtons3 _all">Predicted</div><br>');
 };
 mysql_free_result($listQuery);
 
@@ -1858,7 +3533,11 @@ ORDER BY v.triage, r.rtime;",$_REQUEST['site'],$k);
 
 
 
+
 echo '</div>';
+};
+
+
 
 
 break;};
@@ -1870,6 +3549,28 @@ break;};
 	foreach ($_list as $k => $v) {
 
 $sql = sprintf("SELECT * FROM mau_visit WHERE consoc = '%s' AND site = '%s' AND status != '4';",$k,$_REQUEST['site']);
+$listQuery = mysql_query($sql);
+
+
+		printf('<div data-number="%s" data-code="%s" data-name="%s" class="hdrWideButtons8">%s</div><br>',mysql_num_rows($listQuery),$k,$v,$v);
+	};
+	printf('<div style="margin-top:4px;" data-code="127" data-name="Locum" class="hdrWideButtons8">Locum</div><br>');
+	printf('<div style="margin-top:4px;" data-code="0" data-name="No consultant" class="hdrWideButtons8">Not set</div><br>');
+	echo '</div>';
+
+
+break;
+			
+			
+			};
+			case "lists-consamu":{
+			
+	$_list = $consultantsMAU[$_REQUEST['site']];
+	asort($_list, SORT_STRING);		
+	echo '<div id="lists-consultantamu" >';
+	foreach ($_list as $k => $v) {
+
+$sql = sprintf("SELECT * FROM mau_visit WHERE consmau = '%s' AND site = '%s' AND status != '4';",$k,$_REQUEST['site']);
 $listQuery = mysql_query($sql);
 
 
@@ -2035,7 +3736,7 @@ if ($_REQUEST['status'] == 1 || $_REQUEST['status'] == 0)
 //		printf ('<a class="pBSButtonNursing nursingEdit" href="http://'.HOST.'/index.php?act=formEditNursing&amp;vid=%s">Nursing</a>',$_REQUEST['id']);
 //		printf ('<a style="float:right;" class="pBSButtonDisc discPat" href="http://'.HOST.'/index.php?act=formDiscPat&vid=%s" data-visitid="%s">Discharge</a>',$_REQUEST['id'],$_REQUEST['id']);
 
-printf ('<div data-type="127" data-visitid="%s" class="patient-refer">HAN</div>',$_REQUEST['id']);
+//printf ('<div data-type="127" data-visitid="%s" class="patient-refer">HAN</div>',$_REQUEST['id']);
 
 //printf ('<a class="pBSButtonNote noteEdit" href="http://'.HOST.'/index.php?act=formAddNote&amp;vid=%s">Note</a>',$_REQUEST['id']);
 //echo '&nbsp;&nbsp;';
@@ -2061,17 +3762,21 @@ printf ('<div data-visitid="%s" class="patient-documents">Docs</div>',$_REQUEST[
 			exit;
 		}
 		if (mysql_num_rows($noteQuery) >= '1') {
-			printf ('<div data-number="%s" data-visitid="%s" class="patient-notes">Notes&nbsp;&nbsp;</div>',mysql_num_rows($noteQuery),$_REQUEST['id']);
+			printf ('<div data-patientid="%s" data-number="%s" data-visitid="%s" class="patient-notes">Notes&nbsp;&nbsp;</div>',$nQuery['id'],mysql_num_rows($noteQuery),$_REQUEST['id']);
 		}
 		else
 		{
-			printf ('<div data-number="0" data-visitid="%s" class="patient-notes">Notes</div>',$_REQUEST['id']);
+			printf ('<div data-patientid="%s" data-number="0" data-visitid="%s" class="patient-notes">Notes</div>',$nQuery['id'],$_REQUEST['id']);
 		};
 		mysql_free_result($noteQuery);
+
+
+//printf ('<div data-visitid="%s" class="patient-mdt">MDT</div>',$_REQUEST['id']);
 
 printf ('<div data-dxdone="%s" data-visitid="%s" class="patient-discharge">Discharge%s</div>',$query['dxdone'],$_REQUEST['id'],$query['dxdone'] == 0 ? '' : '');
 
 
+printf ('<div data-visitid="%s" class="patient-remove">Discharge</div>',$_REQUEST['id']);
 
 
 
@@ -2396,7 +4101,7 @@ echo '<p class="_noteHeader">Notes</p>';
 //					printf ('<i><span id="noteID_%s">%s</span> <a class="noteEdit" href="http://'.HOST.'/index.php?act=formAddNote&amp;id=%s"><img src="gfx/Edit.png" width="22" height="22" border="0" /></a></i>',$innerrow['id'], nl2br(htmlspecialchars($innerrow['note'],ENT_QUOTES))  ,  $innerrow['id']);
 //					printf ('<i><span id="noteID_%s">%s</span> <a class="noteEdit" href="http://'.HOST.'/index.php?act=formAddNote&amp;id=%s"><img src="gfx/Edit.png" width="22" height="22" border="0" /></a></i>',$innerrow['id'], $__AES->encrypt( nl2br(htmlspecialchars($innerrow['note'],ENT_QUOTES)) , $__PW, 256)  ,  $innerrow['id']);
 
-printf (	'<i><span id="noteID_%s">%s</span>',
+printf (	'<i><span class="__forDecode" id="noteID_%s">%s</span>',
 			$innerrow['id'],
 			$__AES->encrypt( nl2br(htmlspecialchars($innerrow['note'],ENT_QUOTES)) , $__PW, 256)
 		);
@@ -2649,7 +4354,7 @@ break;
 endswitch;
 
 
-//				echo '</div></div>';
+				echo '</div></div>';
 
 
 
@@ -2657,7 +4362,7 @@ endswitch;
 
 
 
-				break;};
+				break;}; // Moved to dialog->patient-notes
 			case "patsearch":{
 			
 		require_once 'lib/AES/aes.class.php';     // AES PHP implementation
@@ -2775,7 +4480,59 @@ if (mysql_num_rows($dbQuery) != 0) {
 	echo json_encode($r);
 };
 break;};
+			case "mdt":{
+$x="";		
+echo '<div id="pat-mdt" >';
 
+if (date("H") <= 8)
+{
+	printf('<div data-time="%s" class="hdrWideButtons28">Today 8 am</div><br>',$x);
+};
+if (date("H") <= 11)
+{
+	printf('<div data-time="%s" class="hdrWideButtons28">Today 11 am</div><br>',$x);
+};
+if (date("H") <= 20)
+{
+	printf('<div data-time="%s" class="hdrWideButtons28">Today 8 pm</div><br>',$x);
+};
+if (date("H") > 20)
+{
+	printf('<div data-time="%s" class="hdrWideButtons28">Tomorrow 8 am</div><br>',$x);
+};
+
+echo '</div>';
+
+			break;
+			
+			};
+			case "history":{
+
+		echo '<div id="pat-hx" >';
+		
+$sql = sprintf("SELECT * FROM `mau_visit` WHERE `patient` = %s",$_REQUEST['pid']);
+$listQuery = mysql_query($sql);
+if (mysql_num_rows($listQuery) != 0) {
+while ($_row = mysql_fetch_array($listQuery, MYSQL_ASSOC)) {
+
+	printf(
+		'<div data-visitid="%s">%s to %s</div><br>',
+			$_row['id'],
+			date("j-M-Y", strtotime($_row['admitdate'])),
+			date("j-M-Y", strtotime($_row['dischdate']))
+	);
+
+
+
+};
+};
+//mysql_free_result($listQuery);
+
+		echo '</div>';
+			
+			
+			break;
+			};
 		endswitch;
 		break;
 };
@@ -3173,7 +4930,7 @@ case "dbMovePat":{
 						'consmau'	=> 0,
 						'consoc'	=> $_con,
 						'sugward'	=> 0,
-						'accepted'	=> 0
+						'accept'	=> 0
 						);
 			}	
 			else
@@ -3186,7 +4943,7 @@ case "dbMovePat":{
 						'site'   	=> $_REQUEST['destSite'],
 						'ward'  	=> $_REQUEST['destWard'],
 						'bed' 	 	=> $_REQUEST['destBed'],
-						'accepted'	=> 0
+						'accept'	=> 0
 						);
 			};
 
@@ -3608,6 +5365,119 @@ case "dbAddNote":{
 		};
 		break;
 
+};
+case "dbEditDVT":{
+
+		require_once 'lib/AES/aes.class.php';     // AES PHP implementation
+		require_once 'lib/AES/aesctr.class.php';  // AES Counter Mode implementation 
+		global $__PW; $__AES  = new AesCtr;
+		
+
+// 		x		act:	"dbEditDVT",
+// 		x		vid:	$_form.find("input[name=vid]").val(),
+// 		x		pid:	$_form.find("input[name=pid]").val(),
+// 		x		nid:	$_form.find("input[name=nid]").val(),
+//		x		rid:	$_form.find("input[name=rid]").val(),
+// 			x	tlwsr:	$_form.find("#_tlws-result-code").val(),
+// 			x	tlwss:	$_form.find("#_tlws-select-code").val(),
+// 			x	ddimer:	$_form.find("input[name=ddimer]").val(),				
+// 			x	side:	$_form.find("input[name=dvtside]:checked").val(),
+// 			x	rfs:	$_form.find("#_rf-select-code").val()
+//		x		status:	$_form.find("input[name=patient-status-code]").val(),
+
+//print_r($_REQUEST['data']);
+//exit;
+
+if (!empty($_REQUEST['sera'])) {
+ dbStartTransaction();
+ 
+ $rx = multi_parse_str($_REQUEST['sera']);
+ $dx = multi_parse_str($_REQUEST['serb']);
+ 
+ $dbQuery = mysql_query(sprintf("DELETE FROM `mau_pmhx` WHERE `patient` = '%s';",$_REQUEST['pid']));
+ if (!$dbQuery) {
+  echo 'Could not run query (pmhxDelete): ' . mysql_error();
+  dbAbortTransaction();
+  exit;
+ };
+ $dbQuery = mysql_query(sprintf("DELETE FROM `mau_activehx` WHERE `patient` = '%s';",$_REQUEST['pid']));
+ if (!$dbQuery) {
+  echo 'Could not run query (activehxDelete): ' . mysql_error();
+  dbAbortTransaction();
+  exit;
+ };
+ db_ActiveDiagnosis($dx);
+ db_PastMedicalHistory($rx);
+
+ dbEndTransaction();
+};
+
+
+
+$_extras = array(
+
+'tlwsr'		=> $_REQUEST['tlwsr'],
+'tlwss'		=> $_REQUEST['tlwss'],
+'ddimer'	=> $_REQUEST['ddimer'],
+'side'		=> $_REQUEST['side'],
+'rfs'		=> $_REQUEST['rfs']
+
+);
+
+
+			$map = array(
+				'status'	=>	$_REQUEST['status'],
+				'extras'	=>	json_encode($_extras)
+			);
+			dbPut(UPDATE,"mau_referral",$map,$_REQUEST['rid']);
+
+// 			$notemap = array(
+// 				 	'author' 	=>	$_REQUEST['author'],
+// 				 	'bleep'		=>	$_REQUEST['bleep'],
+// 					'note'		=>	$__AES->decrypt($_REQUEST['formID_noteDx'],$__PW, 256),
+// 					'refid'		=>	$_REQUEST['formID_refid'],
+// 					'type'		=>	NOTE_REFDX
+// 					);
+// 			dbPut(UPDATE,"mau_note",$notemap,$_REQUEST['formID_dxid']);
+
+
+// 			$notemap = array(
+// 				 	'author' 	=>	$_REQUEST['Hxauthor'],
+// 				 	'bleep'		=>	$_REQUEST['Hxbleep'],
+// 					'note'		=>	$__AES->decrypt($_REQUEST['Hxnote'],$__PW, 256),
+// 					'refid'		=>	$_REQUEST['formID_refid'],
+// 					'type'		=>	NOTE_REFHX
+// 					);
+// 			dbPut(UPDATE,"mau_note",$notemap,$_REQUEST['formID_hxid']);
+
+				if ($_REQUEST['status'] == "4") {
+					// Referral is complete, so add time to database
+					dbTime("mau_referral",$_REQUEST['rid'],"dtime");
+				};
+				if ($_REQUEST['status'] == "2") {
+					// Referral is accepted, so add time to database
+					dbTime("mau_referral",$_REQUEST['rid'],"stime");
+				};
+
+
+// $__AES->decrypt($_REQUEST['formID_noteDx'],$__PW, 256),
+
+ $notemap = array(
+
+'patient' => $_REQUEST['pid'],
+'visitid' => $_REQUEST['vid'],
+'dvtpc'     => $__AES->decrypt($_REQUEST['pc'],$__PW, 256),
+'dvthx'     => $__AES->decrypt($_REQUEST['hx'],$__PW, 256)  
+);
+ if ($_REQUEST['nid'] == "") {
+   dbPut(INSERT,'mau_data',$notemap,NULL);			
+ } else {
+   dbPut(UPDATE,'mau_data',$notemap,$_REQUEST['nid']);	
+ };
+
+
+
+break;
 };
 case "formAddVisit":{
 
@@ -6405,8 +8275,8 @@ var _e = parseFloat($("input[name=mental]:checked").val());
 var _f = parseFloat($("input[name=mews]:checked").val());
 var _g = parseFloat($("input[name=dx]:checked").val());
 var _score = _a+_b+_c+_d+_e+_f+_g;
-trak.fn.statusMessageDialog("Amb score is " + _score);
-
+//trak.fn.statusMessageDialog("Amb score is " + _score);
+trak.fn.statusMessageDiv("fieldset[name=_flowamb]","Amb score is " + _score);
 
 };
 
@@ -7105,6 +8975,165 @@ echo '</div>';
 
 echo <<<HTML
 			
+</form>
+<script type="text/javascript">
+ $(function() {
+	 $('.ui-dialog-buttonpane').prepend('{$icon}');
+ });
+</script>
+HTML;
+
+
+
+
+
+
+break;
+};
+case "formEditDVT":{ // Doc
+
+// id, vid, type
+		require_once 'lib/AES/aes.class.php';     // AES PHP implementation
+		require_once 'lib/AES/aesctr.class.php';  // AES Counter Mode implementation 
+		global $__PW; $__AES  = new AesCtr;
+		
+$query = dbGet("mau_visit",$_REQUEST['vid']);
+$nQuery = dbGet("mau_patient",$query['patient']);
+$icon = sprintf ('<div style="float:left;padding:6px 0 0 8px;"><img border="0" width="32" height="32" src="gfx/%s" /></div>',$baseAuthorRole[1][1]);
+$notes = dbGetByVisit('mau_data',$_REQUEST['vid']);
+$ref    = dbGet("mau_referral",$_REQUEST['id']);
+
+printf ('<form id="formEditDoc" action="http:/'.HOST.'/index.php" method="post">');
+formWrite("","hidden","act","dbEditDoc");
+formWrite("","hidden","vid",$_REQUEST['vid']);
+formWrite("","hidden","pid",$nQuery['id']);
+formWrite("","hidden","nid",$notes['id']);
+formWrite("","hidden","rid",$_REQUEST['id']);
+
+$_tlws = array(
+
+1 => array('Active cancer (treatment ongoing, within 6 months, or palliative)','1'),
+2 => array('Paralysis, paresis or recent plaster immobilisation of the leg','1'),
+4 => array('In bed ≥&nbsp;3 days or major surgery ≤&nbsp;12 weeks with anaesthesia','1'),
+8 => array('Localised tenderness along the deep venous system','1'),
+16 => array('Entire leg swollen','1'),
+32 => array('Calf swelling at least 3&nbsp;cm larger than asymptomatic side','1'),
+64 => array('Pitting oedema confined to the symptomatic leg','1'),
+128 => array('Collateral superficial veins (non-varicose)','1'),
+256 => array('Previously documented DVT','1'),
+512 => array('An alternative diagnosis is at least as likely as DVT','-2')
+
+);
+$_dvtSide = array(
+1=>'Left',
+2=>'Right',
+3=>'Both'
+);
+$_dvtriskfactors = array(
+
+1 => 'Past thrombosis or thrombophilia',
+2 => 'Family history of thrombosis',
+4 => 'Chronic heart failure',
+8 => 'Chronic venous insufficiency',
+16 => 'Body Mass Index > 30',
+32 => 'Recent long-distance travel',
+64 => 'Using HRT, OCP or tamoxifen',
+128 => 'Red-flag malignancy symptoms',
+
+
+);
+
+$_retrieved = 34; // will be a db lookup
+$_sideRetrieved = 3;
+$_rfRetrieved = 1;
+
+echo '<div id="tlws" style="float:left;width:312px;">' ."\n";
+echo '<label class="nLabel">Wells score</label><br />';
+echo '<div style="width:310px;">';
+echo '<table><tbody>';
+foreach ($_tlws as $_k => $_x) {
+echo '<tr style="width:100%;margin-bottom:2px;" class="ui-button ui-state-default ui-widget ui-corner-all"><td class="nLabel" style="width:224px;text-align:left;padding:4px;">';
+printf ('%s',$_x[0]);
+echo '</td><td>';
+
+echo '<div class="tlws-checkbox">';
+foreach ($baseAccept as $a => $b) {
+
+printf ('<input %svalue="%s" class="acc%s" type="radio" name="tlws%s" id="tlws%s-%s" data-score="%s"><label for="tlws%s-%s">%s</label>',
+(($_retrieved & $_k) AND $a) || ((~$_retrieved & $_k) AND $b) ? 'checked="checked" ' : '',
+$a == 1 ? $_k : 0, $a, $_k, $_k, $a,  $a == 1 ? $_x[1] : 0, $_k, $a, $b
+);
+};
+echo '</div>';
+
+echo '</td></tr>';
+};
+echo '</tbody></table>';
+echo '</div>';
+
+echo '</div>'; // #tlws
+
+
+
+
+echo '<div id="dvtrf" style="float:left;width:312px;">' ."\n";
+echo '<label class="nLabel">Risk factors</label><br />';
+echo '<div style="width:310px;">';
+echo '<table><tbody>';
+foreach ($_dvtriskfactors as $_k => $_x) {
+
+echo '<tr style="width:100%;margin-bottom:2px;" class="ui-button ui-state-default ui-widget ui-corner-all"><td class="nLabel" style="width:224px;text-align:left;padding:4px;">';
+printf ('%s',$_x);
+echo '</td><td>';
+
+echo '<div class="tlws-checkbox">';
+foreach ($baseAccept as $a => $b) {
+
+printf ('<input %svalue="%s" class="acc%s" type="radio" name="rf%s" id="rf%s-%s"><label for="rf%s-%s">%s</label>',
+(($_rfRetrieved & $_k) AND $a) || ((~$_rfRetrieved & $_k) AND $b) ? 'checked="checked" ' : '',
+$a == 1 ? $_k : 0, $a, $_k, $_k, $a, $_k, $a, $b
+);
+};
+echo '</div>';
+
+echo '</td></tr>';
+};
+echo '</tbody></table>';
+echo '</div>';
+echo '</div>'; // #dvtrf
+
+
+echo '<div>';
+
+
+echo '<div style="float:left;">';
+echo '<label class="nLabel">Side</label><br />';
+echo '<div class="tlws-checkbox">';
+foreach ($_dvtSide as $a => $b) {
+
+printf ('<input %svalue="%s" class="dvtside%s" type="radio" name="dvtside%s" id="dvtside%s-%s"><label for="dvtside%s-%s">%s</label>',
+$_sideRetrieved == $a ? 'checked="checked" ' : '',
+$a == 1 ? $_k : 0, $a, 'DAVID', $_k, $a, $_k, $a, $b
+);
+};
+echo '</div>';
+echo '</div>';
+
+echo '<div style="float:left;">';
+echo '<label for="alert" class="nLabel">D-dimer result</label><br />';
+printf ('<input name="ddimer" class="ui-widget ui-state-default ui-corner-all noteAuthorField" style="width:100px;" type="text" id="ddimer" value="%s"/>','');
+echo	"</div>";
+echo '</div>';
+
+
+
+echo '</div>';
+
+
+
+echo <<<HTML
+<input type="hidden" value="" id="_tlws-result-code" name="tlws-result-code">
+<input type="hidden" value="" id="_tlws-select-code" name="tlws-select-code">			
 </form>
 <script type="text/javascript">
  $(function() {

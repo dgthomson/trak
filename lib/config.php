@@ -3,7 +3,7 @@
 // echo $_SERVER['SERVER_NAME'];
 // echo dirname($_SERVER['SCRIPT_NAME']);
 
-define('VERSION','0.70 © David Thomson 13-June-2013');
+define('VERSION','0.71 © David Thomson 16-Feb-2014');
 define('HOST',$_SERVER['SERVER_NAME'].dirname($_SERVER['SCRIPT_NAME']).'/');
 define('CONFIGFILE',__FILE__);
 date_default_timezone_set('Europe/London');
@@ -97,8 +97,8 @@ $consultantsMAU		= array(
 				6	=>	"Manavalan T",
 				7	=>	"Prakash P",
 				8	=>	"Bhat S",
-				9	=>	"Chandrasekara H"
-				
+				9	=>	"Chandrasekara H",
+				10	=>	"Iftikhar MN"
 			),
 2	=> array(
 
@@ -279,7 +279,8 @@ $baseAuthorRole = array(
 		16 => array( "Photographer", "nikond40_front_256.png"),
 		17 => array( "Respiratory physician", "resp.png"),
 		18 => array("Consultant physician","Mallette.png"),
-		19 => array("CrCU Outreach","fcat.png"),	
+		19 => array("CrCU Outreach","fcat.png"),
+		20 => array("DVT Service","RenderBucket_icon.png"),	
 127 => array("Hospital at Night","moon.png")
 	
 );
@@ -727,8 +728,37 @@ $followupTypes = array(
 
 );
 
+$_tlws = array(
+
+1 => array('Active cancer (treatment ongoing, within 6 months, or palliative)','1'),
+2 => array('Paralysis, paresis or recent plaster immobilisation of the leg','1'),
+4 => array('In bed ≥&nbsp;3 days or major surgery ≤&nbsp;12 weeks with anaesthesia','1'),
+8 => array('Localised tenderness along the deep venous system','1'),
+16 => array('Entire leg swollen','1'),
+32 => array('Calf swelling at least 3&nbsp;cm larger than asymptomatic side','1'),
+64 => array('Pitting oedema confined to the symptomatic leg','1'),
+128 => array('Collateral superficial veins (non-varicose)','1'),
+256 => array('Previously documented DVT','1'),
+512 => array('An alternative diagnosis is at least as likely as DVT','-2')
+
+);
+$_dvtriskfactors = array(
+
+1 => 'Past thrombosis or thrombophilia',
+2 => 'Family history of thrombosis',
+4 => 'Chronic heart failure',
+8 => 'Chronic venous insufficiency',
+16 => 'Body Mass Index > 30',
+32 => 'Recent long-distance travel',
+64 => 'Using HRT, OCP or tamoxifen',
+128 => 'Red-flag malignancy symptoms',
 
 
-
+);
+$_dvtSide = array(
+1=>'Left',
+2=>'Right',
+3=>'Both'
+);
 
 ?>

@@ -506,6 +506,7 @@ $_ach=array(0=>'✘',1=>'✔');
 
 echo '<label for="_xxx" class="nLabel">Nurse discharge criteria</label><br />';
 echo '<div class="_refborder" style="width:384px;">';
+// was 384
 for ($_loop=1;$_loop <= 6; $_loop++) {
 //NLD
 echo '<div style="float:left;">';
@@ -515,10 +516,14 @@ if ($_loop==1) {
 printf ('<div class="nLabel" style="font-size:20px;display:block;float:left;margin-top:2px;">&#%s;&nbsp;</div>',$_loop+10111);
 printf ('<input %sname="nldcrit" class="ui-widget ui-state-default ui-corner-all noteAuthorField" type="text" id="nldcriterion%s" value="%s" %s/>', $_loop == 6 ? '' : 'style="margin-bottom:12px;" '  ,$_loop,$notes['nldcrit' . $_loop], $_readonly==1?'readonly="readonly" ':'');
 echo	"</div>";
+
+
+
 echo '<div style="float:left;">';
 if ($_loop==1) {
-	printf ('<label for="nldcrityn%s" class="nLabel">Achieved</label><br />',$_loop-1);
+	printf ('<label style="width:120px;" for="nldcrityn%s" class="nLabel">Achieved</label><br />',$_loop-1);
 };
+
 echo '<div class="dialogButtons">';
 foreach ($_ach as $k => $v) {
 	printf	('<input %svalue="%s" data-disabled="disabled" type="radio" id="nldcriterionach%s%s" name="nldcrityn%s" /><label style="margin-top:-1px;" for="nldcriterionach%s%s">%s</label>',
@@ -528,6 +533,11 @@ echo	"</div>";
 echo	"</div>";
 
 
+// echo '<div style="float:left;">';
+// echo '<div class="dialogButtons">';
+// 	printf	('<input value="" type="radio" id="nldlink%s" name="nldlink" /><label style="margin-top:-1px;" for="nldlink%s">%s</label>',
+// 				$_loop,$_loop,"&nbsp;");
+// echo '</div></div>';
 
 
 
@@ -553,8 +563,8 @@ else
 {
 	$extra="";
 };
-
-printf	(	'<dt class="bedbash-info" data-visitid="%s" data-site="%s" data-ward="%s" data-bed="%s" style="background-color:%s;%s">',
+if ($id=="") {
+ printf	(	'<dt data-visitid="%s" data-site="%s" data-ward="%s" data-bed="%s" style="background-color:%s;%s">',
 			$id,
 			$site,
 			$ward,
@@ -562,6 +572,20 @@ printf	(	'<dt class="bedbash-info" data-visitid="%s" data-site="%s" data-ward="%
 			$bbCol[$status],
 			$extra
 		);
+}
+else
+{
+
+ printf	(	'<dt class="bedbash-info" data-visitid="%s" data-site="%s" data-ward="%s" data-bed="%s" style="background-color:%s;%s">',
+ 			$id,
+ 			$site,
+ 			$ward,
+ 			$num,
+ 			$bbCol[$status],
+ 			$extra
+ 		);
+};
+
 if ($num!=0) {
 echo $num;
 }
@@ -650,13 +674,13 @@ else
 		$_url = urlencode('http://' . HOST . $out);
 		$TBS->Show(OPENTBS_FILE, $out);
 
-//echo <<<HTML
-//<iframe id="adeptol" name="ajaxdocumentviewer" src="http://connect.ajaxdocumentviewer.com?key=$_key&document=$_url&viewerheight=650&viewerwidth=800&cache=yes" border="0" height="650" width="800" scrolling="no" align="left" frameborder="0" marginwidth="1" marginheight="1"> Your browser does not support inline frames or is currently configured not to display inline frames. </iframe>
-//HTML;
-
 echo <<<HTML
-<iframe id="handover" src="https://docs.google.com/viewer?embedded=true&amp;url=$_url" width="770" height="550" style="border: none;"></iframe>
+<iframe id="adeptol" name="ajaxdocumentviewer" src="http://connect.ajaxdocumentviewer.com?viewertype=html5&key=$_key&document=$_url&viewerheight=570&viewerwidth=770&cache=no" border="0" height="650" width="800" scrolling="no" align="left" frameborder="0" marginwidth="1" marginheight="1"> Your browser does not support inline frames or is currently configured not to display inline frames. </iframe>
 HTML;
+
+//echo <<<HTML
+//<iframe id="handover" src="https://docs.google.com/viewer?embedded=true&amp;url=$_url" width="770" height="550" style="border: none;"></iframe>
+//HTML;
 
 // <embed width="100%" height="100%" name="plugin" src="" type="application/pdf">
 

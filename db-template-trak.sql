@@ -75,6 +75,8 @@ CREATE TABLE IF NOT EXISTS `mau_data` (
   `nldcrityn5` tinyint(1) NOT NULL,
   `nldcrityn6` tinyint(1) NOT NULL,
   `scs` varchar(64) NOT NULL,
+  `dvthx` text NOT NULL,
+  `dvtpc` text NOT NULL,
   KEY `id` (`id`),
   KEY `pid` (`patient`),
   KEY `vid` (`visitid`)
@@ -205,6 +207,7 @@ CREATE TABLE IF NOT EXISTS `mau_referral` (
   `stime` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `rtime` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `dtime` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `extras` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `visitid` (`visitid`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
